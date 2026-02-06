@@ -1,8 +1,11 @@
-# TODO: Replace with your team name
+# Red Litah (cat)
 
 ## Our Team
 
-TODO: Replace with your team members
+- Toyosi Ajiboye
+- Shamshad Ansari
+- Godswill Ogbonna
+- Jonathan King
 
 # Setup
 
