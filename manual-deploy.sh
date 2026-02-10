@@ -1,6 +1,6 @@
 ### VARIABLES TO CHANGE - START
-PROJECT_ID=
-SERVICE_NAME=
+PROJECT_ID=shamshad-ansari-fisk
+SERVICE_NAME=ise-lab2-cicd-red-litah-cat
 ### VARIABLES TO CHANGE - END
 
 # ----------- Manual Deployment ------------ #
