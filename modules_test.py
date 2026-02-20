@@ -15,9 +15,8 @@ from modules import display_post, display_activity_summary, display_genai_advice
 class TestDisplayPost(unittest.TestCase):
     """Tests the display_post function."""
 
-    def test_foo(self):
-        """Tests foo."""
-        pass
+pass
+
 
 
 class TestDisplayActivitySummary(unittest.TestCase):
