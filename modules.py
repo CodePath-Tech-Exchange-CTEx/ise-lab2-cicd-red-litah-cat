@@ -8,6 +8,7 @@
 #############################################################################
 
 from internals import create_component
+import streamlit as st
 
 
 # This one has been written for you as an example. You may change it as wanted.
