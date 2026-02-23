@@ -12,7 +12,7 @@ from data_fetcher import get_user_posts, get_genai_advice, get_user_profile, get
 
 def display_app_page():
     """Displays the home page of the app."""
-    st.title('Welcome to SDS!')
+   
 
     # An example of displaying a custom component called "my_custom_component"
     # value = st.text_input('Enter your name')
