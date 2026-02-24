@@ -21,25 +21,53 @@ import streamlit as st
 import modules
 
 modules.st = st 
-st.session_state["rendered_posts"] = [] #Line written by ChatGPT
+st.session_state["rendered_posts"] = [] 
 
-def spy_create_component(data, html_file_name, **kwargs): #Line written by ChatGPT
-    st.session_state["rendered_posts"].append({{ #Line written by ChatGPT
-        "data": data, #Line written by ChatGPT
-        "html_file_name": html_file_name, #Line written by ChatGPT
-        "kwargs": kwargs, #Line written by ChatGPT
+def spy_create_component(data, html_file_name, **kwargs): 
+    st.session_state["rendered_posts"].append({{ 
+        "data": data, 
+        "html_file_name": html_file_name, 
+        "kwargs": kwargs, 
     }})
 
-modules.create_component = spy_create_component #Line written by ChatGPT
+modules.create_component = spy_create_component
 
-modules.display_post( #Line written by ChatGPT
-    {username!r}, #Line written by ChatGPT
-    {user_image!r}, #Line written by ChatGPT
-    {timestamp!r}, #Line written by ChatGPT
-    {content!r}, #Line written by ChatGPT
-    {post_image!r}, #Line written by ChatGPT
+modules.display_post( 
+    {username!r}, 
+    {user_image!r}, 
+    {timestamp!r},
+    {content!r},
+    {post_image!r}, 
 )
-""", default_timeout=10).run() #Line written by ChatGPT
+""", default_timeout=10).run()
+
+    assert not at.exception
+    return at
+
+
+def run_recent_workouts(workouts_list) -> AppTest:
+    """Create a fresh test app session for display_recent_workouts and run once."""
+    at = AppTest.from_string(f"""
+import streamlit as st
+import modules
+
+modules.st = st
+
+# Capture rendered cards
+st.session_state["rendered_cards"] = []
+
+def spy_create_component(data, component_name, height, width):
+    st.session_state["rendered_cards"].append({{
+        "data": data,
+        "component_name": component_name,
+        "height": height,
+        "width": width,
+    }})
+
+modules.create_component = spy_create_component
+
+modules.display_recent_workouts({repr(workouts_list)})
+""").run()
 
     assert not at.exception
     return at
@@ -57,6 +85,10 @@ def ss_get(at: AppTest, key: str, default=None):
         return at.session_state[key]
     except Exception:
         return default
+
+# -------------------------
+# Tests 
+# -------------------------
 
 class TestDisplayPost(unittest.TestCase):
     """Tests the display_post function."""
@@ -151,9 +183,10 @@ class TestDisplayPost(unittest.TestCase):
 
 class TestDisplayActivitySummary(unittest.TestCase):
     """Tests the display_activity_summary function."""
+    
     def test_foo(self):
         """Tests foo."""
-    pass
+        pass
 
 class TestDisplayGenAiAdvice(unittest.TestCase):
     """Tests the display_genai_advice function."""
