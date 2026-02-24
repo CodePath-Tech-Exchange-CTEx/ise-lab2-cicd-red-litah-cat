@@ -36,6 +36,22 @@ def display_app_page():
     user_workouts = get_user_workouts(userId)
     display_recent_workouts(user_workouts)
 
+    # --- GenAI Logic ---
+    st.divider()
+    st.markdown("## 🤖 AI Advice")
+    
+    timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+    advice_content = (
+        "Today focus on controlled reps. Increase weight slightly "
+        "while maintaining strict form. Remember: consistency "
+        "builds results over time."
+    )
+
+    image_url = "https://images.unsplash.com/photo-1558611848-73f7eb4001a1"
+
+    display_genai_advice(timestamp, advice_content, image_url)
+
 # This is the starting point for your app. You do not need to change these lines
 if __name__ == '__main__':
     display_app_page()
