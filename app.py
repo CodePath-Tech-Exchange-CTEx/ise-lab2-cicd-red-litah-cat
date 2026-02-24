@@ -9,13 +9,12 @@ import streamlit as st
 from modules import display_my_custom_component, display_post, display_genai_advice, display_activity_summary, display_recent_workouts
 from data_fetcher import get_user_posts, get_genai_advice, get_user_profile, get_user_sensor_data, get_user_workouts
 
+userId = 'user1'
 
 def display_app_page():
     """Displays the home page of the app."""
-    # An example of displaying a custom component called "my_custom_component"
-    # value = st.text_input('Enter your name')
-    # display_my_custom_component(value)
-    userId = 'user1'
+
+    # --- Post logic ---
     user_profile = get_user_profile(userId)
     username = user_profile['username']
     user_image = user_profile['profile_image']
