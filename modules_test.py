@@ -9,6 +9,7 @@
 import unittest
 from streamlit.testing.v1 import AppTest
 from modules import display_post, display_activity_summary, display_genai_advice, display_recent_workouts
+from unittest.mock import patch
 
 # -------------------------
 # Helpers 
@@ -191,10 +192,131 @@ class TestDisplayActivitySummary(unittest.TestCase):
 class TestDisplayGenAiAdvice(unittest.TestCase):
     """Tests the display_genai_advice function."""
 
-    def test_foo(self):
-        """Tests foo."""
-        pass
+    def setUp(self):
+        """Sets up common test variables."""
+        self.valid_timestamp = "2026-02-23 23:59:52"
+        self.valid_content = "Increase weight slightly while maintaining strict form."
+        self.valid_image = "https://example.com/image.jpg"
 
+    @patch("modules.create_component")
+    def test_display_genai_advice_calls_create_component_once_none(self, mock_create):
+        """Tests create_component is called exactly once and returns None."""
+        result = display_genai_advice(
+            self.valid_timestamp,
+            self.valid_content,
+            self.valid_image
+        )
+
+        mock_create.assert_called_once()
+        self.assertIsNone(result)
+
+    @patch("modules.create_component")
+    def test_display_genai_advice_passes_correct_data_dictionary_none(self, mock_create):
+        """Tests correct data dictionary is passed to create_component."""
+        display_genai_advice(
+            self.valid_timestamp,
+            self.valid_content,
+            self.valid_image
+        )
+
+        expected_data = {
+            'TIMESTAMP': self.valid_timestamp,
+            'CONTENT': self.valid_content,
+            'IMAGE': self.valid_image
+        }
+
+        mock_create.assert_called_once_with(
+            expected_data,
+            'display_genai_advice_component',
+            height=250,
+            scrolling=True
+        )
+
+    @patch("modules.create_component")
+    def test_display_genai_advice_handles_empty_strings_none(self, mock_create):
+        """Tests function handles empty string inputs."""
+        display_genai_advice("", "", "")
+
+        expected_data = {
+            'TIMESTAMP': "",
+            'CONTENT': "",
+            'IMAGE': ""
+        }
+
+        mock_create.assert_called_once_with(
+            expected_data,
+            'display_genai_advice_component',
+            height=250,
+            scrolling=True
+        )
+
+    @patch("modules.create_component")
+    def test_display_genai_advice_handles_none_inputs_none(self, mock_create):
+        """Tests function handles None inputs."""
+        display_genai_advice(None, None, None)
+
+        expected_data = {
+            'TIMESTAMP': None,
+            'CONTENT': None,
+            'IMAGE': None
+        }
+
+        mock_create.assert_called_once_with(
+            expected_data,
+            'display_genai_advice_component',
+            height=250,
+            scrolling=True
+        )
+
+    @patch("modules.create_component")
+    def test_display_genai_advice_handles_long_content_none(self, mock_create):
+        """Tests function handles very long content string."""
+        long_content = "A" * 10000
+
+        display_genai_advice(
+            self.valid_timestamp,
+            long_content,
+            self.valid_image
+        )
+
+        expected_data = {
+            'TIMESTAMP': self.valid_timestamp,
+            'CONTENT': long_content,
+            'IMAGE': self.valid_image
+        }
+
+        mock_create.assert_called_once_with(
+            expected_data,
+            'display_genai_advice_component',
+            height=250,
+            scrolling=True
+        )
+
+    @patch("modules.create_component")
+    def test_display_genai_advice_uses_correct_component_name_none(self, mock_create):
+        display_genai_advice(
+            self.valid_timestamp,
+            self.valid_content,
+            self.valid_image
+        )
+
+        args, kwargs = mock_create.call_args
+        self.assertEqual(args[1], "display_genai_advice_component")
+
+    @patch("modules.create_component")
+    def test_display_genai_advice_contains_required_keys_none(self, mock_create):
+        display_genai_advice(
+            self.valid_timestamp,
+            self.valid_content,
+            self.valid_image
+        )
+
+        args, _ = mock_create.call_args
+        data_dict = args[0]
+
+        self.assertIn("TIMESTAMP", data_dict)
+        self.assertIn("CONTENT", data_dict)
+        self.assertIn("IMAGE", data_dict)
 
 class TestDisplayRecentWorkouts(unittest.TestCase):
     """Tests the display_recent_workouts function."""
