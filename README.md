@@ -7,6 +7,9 @@
 - Godswill Ogbonna
 - Jonathan King
 
+# GCP Deployment Link
+https://ise-lab2-cicd-red-litah-cat-c3j3pl44ia-uc.a.run.app
+
 # Setup
 
 One person needs to follow SETUP.md to complete setup. Ignore this if it is already done for you!
