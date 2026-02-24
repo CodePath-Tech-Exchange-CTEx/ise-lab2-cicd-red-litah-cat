@@ -31,8 +31,18 @@ def display_my_custom_component(value):
 
 
 def display_post(username, user_image, timestamp, content, post_image):
-    """Write a good docstring here."""
-    pass
+    """Displays a post with the author's username,
+    profile image, timestamp, text content, and an optional post image."""
+    data = {
+        'USERNAME': username,
+        'USER_IMAGE': user_image,
+        'TIMESTAMP': timestamp,
+        'CONTENT': content,
+        'POST_IMAGE': post_image,
+    }
+    html_file_name = "posts"
+    create_component(data, html_file_name, height= 500, scrolling=True)
+
 
 def display_activity_summary(workouts_list):
     """Write a good docstring here."""

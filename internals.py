@@ -20,7 +20,7 @@ def safe_string(string):
     return ''.join(['\\' + c if c in ["'", '"', '\\'] else c for c in string])
 
 
-def create_component(data, component_name, height=None, width=None, scrolling=False):
+def create_component(data, component_name, height=None, width=None, scrolling=True):
     # Read the HTML content from the file
     component_html = load_html_file(f'custom_components/{component_name}.html')
 

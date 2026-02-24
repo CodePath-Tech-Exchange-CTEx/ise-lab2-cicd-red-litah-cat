@@ -120,7 +120,7 @@ def get_user_posts(user_id):
         'post_id': 'post1',
         'timestamp': '2024-01-01 00:00:00',
         'content': content,
-        'image': 'image_url',
+        'image': 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT60baWEUwB0o7DAwGBl6ZQL5Gti3JXRuDVrK_HuwZDmgSxXy13gj2cMRMJHZohn4jojrery_SmHIu3AXRcJHjXdkGGIZ4oL8LTHurv-J8L&s=10',
     }]
 
 

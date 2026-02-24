@@ -1,0 +1,81 @@
+<!-- CSS -->
+<style>
+    h2{
+        text-align: center;
+    }
+    .post_section{
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+    .posts{
+        border: 1px solid black;
+        border-radius: 20px;
+        padding: 10px;
+        background-color: antiquewhite;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        width: 50%
+        }
+
+    .user_info{
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding-bottom: 20px;
+        }
+        
+    .user_info img{
+        width: 50px;
+        height: 50px;
+        object-fit: cover;
+        border-radius: 100px;
+    }
+
+    .content{
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        }
+
+    .post_image{
+        width: 140px;
+        height: 140px;
+        object-fit: cover;
+        border-radius: 12px;
+  }
+
+    .post_image[src=""] {
+        display: none;
+    }
+
+  .timestamp{
+    color: gray;
+  }
+</style>
+
+<!-- HTML -->
+ 
+<section class="post_section">
+    <h2>POSTS</h2>
+    <div class="posts">
+        <div class="user_info">
+            <img class="profile-image"
+                src="{{USER_IMAGE}}"
+                onerror="this.src='https://cdn-icons-png.flaticon.com/512/149/149071.png';"> <!-- Line written by ChatGPT -->
+            <p>{{USERNAME}}</p>
+        </div>
+        <div class="content">
+            <img class="post_image"
+                src="{{POST_IMAGE}}"
+                onerror="this.style.display='none'"><!-- Line written by ChatGPT -->
+            <p>{{CONTENT}}</p>
+        </div>
+        <p class="timestamp">{{TIMESTAMP}}</p>
+    </div>
+</section>
+
+<!-- JavaScript -->
+<script>
+</script>
