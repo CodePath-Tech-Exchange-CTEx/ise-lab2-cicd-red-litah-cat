@@ -27,12 +27,6 @@ def display_app_page():
 
     display_post(username, user_image, timestamp, content, post_image)
 
-    # Recent Workouts Logic
-    st.header("Recent Activity")
-    
-    user_workouts = get_user_workouts(userId)
-    display_recent_workouts(user_workouts)
-
 # This is the starting point for your app. You do not need to change these lines
 if __name__ == '__main__':
     display_app_page()

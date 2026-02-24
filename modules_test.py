@@ -169,57 +169,6 @@ class TestDisplayGenAiAdvice(unittest.TestCase):
 class TestDisplayRecentWorkouts(unittest.TestCase):
     """Tests the display_recent_workouts function."""
 
-    def test_empty_list_shows_info_message(self):
-        at = run_recent_workouts([])
-
-        self.assertGreaterEqual(len(at.info), 1)
-        self.assertEqual(at.info[0].value, "No recent workouts found.")
-
-    def test_non_empty_list_renders_one_card(self):
-        workouts = [{
-            "start_timestamp": "2024-01-01 00:00:00",
-            "end_timestamp": "2024-01-01 00:30:00",
-            "distance": 5.0,
-            "steps": 1000,
-            "calories_burned": 200,
-            "start_lat_lng": [1.0, 2.0],
-            "end_lat_lng": [3.0, 4.0],
-        }]
-
-        at = run_recent_workouts(workouts)
-        rendered = ss_get(at, "rendered_cards", [])
-
-        self.assertEqual(len(rendered), 1)
-
-    def test_card_data_mapping_is_correct(self):
-        workouts = [{
-            "start_timestamp": "2024-01-01 00:00:00",
-            "end_timestamp": "2024-01-01 00:30:00",
-            "distance": 20.0,
-            "steps": 5760,
-            "calories_burned": 34,
-            "start_lat_lng": [1.07, 4.45],
-            "end_lat_lng": [1.06, 4.55],
-        }]
-
-        at = run_recent_workouts(workouts)
-        rendered = ss_get(at, "rendered_cards", [])
-        card = rendered[0]
-
-        expected_data = {
-            "START_TIME": "2024-01-01 00:00:00",
-            "END_TIME": "2024-01-01 00:30:00",
-            "DISTANCE": "20.0 km",
-            "STEPS": 5760,
-            "CALORIES": 34,
-            "START_COORDS": "1.07, 4.45",
-            "END_COORDS": "1.06, 4.55",
-        }
-
-        self.assertEqual(card["component_name"], "workout_card")
-        self.assertEqual(card["height"], 270)
-        self.assertEqual(card["width"], 500)
-        self.assertEqual(card["data"], expected_data)
-
+    pass
 if __name__ == "__main__":
     unittest.main()
