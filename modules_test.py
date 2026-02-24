@@ -10,7 +10,6 @@ import unittest
 from streamlit.testing.v1 import AppTest
 from modules import display_post, display_activity_summary, display_genai_advice, display_recent_workouts
 
-<<<<<<< display-post
 # -------------------------
 # Helpers 
 # -------------------------
@@ -41,48 +40,13 @@ modules.display_post( #Line written by ChatGPT
     {post_image!r}, #Line written by ChatGPT
 )
 """, default_timeout=10).run() #Line written by ChatGPT
-=======
-# Helpers
-
-def run_recent_workouts(workouts_list) -> AppTest:
-    """Create a fresh test app session for display_recent_workouts and run once."""
-    at = AppTest.from_string(f"""
-import streamlit as st
-import modules
-
-modules.st = st
-
-# Capture rendered cards
-st.session_state["rendered_cards"] = []
-
-def spy_create_component(data, component_name, height, width):
-    st.session_state["rendered_cards"].append({{
-        "data": data,
-        "component_name": component_name,
-        "height": height,
-        "width": width,
-    }})
-
-modules.create_component = spy_create_component
-
-modules.display_recent_workouts({repr(workouts_list)})
-""").run()
->>>>>>> main
 
     assert not at.exception
     return at
 
 
 def ss_get(at: AppTest, key: str, default=None):
-<<<<<<< display-post
     """Safe session_state getter."""
-=======
-    """Safe session_state getter.
-
-    Streamlit's AppTest exposes session_state as a proxy (not a dict), so
-    dict-style helpers like `.get()` may not exist.
-    """
->>>>>>> main
     try:
         if key in at.session_state:
             return at.session_state[key]
@@ -93,11 +57,6 @@ def ss_get(at: AppTest, key: str, default=None):
         return at.session_state[key]
     except Exception:
         return default
-<<<<<<< display-post
-=======
-        
-# Write your tests below
->>>>>>> main
 
 class TestDisplayPost(unittest.TestCase):
     """Tests the display_post function."""
