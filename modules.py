@@ -87,5 +87,22 @@ def display_recent_workouts(workouts_list):
 pass
 
 def display_genai_advice(timestamp, content, image):
-    """Write a good docstring here."""
-    pass
+    """Write a good docstring here.
+    
+    Displays advice given from genai
+
+    Args
+        timestamp (str): The time the advice was generated.
+        content (str): The generated advice text.
+        image (str): Path to a motivational image.
+    Returns
+        None
+
+    """
+    data = {'TIMESTAMP': timestamp,
+            'CONTENT': content,
+            'IMAGE': image}
+
+    html_file_name = 'display_genai_advice_component'
+    create_component(data, html_file_name, height=250, scrolling=True)
+    
