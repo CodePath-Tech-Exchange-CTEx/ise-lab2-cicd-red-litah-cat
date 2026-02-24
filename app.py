@@ -29,12 +29,13 @@ def display_app_page():
 
     # --- Activity Summary Logic ---
     st.divider()
-    st.header("Recent Activity")
+    st.header("Activity Summary")
 
     user_workouts = get_user_workouts(userId)
     display_activity_summary(user_workouts)
 
     # --- Recent Workouts Logic ---
+    st.divider()
     st.header("Recent Activity")
     
     user_workouts = get_user_workouts(userId)
