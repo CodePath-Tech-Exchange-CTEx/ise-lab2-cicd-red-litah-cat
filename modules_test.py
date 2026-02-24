@@ -17,34 +17,34 @@ from unittest.mock import patch
 # -------------------------
 
 def run_display_post(username, user_image, timestamp, content, post_image) -> AppTest:
-    """Create a fresh test app session for display_post and run once."""
+    """Create a fresh test app session for display_post and run once.""" #
     at = AppTest.from_string(f"""
 import streamlit as st 
 import modules
 
-modules.st = st 
-st.session_state["rendered_posts"] = [] 
+modules.st = st #Line written by ChatGPT
+st.session_state["rendered_posts"] = [] #Line written by ChatGPT
 
-def spy_create_component(data, html_file_name, **kwargs): 
-    st.session_state["rendered_posts"].append({{ 
-        "data": data, 
-        "html_file_name": html_file_name, 
-        "kwargs": kwargs, 
+def spy_create_component(data, html_file_name, **kwargs): #Line written by ChatGPT
+    st.session_state["rendered_posts"].append({{ #Line written by ChatGPT
+        "data": data,  #Line written by ChatGPT
+        "html_file_name": html_file_name, #Line written by ChatGPT
+        "kwargs": kwargs, #Line written by ChatGPT
     }})
 
-modules.create_component = spy_create_component
+modules.create_component = spy_create_component #Line written by ChatGPT
 
-modules.display_post( 
-    {username!r}, 
-    {user_image!r}, 
-    {timestamp!r},
-    {content!r},
-    {post_image!r}, 
+modules.display_post( #Line written by ChatGPT
+    {username!r}, #Line written by ChatGPT
+    {user_image!r}, #Line written by ChatGPT
+    {timestamp!r}, #Line written by ChatGPT
+    {content!r}, #Line written by ChatGPT
+    {post_image!r}, #Line written by ChatGPT
 )
-""", default_timeout=10).run()
+""", default_timeout=10).run() #Line written by ChatGPT
 
-    assert not at.exception
-    return at
+    assert not at.exception #Line written by ChatGPT
+    return at #Line written by ChatGPT
 
 
 def run_recent_workouts(workouts_list) -> AppTest:
@@ -56,26 +56,26 @@ import modules
 modules.st = st
 
 # Capture rendered cards
-st.session_state["rendered_cards"] = []
+st.session_state["rendered_cards"] = [] #Line written by ChatGPT
 
-def spy_create_component(data, component_name, height, width):
-    st.session_state["rendered_cards"].append({{
-        "data": data,
-        "component_name": component_name,
-        "height": height,
-        "width": width,
+def spy_create_component(data, component_name, height, width): #Line written by ChatGPT
+    st.session_state["rendered_cards"].append({{ #Line written by ChatGPT
+        "data": data, #Line written by ChatGPT
+        "component_name": component_name, #Line written by ChatGPT
+        "height": height, #Line written by ChatGPT
+        "width": width, #Line written by ChatGPT
     }})
 
-modules.create_component = spy_create_component
+modules.create_component = spy_create_component #Line written by ChatGPT
 
 modules.display_recent_workouts({repr(workouts_list)})
-""").run()
+""").run() #Line written by ChatGPT
 
-    assert not at.exception
-    return at
+    assert not at.exception #Line written by ChatGPT
+    return at #Line written by ChatGPT
 
 
-def ss_get(at: AppTest, key: str, default=None):
+def ss_get(at: AppTest, key: str, default=None): 
     """Safe session_state getter."""
     try:
         if key in at.session_state:
@@ -391,7 +391,7 @@ class TestDisplayRecentWorkouts(unittest.TestCase):
         }
 
         self.assertEqual(card["component_name"], "workout_card")
-        self.assertEqual(card["height"], 270)
+        self.assertEqual(card["height"], 270) 
         self.assertEqual(card["width"], 500)
         self.assertEqual(card["data"], expected_data)
 
