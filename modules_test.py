@@ -186,19 +186,28 @@ class TestDisplayActivitySummary(unittest.TestCase):
     """Tests the display_activity_summary function."""
    
     def test_totals_computed_correctly(self):
-        """Workouts, calories, and duration are summed correctly from the list."""
+        """TOTAL_WORKOUTS, TOTAL_CALORIES, and TOTAL_DURATION are computed
+        correctly from real data_fetcher keys (calories_burned + timestamps)."""
         workouts = [
-            {'name': 'Running',  'date': 'Mar 15, 2024', 'calories': 450, 'duration': 35},
-            {'name': 'Cycling',  'date': 'Mar 14, 2024', 'calories': 380, 'duration': 45},
-            {'name': 'Swimming', 'date': 'Mar 13, 2024', 'calories': 300, 'duration': 30},
+            {
+                'calories_burned': 80,
+                'start_timestamp': '2024-01-01 00:00:00',
+                'end_timestamp':   '2024-01-01 00:30:00',  # 30 min
+            },
+            {
+                'calories_burned': 60,
+                'start_timestamp': '2024-01-02 00:00:00',
+                'end_timestamp':   '2024-01-02 01:00:00',  # 60 min
+            },
         ]
         with patch('modules.create_component') as mock_cc:
             display_activity_summary(workouts)
             data, _ = mock_cc.call_args[0]
 
-        self.assertEqual(data['TOTAL_WORKOUTS'], 3)
-        self.assertEqual(data['TOTAL_CALORIES'], 1130)
-        self.assertEqual(data['TOTAL_DURATION'], 110)
+        self.assertEqual(data['TOTAL_WORKOUTS'], 2)
+        self.assertEqual(data['TOTAL_CALORIES'], 140)
+        self.assertEqual(data['TOTAL_DURATION'], 90)   # 30 + 60 minutes
+
 
 
 class TestDisplayGenAiAdvice(unittest.TestCase):
