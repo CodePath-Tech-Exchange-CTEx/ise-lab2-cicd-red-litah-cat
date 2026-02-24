@@ -27,12 +27,16 @@ def display_app_page():
 
     display_post(username, user_image, timestamp, content, post_image)
 
-    # --- Divider ---
+    # --- Activity Summary Logic ---
     st.divider()
+    st.header("Recent Activity")
+
+    user_workouts = get_user_workouts(userId)
+    display_activity_summary(user_workouts)
 
     # --- Recent Workouts Logic ---
     st.header("Recent Activity")
-
+    
     user_workouts = get_user_workouts(userId)
     display_recent_workouts(user_workouts)
 

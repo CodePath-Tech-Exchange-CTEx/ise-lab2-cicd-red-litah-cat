@@ -74,7 +74,7 @@ def display_activity_summary(workouts_list):
         'GOAL_PCT':       goal_pct,
     }
 
-    html_file_name = "workout_summary"
+    html_file_name = "activity_summary"
     create_component(data, html_file_name)
 
 def display_recent_workouts(workouts_list):
@@ -84,7 +84,25 @@ def display_recent_workouts(workouts_list):
     Input: a list of dictionaries containing workout stats from data_fetcher.py.
     Output: None.
     """
-pass
+    if not workouts_list:
+        st.info("No recent workouts found.")
+        return
+
+    for workout in workouts_list:
+        # Mapping data_fetcher keys to HTML template placeholders.
+        data = {
+            'START_TIME': workout['start_timestamp'],
+            'END_TIME': workout['end_timestamp'],
+            'DISTANCE': f"{workout['distance']} km",
+            'STEPS': workout['steps'],
+            'CALORIES': workout['calories_burned'],
+            'START_COORDS': f"{workout['start_lat_lng'][0]}, {workout['start_lat_lng'][1]}",
+            'END_COORDS': f"{workout['end_lat_lng'][0]}, {workout['end_lat_lng'][1]}"
+        }
+        
+        # This renders 'custom_components/workout_card.html'.
+        html_file_name = "workout_card"
+        create_component(data, "workout_card", 270, 500)
 
 def display_genai_advice(timestamp, content, image):
     """Write a good docstring here.
