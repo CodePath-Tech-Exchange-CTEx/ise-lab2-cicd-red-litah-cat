@@ -43,10 +43,39 @@ def display_post(username, user_image, timestamp, content, post_image):
     html_file_name = "posts"
     create_component(data, html_file_name, height= 500, scrolling=True)
 
-
 def display_activity_summary(workouts_list):
-    """Write a good docstring here."""
-    pass
+    """Displays an activity summary card over a period of time.
+
+    """
+    # Compute aggregate stats across all workouts
+    from datetime import datetime
+    total_workouts = len(workouts_list)
+    total_calories = sum(w.get('calories_burned', 0) for w in workouts_list)
+
+    # Derive duration in minutes from start/end timestamps
+    total_duration = 0
+    for w in workouts_list:
+        try:
+            start = datetime.strptime(w['start_timestamp'], '%Y-%m-%d %H:%M:%S')
+            end   = datetime.strptime(w['end_timestamp'],   '%Y-%m-%d %H:%M:%S')
+            total_duration += int((end - start).total_seconds() / 60)
+        except (KeyError, ValueError):
+            pass
+
+    # Weekly goal: cap at 7 days and compute bar fill percentage
+    goal_days = min(total_workouts, 7)
+    goal_pct  = round((goal_days / 7) * 100)
+
+    data = {
+        'TOTAL_WORKOUTS': total_workouts,
+        'TOTAL_CALORIES': total_calories,
+        'TOTAL_DURATION': total_duration,
+        'GOAL_DAYS':      goal_days,
+        'GOAL_PCT':       goal_pct,
+    }
+
+    html_file_name = "workout_summary"
+    create_component(data, html_file_name)
 
 def display_recent_workouts(workouts_list):
     """
@@ -55,25 +84,7 @@ def display_recent_workouts(workouts_list):
     Input: a list of dictionaries containing workout stats from data_fetcher.py.
     Output: None.
     """
-    if not workouts_list:
-        st.info("No recent workouts found.")
-        return
-
-    for workout in workouts_list:
-        # Mapping data_fetcher keys to HTML template placeholders.
-        data = {
-            'START_TIME': workout['start_timestamp'],
-            'END_TIME': workout['end_timestamp'],
-            'DISTANCE': f"{workout['distance']} km",
-            'STEPS': workout['steps'],
-            'CALORIES': workout['calories_burned'],
-            'START_COORDS': f"{workout['start_lat_lng'][0]}, {workout['start_lat_lng'][1]}",
-            'END_COORDS': f"{workout['end_lat_lng'][0]}, {workout['end_lat_lng'][1]}"
-        }
-        
-        # This renders 'custom_components/workout_card.html'.
-        html_file_name = "workout_card"
-        create_component(data, "workout_card", 270, 500)
+pass
 
 def display_genai_advice(timestamp, content, image):
     """Write a good docstring here.
