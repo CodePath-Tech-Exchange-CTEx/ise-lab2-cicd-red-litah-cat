@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Activity Summary</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+
+<style>
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Inter", sans-serif;
+}
+
+body {
+  background: #0b1220;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+.card {
+  width: 900px;
+  background: linear-gradient(135deg, #0f1a2f, #0c1425);
+  border-radius: 20px;
+  padding: 30px;
+  color: #ffffff;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.icon-box {
+  width: 70px;
+  height: 70px;
+  background: #b4f000;
+  border-radius: 16px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 30px;
+}
+
+.header-text h1 {
+  font-size: 32px;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+.header-text p {
+  margin-top: 5px;
+  color: #9aa5bd;
+}
+
+.badge {
+  padding: 10px 20px;
+  border-radius: 25px;
+  border: 1px solid #b4f000;
+  color: #b4f000;
+  font-weight: 600;
+}
+
+.stats {
+  margin-top: 40px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  text-align: center;
+  border-top: 1px solid #1e2a44;
+  border-bottom: 1px solid #1e2a44;
+}
+
+.stat {
+  padding: 40px 0;
+}
+
+.stat:not(:last-child) {
+  border-right: 1px solid #1e2a44;
+}
+
+.stat h2 {
+  font-size: 48px;
+  margin-bottom: 10px;
+}
+
+.stat p {
+  color: #8d99b8;
+  letter-spacing: 2px;
+}
+
+.workouts h2 { color: #b4f000; }
+.calories h2 { color: #ff5c5c; }
+.minutes h2 { color: #4c8dff; }
+
+.goal-section {
+  margin-top: 30px;
+}
+
+.goal-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 15px;
+  color: #9aa5bd;
+  font-weight: 600;
+  letter-spacing: 1px;
+}
+
+.progress-bar {
+  height: 12px;
+  background: #1c2742;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.progress {
+  height: 100%;
+  width: 71%; /* 5/7 days */
+  background: linear-gradient(to right, #4c8dff, #b4f000);
+  border-radius: 10px;
+}
+
+.footer {
+  margin-top: 25px;
+  color: #7d8aaa;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.footer-dot {
+  width: 8px;
+  height: 8px;
+  background: #b4f000;
+  border-radius: 50%;
+}
+</style>
+</head>
+
+<body>
+
+<div class="card">
+  <div class="header">
+    <div class="header-left">
+      <div class="icon-box">🏃</div>
+      <div class="header-text">
+        <h1>ACTIVITY SUMMARY</h1>
+        <p>March 11 – March 15, 2024</p>
+      </div>
+    </div>
+    <div class="badge">THIS WEEK</div>
+  </div>
+
+  <div class="stats">
+    <div class="stat workouts">
+      <h2>5</h2>
+      <p>WORKOUTS</p>
+    </div>
+    <div class="stat calories">
+      <h2>1,830</h2>
+      <p>CALORIES</p>
+    </div>
+    <div class="stat minutes">
+      <h2>185</h2>
+      <p>MINUTES</p>
+    </div>
+  </div>
+
+  <div class="goal-section">
+    <div class="goal-header">
+      <span>WEEKLY GOAL</span>
+      <span style="color:#b4f000;">5 / 7 days</span>
+    </div>
+    <div class="progress-bar">
+      <div class="progress"></div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <div class="footer-dot"></div>
+    <span>Synced just now · display_activity_summary(workouts_list)</span>
+  </div>
+</div>
+
+</body>
+</html>
