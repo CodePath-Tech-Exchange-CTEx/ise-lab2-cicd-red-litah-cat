@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Activity Summary</title>
+<title>Workout Summary</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 
@@ -56,14 +56,9 @@ body {
 }
 
 .header-text h1 {
-  font-size: 32px;
+  font-size: 28px;
   font-weight: 700;
   letter-spacing: 1px;
-}
-
-.header-text p {
-  margin-top: 5px;
-  color: #9aa5bd;
 }
 
 .badge {
@@ -127,9 +122,10 @@ body {
 
 .progress {
   height: 100%;
-  width: 71%; /* 5/7 days */
+  width: 0%;
   background: linear-gradient(to right, #4c8dff, #b4f000);
   border-radius: 10px;
+  transition: width 0.8s ease;
 }
 
 .footer {
@@ -157,7 +153,6 @@ body {
       <div class="icon-box">🏃</div>
       <div class="header-text">
         <h1>ACTIVITY SUMMARY</h1>
-        <p>March 11 – March 15, 2024</p>
       </div>
     </div>
     <div class="badge">THIS WEEK</div>
@@ -165,15 +160,15 @@ body {
 
   <div class="stats">
     <div class="stat workouts">
-      <h2>5</h2>
+      <h2 id="totalWorkouts">0</h2>
       <p>WORKOUTS</p>
     </div>
     <div class="stat calories">
-      <h2>1,830</h2>
+      <h2 id="totalCalories">0</h2>
       <p>CALORIES</p>
     </div>
     <div class="stat minutes">
-      <h2>185</h2>
+      <h2 id="totalDuration">0</h2>
       <p>MINUTES</p>
     </div>
   </div>
@@ -181,10 +176,10 @@ body {
   <div class="goal-section">
     <div class="goal-header">
       <span>WEEKLY GOAL</span>
-      <span style="color:#b4f000;">5 / 7 days</span>
+      <span id="goalText" style="color:#b4f000;">0 / 7 days</span>
     </div>
     <div class="progress-bar">
-      <div class="progress"></div>
+      <div class="progress" id="progressBar"></div>
     </div>
   </div>
 
@@ -193,6 +188,32 @@ body {
     <span>Synced just now · display_activity_summary(workouts_list)</span>
   </div>
 </div>
+
+<script>
+/*
+Assumes your Python create_component injects:
+
+window.componentData = {...}
+*/
+
+const data = window.componentData || {
+  TOTAL_WORKOUTS: 0,
+  TOTAL_CALORIES: 0,
+  TOTAL_DURATION: 0,
+  GOAL_DAYS: 0,
+  GOAL_PCT: 0
+};
+
+document.getElementById("totalWorkouts").innerText = data.TOTAL_WORKOUTS;
+document.getElementById("totalCalories").innerText = data.TOTAL_CALORIES.toLocaleString();
+document.getElementById("totalDuration").innerText = data.TOTAL_DURATION;
+
+document.getElementById("goalText").innerText =
+  `${data.GOAL_DAYS} / 7 days`;
+
+document.getElementById("progressBar").style.width =
+  `${data.GOAL_PCT}%`;
+</script>
 
 </body>
 </html>

@@ -43,17 +43,24 @@ def display_post(username, user_image, timestamp, content, post_image):
     html_file_name = "posts"
     create_component(data, html_file_name, height= 500, scrolling=True)
 
-
-
 def display_activity_summary(workouts_list):
-    """Displays an activity summary card over a period of time
+    """Displays an activity summary card over a period of time.
 
-    
     """
     # Compute aggregate stats across all workouts
+    from datetime import datetime
     total_workouts = len(workouts_list)
-    total_calories = sum(w.get('calories', 0) for w in workouts_list)
-    total_duration = sum(w.get('duration', 0) for w in workouts_list)
+    total_calories = sum(w.get('calories_burned', 0) for w in workouts_list)
+
+    # Derive duration in minutes from start/end timestamps
+    total_duration = 0
+    for w in workouts_list:
+        try:
+            start = datetime.strptime(w['start_timestamp'], '%Y-%m-%d %H:%M:%S')
+            end   = datetime.strptime(w['end_timestamp'],   '%Y-%m-%d %H:%M:%S')
+            total_duration += int((end - start).total_seconds() / 60)
+        except (KeyError, ValueError):
+            pass
 
     # Weekly goal: cap at 7 days and compute bar fill percentage
     goal_days = min(total_workouts, 7)
@@ -69,7 +76,6 @@ def display_activity_summary(workouts_list):
 
     html_file_name = "workout_summary"
     create_component(data, html_file_name)
-
 
 def display_recent_workouts(workouts_list):
     """
