@@ -66,14 +66,11 @@ class TestDisplayPost(unittest.TestCase):
         """Tests foo."""
         pass
 
-
 class TestDisplayActivitySummary(unittest.TestCase):
     """Tests the display_activity_summary function."""
-
     def test_foo(self):
         """Tests foo."""
-        pass
-
+    pass
 
 class TestDisplayGenAiAdvice(unittest.TestCase):
     """Tests the display_genai_advice function."""

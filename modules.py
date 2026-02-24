@@ -34,11 +34,9 @@ def display_post(username, user_image, timestamp, content, post_image):
     """Write a good docstring here."""
     pass
 
-
 def display_activity_summary(workouts_list):
     """Write a good docstring here."""
     pass
-
 
 def display_recent_workouts(workouts_list):
     """
