@@ -45,17 +45,12 @@ def display_app_page():
     st.divider()
     st.markdown("## 🤖 AI Advice")
     
-    timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    gen_ai_advice = get_genai_advice(userId)
+    timestamp = gen_ai_advice['timestamp']
+    content = gen_ai_advice['content']
+    image = gen_ai_advice['image']
 
-    advice_content = (
-        "Today focus on controlled reps. Increase weight slightly "
-        "while maintaining strict form. Remember: consistency "
-        "builds results over time."
-    )
-
-    image_url = "https://images.unsplash.com/photo-1558611848-73f7eb4001a1"
-
-    display_genai_advice(timestamp, advice_content, image_url)
+    display_genai_advice(timestamp, content, image)
 
 # This is the starting point for your app. You do not need to change these lines
 if __name__ == '__main__':
