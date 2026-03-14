@@ -11,8 +11,8 @@ from data_fetcher import get_user_workouts
 
 class TestDataFetcher(unittest.TestCase):
 
-    @patch('data_fetcher.client')
-    def test_get_user_workouts_comprehensive(self, mock_client):
+    @patch('data_fetcher.bigquery.Client')
+    def test_get_user_workouts_comprehensive(self, mock_client_class):
         """
         Comprehensive test covering:
         1. Successful mapping of all fields.
@@ -44,9 +44,10 @@ class TestDataFetcher(unittest.TestCase):
         mock_row_partial.TotalSteps = None
         mock_row_partial.CaloriesBurned = None
 
+        mock_instance = mock_client_class.return_value
         mock_query_job = MagicMock()
         mock_query_job.result.return_value = [mock_row_full, mock_row_partial]
-        mock_client.query.return_value = mock_query_job
+        mock_instance.query.return_value = mock_query_job
 
         # Execute
         result = get_user_workouts('user1')
@@ -81,12 +82,13 @@ class TestDataFetcher(unittest.TestCase):
         self.assertEqual(partial['end_lat_lng'], (None, None))
 
 
-    @patch('data_fetcher.client')
-    def test_get_user_workouts_no_data(self, mock_client):
+    @patch('data_fetcher.bigquery.Client')
+    def test_get_user_workouts_no_data(self, mock_client_class):
         """Tests scenario where a user has 0 workouts in the database."""
+        mock_instance = mock_client_class.return_value
         mock_query_job = MagicMock()
-        mock_query_job.result.return_value = [] 
-        mock_client.query.return_value = mock_query_job
+        mock_query_job.result.return_value = []
+        mock_instance.query.return_value = mock_query_job
 
         result = get_user_workouts('newUser')
         

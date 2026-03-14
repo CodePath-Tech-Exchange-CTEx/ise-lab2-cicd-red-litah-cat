@@ -7,6 +7,9 @@
 import random
 from google.cloud import bigquery
 
+PROJECT_ID = "shamshad-ansari-fisk"
+COURSE_CODE = "ISE"
+
 client = bigquery.Client()
 
 users = {
@@ -71,6 +74,11 @@ def get_user_workouts(user_id):
     """
     Fetches all workout records for a specific user from the BigQuery Workouts table.
     """
+
+    # Line written by Gemini.
+    client = bigquery.Client(project=PROJECT_ID)
+
+
     # The query retrieves workout metrics for the specific user from the Workouts table. Line written by Gemini.
     query = f"""
         SELECT 
@@ -84,7 +92,7 @@ def get_user_workouts(user_id):
             TotalDistance, 
             TotalSteps, 
             CaloriesBurned
-        FROM `shamshad-ansari-fisk.ISE.Workouts`
+        FROM `{PROJECT_ID}.{COURSE_CODE}.Workouts`
         WHERE UserId = @user_id
     """
     
