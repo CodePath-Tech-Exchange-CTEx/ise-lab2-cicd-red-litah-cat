@@ -9,6 +9,7 @@
 
 from internals import create_component
 import streamlit as st
+from datetime import datetime
 
 
 # This one has been written for you as an example. You may change it as wanted.
@@ -44,31 +45,46 @@ def display_post(username, user_image, timestamp, content, post_image):
     create_component(data, html_file_name, height= 500, scrolling=True)
 
 def display_activity_summary(workouts_list):
-    """Displays an activity summary card over a period of time.
-
     """
-    # Compute aggregate stats across all workouts
-    from datetime import datetime
+    Displays an activity summary card over a period of time based on a list of workouts.
+    
+    Input: A list of workout dictionaries containing start/end timestamps and calories.
+    Output: None.
+    """
+    
+    # Compute aggregate stats across all workouts.
     total_workouts = len(workouts_list)
-    total_calories = sum(w.get('calories_burned', 0) for w in workouts_list)
+    total_calories = sum(w.get('calories_burned') or 0 for w in workouts_list)
 
-    # Derive duration in minutes from start/end timestamps
+    # Derive duration in minutes from start/end timestamps.
     total_duration = 0
     for w in workouts_list:
-        try:
-            start = datetime.strptime(w['start_timestamp'], '%Y-%m-%d %H:%M:%S')
-            end   = datetime.strptime(w['end_timestamp'],   '%Y-%m-%d %H:%M:%S')
-            total_duration += int((end - start).total_seconds() / 60)
-        except (KeyError, ValueError):
-            pass
+        start = w.get('start_timestamp')
+        end = w.get('end_timestamp')
+        
+        # Only calculate if both timestamps exist to avoid logic errors.
+        if start and end:
+            try:
+                # Handle cases where DB returns strings vs. datetime objects.
+                if isinstance(start, str):
+                    start_dt = datetime.strptime(start, '%Y-%m-%d %H:%M:%S')
+                    end_dt = datetime.strptime(end, '%Y-%m-%d %H:%M:%S')
+                else:
+                    start_dt, end_dt = start, end
+                
+                duration_seconds = (end_dt - start_dt).total_seconds()
+                total_duration += int(max(0, duration_seconds) / 60)
+            except (ValueError, TypeError):
+                # If timestamp format is invalid, we skip this specific workout.
+                pass
 
-    # Weekly goal: cap at 7 days and compute bar fill percentage
+    # Weekly goal: cap at 7 days and compute bar fill percentage.
     goal_days = min(total_workouts, 7)
-    goal_pct  = round((goal_days / 7) * 100)
+    goal_pct = round((goal_days / 7) * 100) if total_workouts > 0 else 0
 
     data = {
         'TOTAL_WORKOUTS': total_workouts,
-        'TOTAL_CALORIES': total_calories,
+        'TOTAL_CALORIES': int(total_calories),
         'TOTAL_DURATION': total_duration,
         'GOAL_DAYS':      goal_days,
         'GOAL_PCT':       goal_pct,
