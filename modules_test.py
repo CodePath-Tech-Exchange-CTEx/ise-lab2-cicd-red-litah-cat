@@ -351,13 +351,14 @@ class TestDisplayRecentWorkouts(unittest.TestCase):
 
     def test_non_empty_list_renders_one_card(self):
         workouts = [{
+            "workout_id": "workout_1",
             "start_timestamp": "2024-01-01 00:00:00",
             "end_timestamp": "2024-01-01 00:30:00",
             "distance": 5.0,
             "steps": 1000,
             "calories_burned": 200,
-            "start_lat_lng": [1.0, 2.0],
-            "end_lat_lng": [3.0, 4.0],
+            "start_lat_lng": (1.0, 2.0), 
+            "end_lat_lng": (3.0, 4.0),  
         }]
 
         at = run_recent_workouts(workouts)
@@ -367,13 +368,14 @@ class TestDisplayRecentWorkouts(unittest.TestCase):
 
     def test_card_data_mapping_is_correct(self):
         workouts = [{
+            "workout_id": "workout_full",
             "start_timestamp": "2024-01-01 00:00:00",
             "end_timestamp": "2024-01-01 00:30:00",
             "distance": 20.0,
             "steps": 5760,
             "calories_burned": 34,
-            "start_lat_lng": [1.07, 4.45],
-            "end_lat_lng": [1.06, 4.55],
+            "start_lat_lng": (1.07, 4.45),
+            "end_lat_lng": (1.06, 4.55),
         }]
 
         at = run_recent_workouts(workouts)
@@ -390,10 +392,23 @@ class TestDisplayRecentWorkouts(unittest.TestCase):
             "END_COORDS": "1.06, 4.55",
         }
 
+        # Validate component metadata and content mapping
         self.assertEqual(card["component_name"], "workout_card")
         self.assertEqual(card["height"], 270) 
         self.assertEqual(card["width"], 500)
         self.assertEqual(card["data"], expected_data)
+
+    def test_multiple_workouts_render_multiple_cards(self):
+        workouts = [
+            {"workout_id": "w1", "start_timestamp": "...", "end_timestamp": "...", "distance": 1.0, 
+             "steps": 100, "calories_burned": 10, "start_lat_lng": (0,0), "end_lat_lng": (0,0)},
+            {"workout_id": "w2", "start_timestamp": "...", "end_timestamp": "...", "distance": 2.0, 
+             "steps": 200, "calories_burned": 20, "start_lat_lng": (0,0), "end_lat_lng": (0,0)}
+        ]
+        
+        at = run_recent_workouts(workouts)
+        rendered = ss_get(at, "rendered_cards", [])
+        self.assertEqual(len(rendered), 2)
 
 if __name__ == "__main__":
     unittest.main()
