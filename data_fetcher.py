@@ -10,7 +10,6 @@ from google.cloud import bigquery
 PROJECT_ID = "shamshad-ansari-fisk"
 COURSE_CODE = "ISE"
 
-client = bigquery.Client()
 
 users = {
     'user1': {
