@@ -6,12 +6,93 @@
 # You will write these tests in Unit 3.
 #############################################################################
 import unittest
+from unittest.mock import MagicMock, patch
+from data_fetcher import get_user_workouts
 
 class TestDataFetcher(unittest.TestCase):
 
-    def test_foo(self):
-        """Tests foo."""
-        pass
+    @patch('data_fetcher.client')
+    def test_get_user_workouts_comprehensive(self, mock_client):
+        """
+        Comprehensive test covering:
+        1. Successful mapping of all fields.
+        2. Handling multiple workout records.
+        3. Handling missing/null optional fields.
+        """
+        # Scenario: Two workouts, one complete, one with missing data 
+        mock_row_full = MagicMock()
+        mock_row_full.WorkoutId = 'workout_full'
+        mock_row_full.StartTimestamp = '2026-03-14 07:00:00'
+        mock_row_full.EndTimestamp = '2026-03-14 08:00:00'
+        mock_row_full.StartLocationLat = 37.7749
+        mock_row_full.StartLocationLong = -122.4194
+        mock_row_full.EndLocationLat = 37.8049
+        mock_row_full.EndLocationLong = -122.4210
+        mock_row_full.TotalDistance = 5.0
+        mock_row_full.TotalSteps = 8000
+        mock_row_full.CaloriesBurned = 400.0
+
+        mock_row_partial = MagicMock()
+        mock_row_partial.WorkoutId = 'workout_partial'
+        mock_row_partial.StartTimestamp = '2026-03-14 09:00:00'
+        mock_row_partial.EndTimestamp = '2026-03-14 09:30:00'
+        mock_row_partial.StartLocationLat = None
+        mock_row_partial.StartLocationLong = None
+        mock_row_partial.EndLocationLat = None
+        mock_row_partial.EndLocationLong = None
+        mock_row_partial.TotalDistance = None
+        mock_row_partial.TotalSteps = None
+        mock_row_partial.CaloriesBurned = None
+
+        mock_query_job = MagicMock()
+        mock_query_job.result.return_value = [mock_row_full, mock_row_partial]
+        mock_client.query.return_value = mock_query_job
+
+        # Execute
+        result = get_user_workouts('user1')
+
+        # Assertions for multiple workouts
+        self.assertEqual(len(result), 2)
+
+        # Assertions for the 'Full' workout mapping
+        full = result[0]
+        expected_keys = {
+            "workout_id", "start_timestamp", "end_timestamp",
+            "start_lat_lng", "end_lat_lng",
+            "distance", "steps", "calories_burned"
+        }
+        self.assertEqual(set(full.keys()), expected_keys)
+
+        self.assertEqual(full['workout_id'], 'workout_full')
+        self.assertEqual(full['start_timestamp'], '2026-03-14 07:00:00')
+        self.assertEqual(full['end_timestamp'], '2026-03-14 08:00:00')
+        self.assertEqual(full['start_lat_lng'], (37.7749, -122.4194))
+        self.assertEqual(full['end_lat_lng'], (37.8049, -122.4210))
+        self.assertEqual(full['distance'], 5.0)
+        self.assertEqual(full['calories_burned'], 400.0)
+        self.assertEqual(full['steps'], 8000)
+
+
+        # Assertions for 'Partial' workout to ensure no crash on Nulls 
+        partial = result[1]
+        self.assertEqual(partial['workout_id'], 'workout_partial')
+        self.assertIsNone(partial['distance'])
+        self.assertEqual(partial['start_lat_lng'], (None, None))
+        self.assertEqual(partial['end_lat_lng'], (None, None))
+
+
+    @patch('data_fetcher.client')
+    def test_get_user_workouts_no_data(self, mock_client):
+        """Tests scenario where a user has 0 workouts in the database."""
+        mock_query_job = MagicMock()
+        mock_query_job.result.return_value = [] 
+        mock_client.query.return_value = mock_query_job
+
+        result = get_user_workouts('newUser')
+        
+        self.assertEqual(result, [])
+        self.assertIsInstance(result, list)
+
 
 if __name__ == "__main__":
     unittest.main()
