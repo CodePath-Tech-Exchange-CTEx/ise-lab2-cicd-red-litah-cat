@@ -31,14 +31,13 @@ def display_app_page():
     st.divider()
     st.header("Activity Summary")
 
-    # user_workouts = get_user_workouts(userId)
-    display_activity_summary([])
+    user_workouts = get_user_workouts(userId)
+    display_activity_summary(user_workouts)
 
     # --- Recent Workouts Logic ---
     st.divider()
     st.header("Recent Activity")
     
-    user_workouts = get_user_workouts(userId)
     display_recent_workouts(user_workouts)
 
     # --- GenAI Logic ---
