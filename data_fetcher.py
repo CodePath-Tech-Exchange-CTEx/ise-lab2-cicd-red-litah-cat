@@ -170,6 +170,41 @@ def get_user_posts(user_id):
 
     return posts
 
+def get_user_friends(user_id):
+    """Returns a user's friends"""
+    client = bigquery.Client(project=PROJECT_ID)
+
+    query = f"""
+        SELECT UserId2 AS user_id
+        FROM `{PROJECT_ID}.{COURSE_CODE}.Friends`
+        WHERE UserId1 = @user_id
+
+        UNION DISTINCT
+
+        SELECT UserId1 AS user_id
+        FROM `{PROJECT_ID}.{COURSE_CODE}.Friends`
+        WHERE UserId2 = @user_id
+    """
+
+    job_config = bigquery.QueryJobConfig(
+        query_parameters=[
+            bigquery.ScalarQueryParameter("user_id", "STRING", user_id)
+        ]
+    )
+
+    query_job = client.query(query, job_config=job_config)
+    results = query_job.result()
+
+    friends = []
+    for row in results:
+        friend_dict = {
+            "user_id": row.user_id
+        }
+        friends.append(friend_dict)
+
+    return friends
+
+
 def get_genai_advice(user_id):
     """Returns the most recent advice from the genai model.
 
