@@ -8,7 +8,7 @@
 import unittest
 from unittest.mock import MagicMock, patch
 from data_fetcher import get_user_workouts, insert_post
-
+from data_fetcher import get_user_workouts, get_user_sensor_data
 class TestDataFetcher(unittest.TestCase):
 
     @patch('data_fetcher.bigquery.Client')
@@ -145,6 +145,50 @@ class TestDataFetcher(unittest.TestCase):
         }
  
         self.assertNotEqual(first_params['post_id'], second_params['post_id'])
+        
+     @patch('data_fetcher.bigquery.Client')
+    def test_get_user_sensor_data_success(self, mock_client_class):
+        """Tests mapping BigQuery SensorData rows to Python dictionaries."""
+        # Arrange: Setup mock data representing BigQuery rows for 'workout1'
+        mock_row_1 = MagicMock()
+        mock_row_1.SensorType = 'Heart Rate'
+        mock_row_1.Timestamp = '2024-07-29 07:15:00'
+        mock_row_1.Data = 120.0
+        mock_row_1.Units = 'bpm'
+
+        mock_row_2 = MagicMock()
+        mock_row_2.SensorType = 'Step Count'
+        mock_row_2.Timestamp = '2024-07-29 07:30:00'
+        mock_row_2.Data = 3000.0
+        mock_row_2.Units = 'steps'
+
+        mock_row_3 = MagicMock()
+        mock_row_3.SensorType = 'Temperature'
+        mock_row_3.Timestamp = '2024-07-29 07:45:00'
+        mock_row_3.Data = 36.5
+        mock_row_3.Units = 'Celsius'
+
+        mock_instance = mock_client_class.return_value
+        mock_query_job = MagicMock()
+        mock_query_job.result.return_value = [mock_row_1, mock_row_2, mock_row_3]
+        mock_instance.query.return_value = mock_query_job
+
+        # Act
+        result = get_user_sensor_data('user1', 'workout1')
+
+        # Assert
+        self.assertEqual(len(result), 3)
+        self.assertEqual(result[0], {'sensor_type': 'Heart Rate', 'timestamp': '2024-07-29 07:15:00', 'data': 120.0, 'units': 'bpm'})
+        self.assertEqual(result[1], {'sensor_type': 'Step Count', 'timestamp': '2024-07-29 07:30:00', 'data': 3000.0, 'units': 'steps'})
+        self.assertEqual(result[2], {'sensor_type': 'Temperature', 'timestamp': '2024-07-29 07:45:00', 'data': 36.5, 'units': 'Celsius'})
+
+    @patch('data_fetcher.bigquery.Client')
+    def test_get_user_sensor_data_empty(self, mock_client_class):
+        """Tests that an empty result set safely returns an empty list."""
+        mock_client_class.return_value.query.return_value.result.return_value = []
+
+        result = get_user_sensor_data('user1', 'workout1')
+        self.assertEqual(result, [])
 
 
 if __name__ == "__main__":
