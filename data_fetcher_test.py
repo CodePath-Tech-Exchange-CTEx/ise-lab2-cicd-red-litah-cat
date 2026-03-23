@@ -204,7 +204,7 @@ class TestGetUserSensorData(unittest.TestCase):
 
         self.assertEqual(result, expected)
 
-    @patch("your_file.bigquery.Client")
+    @patch("data_fetcher.bigquery.Client")
     def test_get_user_sensor_data_empty_result(self, mock_client_class):
         mock_client = MagicMock()
         mock_client_class.return_value = mock_client
