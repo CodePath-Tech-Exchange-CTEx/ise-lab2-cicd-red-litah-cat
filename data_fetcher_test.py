@@ -689,6 +689,42 @@ class TestGetUserProfile(unittest.TestCase):
 
         assert result == []
 
+    @patch("data_fetcher.bigquery.Client")
+    def test_get_user_friends_returns_friends(self, mock_client_class):
+        mock_client = Mock()
+        mock_client_class.return_value = mock_client
+
+        row1 = Mock()
+        row1.user_id = "u2"
+
+        row2 = Mock()
+        row2.user_id = "u3"
+
+        mock_query_job = Mock()
+        mock_query_job.result.return_value = [row1, row2]
+        mock_client.query.return_value = mock_query_job
+
+        result = get_user_friends("u1")
+
+        assert result == [
+            {"user_id": "u2"},
+            {"user_id": "u3"},
+        ]
+
+        mock_client.query.assert_called_once()
+
+    @patch("data_fetcher.bigquery.Client")
+    def test_get_user_friends_returns_empty_list_when_no_friends(self, mock_client_class):
+        mock_client = Mock()
+        mock_client_class.return_value = mock_client
+
+        mock_query_job = Mock()
+        mock_query_job.result.return_value = []
+        mock_client.query.return_value = mock_query_job
+
+        result = get_user_friends("u999")
+
+        assert result == []
 
 if __name__ == "__main__":
     unittest.main()
