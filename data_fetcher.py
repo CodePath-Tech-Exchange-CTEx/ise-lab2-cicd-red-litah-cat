@@ -262,6 +262,27 @@ def get_user_friends(user_id):
 
     return friends
 
+    job_config = bigquery.QueryJobConfig(
+        query_parameters=[
+            bigquery.ScalarQueryParameter("user_id", "STRING", user_id)
+        ]
+    )
+
+    query_job = client.query(query, job_config=job_config)
+    results = query_job.result()
+
+    posts = []
+    for row in results:
+        post_dict = {
+            "user_id": row.user_id,
+            "post_id": row.post_id,
+            "timestamp": row.timestamp,
+            "content": row.content,
+            "image": row.image
+        }
+        posts.append(post_dict)
+
+    return posts
 
 def get_genai_advice(user_id):
     """Returns the most recent advice from the genai model.
