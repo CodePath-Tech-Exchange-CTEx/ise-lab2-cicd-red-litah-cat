@@ -128,7 +128,7 @@ class TestDisplayPost(unittest.TestCase):
 
         self.assertEqual(post["html_file_name"], "posts")
         self.assertEqual(post["data"], expected_data)
-        self.assertEqual(post["kwargs"].get("height"), 500)
+        self.assertEqual(post["kwargs"].get("height"), 300)
         self.assertEqual(post["kwargs"].get("scrolling"), True)
 
     def test_empty_post_image(self):
