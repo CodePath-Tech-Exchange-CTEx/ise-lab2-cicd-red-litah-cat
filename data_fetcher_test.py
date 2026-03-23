@@ -7,7 +7,7 @@
 #############################################################################
 import unittest
 from unittest.mock import MagicMock, patch
-from data_fetcher import get_user_workouts
+from data_fetcher import get_user_workouts, insert_post
 
 class TestDataFetcher(unittest.TestCase):
 
@@ -94,6 +94,57 @@ class TestDataFetcher(unittest.TestCase):
         
         self.assertEqual(result, [])
         self.assertIsInstance(result, list)
+
+    
+    @patch('data_fetcher.bigquery.Client')
+    def test_insert_post_executes_query(self, mock_client_class):
+        """Tests that insert_post calls BigQuery with the correct parameters."""
+        mock_instance = mock_client_class.return_value
+        mock_query_job = MagicMock()
+        mock_instance.query.return_value = mock_query_job
+ 
+        insert_post('user1', 'I walked 8000 steps today!')
+ 
+        # Verify a query was actually run
+        mock_instance.query.assert_called_once()
+        mock_query_job.result.assert_called_once()
+ 
+        # Verify the content and user_id were passed as query parameters
+        call_args = mock_instance.query.call_args
+        job_config = call_args.kwargs.get('job_config') or call_args.args[1]
+        param_names = {p.name for p in job_config.query_parameters}
+        param_values = {p.name: p.value for p in job_config.query_parameters}
+ 
+        self.assertIn('user_id', param_names)
+        self.assertIn('content', param_names)
+        self.assertIn('post_id', param_names)
+        self.assertIn('timestamp', param_names)
+        self.assertEqual(param_values['user_id'], 'user1')
+        self.assertEqual(param_values['content'], 'I walked 8000 steps today!')
+    
+
+    @patch('data_fetcher.bigquery.Client')
+    def test_insert_post_unique_ids(self, mock_client_class):
+        """Tests that each call to insert_post generates a unique post ID."""
+        mock_instance = mock_client_class.return_value
+        mock_query_job = MagicMock()
+        mock_instance.query.return_value = mock_query_job
+ 
+        insert_post('user1', 'First post')
+        insert_post('user1', 'Second post')
+ 
+        self.assertEqual(mock_instance.query.call_count, 2)
+ 
+        first_params = {
+            p.name: p.value
+            for p in mock_instance.query.call_args_list[0].kwargs.get('job_config').query_parameters
+        }
+        second_params = {
+            p.name: p.value
+            for p in mock_instance.query.call_args_list[1].kwargs.get('job_config').query_parameters
+        }
+ 
+        self.assertNotEqual(first_params['post_id'], second_params['post_id'])
 
 
 if __name__ == "__main__":
