@@ -45,31 +45,50 @@ users = {
 }
 
 
+
+
+
+# PROJECT_ID = "godswill-ogbonna-fisk"
+# COURSE_CODE = "ISE"
+
 def get_user_sensor_data(user_id, workout_id):
-    """Returns a list of timestampped information for a given workout.
+    """Returns a list of timestamped information for a given workout."""
+    client = bigquery.Client(project=PROJECT_ID)
 
-    This function currently returns random data. You will re-write it in Unit 3.
+    query = f"""
+        SELECT 
+            st.Name AS SensorType,
+            sd.Timestamp,
+            sd.SensorValue AS Data,
+            st.Units
+        FROM `{PROJECT_ID}.{COURSE_CODE}.SensorData` sd
+        JOIN `{PROJECT_ID}.{COURSE_CODE}.Workouts` w
+            ON sd.WorkoutID = w.WorkoutId
+        JOIN `{PROJECT_ID}.{COURSE_CODE}.SensorTypes` st
+            ON sd.SensorId = st.SensorId
+        WHERE w.UserId = @user_id AND sd.WorkoutID = @workout_id
     """
-    sensor_data = []
-    sensor_types = [
-        'accelerometer',
-        'gyroscope',
-        'pressure',
-        'temperature',
-        'heart_rate',
-    ]
-    for index in range(random.randint(5, 100)):
-        random_minute = str(random.randint(0, 59))
-        if len(random_minute) == 1:
-            random_minute = '0' + random_minute
-        timestamp = '2024-01-01 00:' + random_minute + ':00'
-        data = random.random() * 100
-        sensor_type = random.choice(sensor_types)
-        sensor_data.append(
-            {'sensor_type': sensor_type, 'timestamp': timestamp, 'data': data}
-        )
-    return sensor_data
 
+    job_config = bigquery.QueryJobConfig(
+        query_parameters=[
+            bigquery.ScalarQueryParameter("user_id", "STRING", user_id),
+            bigquery.ScalarQueryParameter("workout_id", "STRING", workout_id)
+        ]
+    )
+
+    query_job = client.query(query, job_config=job_config)
+    results = query_job.result()
+
+    sensor_data = []
+    for row in results:
+        sensor_data.append({
+            "sensor_type": row.SensorType,
+            "timestamp": row.Timestamp,
+            "data": row.Data,
+            "units": row.Units
+        })
+
+    return sensor_data
 
 def get_user_workouts(user_id):
     """
