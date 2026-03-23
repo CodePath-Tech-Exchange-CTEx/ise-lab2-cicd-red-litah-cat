@@ -149,7 +149,7 @@ class TestDataFetcher(unittest.TestCase):
         
 class TestGetUserSensorData(unittest.TestCase):
 
-    @patch("your_file.bigquery.Client")
+    @patch("data_fetcher.bigquery.Client")
     def test_get_user_sensor_data_returns_expected_data(self, mock_client_class):
         mock_client = MagicMock()
         mock_client_class.return_value = mock_client
@@ -217,7 +217,7 @@ class TestGetUserSensorData(unittest.TestCase):
 
         self.assertEqual(result, [])
 
-    @patch("your_file.bigquery.Client")
+    @patch("data_fetcher.bigquery.Client")
     def test_get_user_sensor_data_calls_query_with_correct_parameters(self, mock_client_class):
         mock_client = MagicMock()
         mock_client_class.return_value = mock_client
@@ -242,7 +242,7 @@ class TestGetUserSensorData(unittest.TestCase):
         self.assertEqual(params[1].name, "workout_id")
         self.assertEqual(params[1].value, "workout1")
 
-    @patch("your_file.bigquery.Client")
+    @patch("data_fetcher.bigquery.Client")
     def test_get_user_sensor_data_single_row(self, mock_client_class):
         mock_client = MagicMock()
         mock_client_class.return_value = mock_client
