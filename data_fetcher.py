@@ -5,6 +5,8 @@
 #############################################################################
 
 import random
+import uuid
+from datetime import datetime
 from google.cloud import bigquery
 
 PROJECT_ID = "shamshad-ansari-fisk"
@@ -172,3 +174,33 @@ def get_genai_advice(user_id):
         'content': advice,
         'image': image,
     }
+
+def insert_post(user_id, content):
+    """Inserts a new post into the BigQuery Posts table.
+ 
+    Args:
+        user_id: The ID of the user creating the post.
+        content: The text content of the post.
+    """
+    client = bigquery.Client(project=PROJECT_ID)
+ 
+    post_id = str(uuid.uuid4())
+    timestamp = datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')
+ 
+    query = f"""
+        INSERT INTO `{PROJECT_ID}.{COURSE_CODE}.Posts` (PostId, AuthorId, Timestamp, ImageUrl, Content)
+        VALUES (@post_id, @user_id, @timestamp, NULL, @content)
+    """
+ 
+    # We use parameterized queries to prevent SQL injection.
+    job_config = bigquery.QueryJobConfig(
+        query_parameters=[
+            bigquery.ScalarQueryParameter("post_id", "STRING", post_id),
+            bigquery.ScalarQueryParameter("user_id", "STRING", user_id),
+            bigquery.ScalarQueryParameter("timestamp", "STRING", timestamp),
+            bigquery.ScalarQueryParameter("content", "STRING", content),
+        ]
+    )
+ 
+    query_job = client.query(query, job_config=job_config)
+    query_job.result()
