@@ -7,7 +7,7 @@
 #############################################################################
 import unittest
 from unittest.mock import MagicMock, patch, Mock
-from data_fetcher import get_user_workouts, get_user_posts, get_user_friends
+from data_fetcher import get_user_workouts, insert_post, get_user_posts, get_user_friends
 
 class TestDataFetcher(unittest.TestCase):
 
