@@ -46,20 +46,29 @@ users = {
 
 
 
+
+
+PROJECT_ID = "godswill-ogbonna-fisk"
+COURSE_CODE = "ISE"
+
 def get_user_sensor_data(user_id, workout_id):
     """Returns a list of timestamped information for a given workout."""
     client = bigquery.Client(project=PROJECT_ID)
 
     query = f"""
         SELECT 
-            SensorType, 
-            Timestamp, 
-            Data, 
-            Units
-        FROM `{PROJECT_ID}.{COURSE_CODE}.SensorData`
-        WHERE UserId = @user_id AND WorkoutId = @workout_id
+            st.Name AS SensorType,
+            sd.Timestamp,
+            sd.SensorValue AS Data,
+            st.Units
+        FROM `{PROJECT_ID}.{COURSE_CODE}.SensorData` sd
+        JOIN `{PROJECT_ID}.{COURSE_CODE}.Workouts` w
+            ON sd.WorkoutID = w.WorkoutId
+        JOIN `{PROJECT_ID}.{COURSE_CODE}.SensorTypes` st
+            ON sd.SensorId = st.SensorId
+        WHERE w.UserId = @user_id AND sd.WorkoutID = @workout_id
     """
-    
+
     job_config = bigquery.QueryJobConfig(
         query_parameters=[
             bigquery.ScalarQueryParameter("user_id", "STRING", user_id),
@@ -73,12 +82,12 @@ def get_user_sensor_data(user_id, workout_id):
     sensor_data = []
     for row in results:
         sensor_data.append({
-            'sensor_type': row.SensorType,
-            'timestamp': row.Timestamp,
-            'data': row.Data,
-            'units': row.Units
+            "sensor_type": row.SensorType,
+            "timestamp": row.Timestamp,
+            "data": row.Data,
+            "units": row.Units
         })
-        
+
     return sensor_data
 
 def get_user_workouts(user_id):

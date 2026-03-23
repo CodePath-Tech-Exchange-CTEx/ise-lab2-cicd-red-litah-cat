@@ -9,6 +9,7 @@ import unittest
 from unittest.mock import MagicMock, patch
 from data_fetcher import get_user_workouts, insert_post
 from data_fetcher import get_user_workouts, get_user_sensor_data
+from datetime import datetime
 class TestDataFetcher(unittest.TestCase):
 
     @patch('data_fetcher.bigquery.Client')
@@ -146,49 +147,124 @@ class TestDataFetcher(unittest.TestCase):
  
         self.assertNotEqual(first_params['post_id'], second_params['post_id'])
         
-     @patch('data_fetcher.bigquery.Client')
-    def test_get_user_sensor_data_success(self, mock_client_class):
-        """Tests mapping BigQuery SensorData rows to Python dictionaries."""
-        # Arrange: Setup mock data representing BigQuery rows for 'workout1'
-        mock_row_1 = MagicMock()
-        mock_row_1.SensorType = 'Heart Rate'
-        mock_row_1.Timestamp = '2024-07-29 07:15:00'
-        mock_row_1.Data = 120.0
-        mock_row_1.Units = 'bpm'
+class TestGetUserSensorData(unittest.TestCase):
 
-        mock_row_2 = MagicMock()
-        mock_row_2.SensorType = 'Step Count'
-        mock_row_2.Timestamp = '2024-07-29 07:30:00'
-        mock_row_2.Data = 3000.0
-        mock_row_2.Units = 'steps'
+    @patch("your_file.bigquery.Client")
+    def test_get_user_sensor_data_returns_expected_data(self, mock_client_class):
+        mock_client = MagicMock()
+        mock_client_class.return_value = mock_client
 
-        mock_row_3 = MagicMock()
-        mock_row_3.SensorType = 'Temperature'
-        mock_row_3.Timestamp = '2024-07-29 07:45:00'
-        mock_row_3.Data = 36.5
-        mock_row_3.Units = 'Celsius'
-
-        mock_instance = mock_client_class.return_value
         mock_query_job = MagicMock()
-        mock_query_job.result.return_value = [mock_row_1, mock_row_2, mock_row_3]
-        mock_instance.query.return_value = mock_query_job
+        mock_client.query.return_value = mock_query_job
 
-        # Act
-        result = get_user_sensor_data('user1', 'workout1')
+        mock_rows = [
+            MagicMock(
+                SensorType="Heart Rate",
+                Timestamp=datetime(2024, 7, 29, 7, 15, 0),
+                Data=120.0,
+                Units="bpm"
+            ),
+            MagicMock(
+                SensorType="Step Count",
+                Timestamp=datetime(2024, 7, 29, 7, 30, 0),
+                Data=3000.0,
+                Units="steps"
+            ),
+            MagicMock(
+                SensorType="Temperature",
+                Timestamp=datetime(2024, 7, 29, 7, 45, 0),
+                Data=36.5,
+                Units="Celsius"
+            ),
+        ]
+        mock_query_job.result.return_value = mock_rows
 
-        # Assert
-        self.assertEqual(len(result), 3)
-        self.assertEqual(result[0], {'sensor_type': 'Heart Rate', 'timestamp': '2024-07-29 07:15:00', 'data': 120.0, 'units': 'bpm'})
-        self.assertEqual(result[1], {'sensor_type': 'Step Count', 'timestamp': '2024-07-29 07:30:00', 'data': 3000.0, 'units': 'steps'})
-        self.assertEqual(result[2], {'sensor_type': 'Temperature', 'timestamp': '2024-07-29 07:45:00', 'data': 36.5, 'units': 'Celsius'})
+        result = get_user_sensor_data("user1", "workout1")
 
-    @patch('data_fetcher.bigquery.Client')
-    def test_get_user_sensor_data_empty(self, mock_client_class):
-        """Tests that an empty result set safely returns an empty list."""
-        mock_client_class.return_value.query.return_value.result.return_value = []
+        expected = [
+            {
+                "sensor_type": "Heart Rate",
+                "timestamp": datetime(2024, 7, 29, 7, 15, 0),
+                "data": 120.0,
+                "units": "bpm"
+            },
+            {
+                "sensor_type": "Step Count",
+                "timestamp": datetime(2024, 7, 29, 7, 30, 0),
+                "data": 3000.0,
+                "units": "steps"
+            },
+            {
+                "sensor_type": "Temperature",
+                "timestamp": datetime(2024, 7, 29, 7, 45, 0),
+                "data": 36.5,
+                "units": "Celsius"
+            },
+        ]
 
-        result = get_user_sensor_data('user1', 'workout1')
+        self.assertEqual(result, expected)
+
+    @patch("your_file.bigquery.Client")
+    def test_get_user_sensor_data_empty_result(self, mock_client_class):
+        mock_client = MagicMock()
+        mock_client_class.return_value = mock_client
+
+        mock_query_job = MagicMock()
+        mock_client.query.return_value = mock_query_job
+        mock_query_job.result.return_value = []
+
+        result = get_user_sensor_data("user999", "workout999")
+
         self.assertEqual(result, [])
+
+    @patch("your_file.bigquery.Client")
+    def test_get_user_sensor_data_calls_query_with_correct_parameters(self, mock_client_class):
+        mock_client = MagicMock()
+        mock_client_class.return_value = mock_client
+
+        mock_query_job = MagicMock()
+        mock_client.query.return_value = mock_query_job
+        mock_query_job.result.return_value = []
+
+        get_user_sensor_data("user1", "workout1")
+
+        mock_client.query.assert_called_once()
+        args, kwargs = mock_client.query.call_args
+
+        query_string = args[0]
+        job_config = kwargs["job_config"]
+
+        self.assertIn("WHERE w.UserId = @user_id AND sd.WorkoutID = @workout_id", query_string)
+
+        params = job_config.query_parameters
+        self.assertEqual(params[0].name, "user_id")
+        self.assertEqual(params[0].value, "user1")
+        self.assertEqual(params[1].name, "workout_id")
+        self.assertEqual(params[1].value, "workout1")
+
+    @patch("your_file.bigquery.Client")
+    def test_get_user_sensor_data_single_row(self, mock_client_class):
+        mock_client = MagicMock()
+        mock_client_class.return_value = mock_client
+
+        mock_query_job = MagicMock()
+        mock_client.query.return_value = mock_query_job
+
+        mock_query_job.result.return_value = [
+            MagicMock(
+                SensorType="Heart Rate",
+                Timestamp=datetime(2024, 7, 29, 9, 20, 0),
+                Data=115.0,
+                Units="bpm"
+            )
+        ]
+
+        result = get_user_sensor_data("user2", "workout2")
+
+        self.assertEqual(len(result), 1)
+        self.assertEqual(result[0]["sensor_type"], "Heart Rate")
+        self.assertEqual(result[0]["data"], 115.0)
+        self.assertEqual(result[0]["units"], "bpm")
 
 
 if __name__ == "__main__":
