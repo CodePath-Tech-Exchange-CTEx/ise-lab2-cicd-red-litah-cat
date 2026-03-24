@@ -149,11 +149,46 @@ def get_user_workouts(user_id):
 def get_user_profile(user_id):
     """Returns information about the given user.
 
-    This function currently returns random data. You will re-write it in Unit 3.
     """
-    if user_id not in users:
-        raise ValueError(f'User {user_id} not found.')
-    return users[user_id]
+    client = bigquery.Client(project=PROJECT_ID)
+
+    # Line written by Gemini
+    query = f"""
+        WITH all_friendships AS (
+            SELECT UserId1 AS user_id, UserId2 AS friend_id FROM `{PROJECT_ID}.{COURSE_CODE}.Friends`
+            UNION DISTINCT
+            SELECT UserId2 AS user_id, UserId1 AS friend_id FROM `{PROJECT_ID}.{COURSE_CODE}.Friends`
+        )
+
+        SELECT
+            u.Name AS full_name,
+            u.Username AS username,
+            u.DateOfBirth AS date_of_birth,
+            u.ImageUrl AS profile_image,
+            ARRAY_AGG(f.friend_id IGNORE NULLS) AS friends
+        FROM
+            `{PROJECT_ID}.{COURSE_CODE}.Users` AS u
+        LEFT JOIN
+            all_friendships AS f ON u.UserId = f.user_id
+        WHERE u.UserId = @target_id
+        GROUP BY
+            u.UserId, u.Name, u.Username, u.DateOfBirth, u.ImageUrl
+    """
+    
+    # Line written by Gemini
+    job_config = bigquery.QueryJobConfig(
+        query_parameters=[
+            bigquery.ScalarQueryParameter("target_id", "STRING", user_id)
+        ]
+    )
+
+    query_job = client.query(query, job_config=job_config)
+    results = query_job.result()
+
+    for row in results:
+        return dict(row)
+
+    raise ValueError(f'User {user_id} not found.')
 
 
 def get_user_posts(user_id):
@@ -231,7 +266,7 @@ def get_user_friends(user_id):
 def get_genai_advice(user_id):
     """Returns the most recent advice from the genai model.
 
-    This function currently returns random data. You will re-write it in Unit 3.
+
     """
 
     # Gets all workouts

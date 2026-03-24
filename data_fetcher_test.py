@@ -546,6 +546,92 @@ class TestGetImageUrlGenaiAdvice(unittest.TestCase):
 
         # Because your code uses .get('urls', {}).get('regular'), it gracefully handles missing keys
         self.assertIsNone(result)
+# Written by Gemini
+class TestGetUserProfile(unittest.TestCase):
+
+    @patch('data_fetcher.bigquery.Client')
+    def test_get_user_profile_success(self, mock_client_class):
+        """Tests that a valid user with friends returns the correct dictionary."""
+        mock_instance = mock_client_class.return_value
+        mock_query_job = MagicMock()
+        
+        # We simulate a BigQuery row using a dictionary. 
+        mock_row = {
+            'full_name': 'Alice Smith',
+            'username': 'alice_s',
+            'date_of_birth': '1995-05-20',
+            'profile_image': 'https://example.com/alice.jpg',
+            'friends': ['user2', 'user3']
+        }
+        
+        mock_query_job.result.return_value = [mock_row]
+        mock_instance.query.return_value = mock_query_job
+
+        # Execute
+        result = get_user_profile('user1')
+
+        # Assertions
+        self.assertEqual(result['full_name'], 'Alice Smith')
+        self.assertEqual(len(result['friends']), 2)
+        self.assertIn('user2', result['friends'])
+
+    @patch('data_fetcher.bigquery.Client')
+    def test_get_user_profile_no_friends(self, mock_client_class):
+        """Tests that a user with no friends returns an empty list for 'friends'."""
+        mock_instance = mock_client_class.return_value
+        mock_query_job = MagicMock()
+        
+        # SQL's ARRAY_AGG with LEFT JOIN usually returns an empty list [] or [None] 
+        # if no matches are found. We mock an empty list here.
+        mock_row = {
+            'full_name': 'Lonely Bob',
+            'username': 'bob0',
+            'date_of_birth': '1980-01-01',
+            'profile_image': None,
+            'friends': [] 
+        }
+        
+        mock_query_job.result.return_value = [mock_row]
+        mock_instance.query.return_value = mock_query_job
+
+        result = get_user_profile('user_bob')
+        self.assertEqual(result['friends'], [])
+
+    @patch('data_fetcher.bigquery.Client')
+    def test_get_user_profile_not_found(self, mock_client_class):
+        """Tests that a ValueError is raised if the user ID doesn't exist."""
+        mock_instance = mock_client_class.return_value
+        mock_query_job = MagicMock()
+        
+        # Simulate an empty result set (user not in Users table)
+        mock_query_job.result.return_value = []
+        mock_instance.query.return_value = mock_query_job
+
+        with self.assertRaises(ValueError) as cm:
+            get_user_profile('fake_id')
+        
+        self.assertEqual(str(cm.exception), 'User fake_id not found.')
+
+    @patch('data_fetcher.bigquery.Client')
+    def test_get_user_profile_config_parameters(self, mock_client_class):
+        """Verifies that QueryJobConfig is used to pass the ID safely."""
+        mock_instance = mock_client_class.return_value
+        mock_query_job = MagicMock()
+        mock_query_job.result.return_value = [{'dummy': 'data'}]
+        mock_instance.query.return_value = mock_query_job
+
+        get_user_profile('secure_user_123')
+
+        # Dig into the mock to find the QueryJobConfig that was sent to .query()
+        _, kwargs = mock_instance.query.call_args
+        job_config = kwargs.get('job_config')
+        
+        self.assertIsNotNone(job_config, "QueryJobConfig was not passed to client.query")
+        
+        # Check that the parameter name and value match
+        param = job_config.query_parameters[0]
+        self.assertEqual(param.name, 'target_id')
+        self.assertEqual(param.value, 'secure_user_123')
 
 if __name__ == "__main__":
     unittest.main()
