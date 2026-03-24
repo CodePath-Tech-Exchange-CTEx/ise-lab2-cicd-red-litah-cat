@@ -6,8 +6,8 @@
 # You will write these tests in Unit 3.
 #############################################################################
 import unittest
-from unittest.mock import MagicMock, patch
-from data_fetcher import get_user_workouts, insert_post
+from unittest.mock import MagicMock, patch, Mock
+from data_fetcher import get_user_workouts, insert_post, get_user_posts, get_user_friends
 from data_fetcher import get_user_workouts, get_user_sensor_data
 from datetime import datetime
 class TestDataFetcher(unittest.TestCase):
@@ -96,7 +96,6 @@ class TestDataFetcher(unittest.TestCase):
         self.assertEqual(result, [])
         self.assertIsInstance(result, list)
 
-    
     @patch('data_fetcher.bigquery.Client')
     def test_insert_post_executes_query(self, mock_client_class):
         """Tests that insert_post calls BigQuery with the correct parameters."""
@@ -266,6 +265,100 @@ class TestGetUserSensorData(unittest.TestCase):
         self.assertEqual(result[0]["data"], 115.0)
         self.assertEqual(result[0]["units"], "bpm")
 
+
+    @patch("data_fetcher.bigquery.Client")
+    def test_get_user_posts_returns_posts(self, mock_client_class):
+        mock_client = Mock()
+        mock_client_class.return_value = mock_client
+
+        row1 = Mock()
+        row1.user_id = "u1"
+        row1.post_id = "p1"
+        row1.timestamp = "2026-03-22 10:00:00"
+        row1.content = "Hello"
+        row1.image = "img1.jpg"
+
+        row2 = Mock()
+        row2.user_id = "u1"
+        row2.post_id = "p2"
+        row2.timestamp = "2026-03-22 11:00:00"
+        row2.content = None
+        row2.image = None
+
+        mock_query_job = Mock()
+        mock_query_job.result.return_value = [row1, row2]
+        mock_client.query.return_value = mock_query_job
+
+        result = get_user_posts("u1")
+
+        assert result == [
+            {
+                "user_id": "u1",
+                "post_id": "p1",
+                "timestamp": "2026-03-22 10:00:00",
+                "content": "Hello",
+                "image": "img1.jpg",
+            },
+            {
+                "user_id": "u1",
+                "post_id": "p2",
+                "timestamp": "2026-03-22 11:00:00",
+                "content": None,
+                "image": None,
+            },
+        ]
+
+        mock_client.query.assert_called_once()
+
+    @patch("data_fetcher.bigquery.Client")
+    def test_get_user_posts_returns_empty_list_when_no_posts(self, mock_client_class):
+        mock_client = Mock()
+        mock_client_class.return_value = mock_client
+
+        mock_query_job = Mock()
+        mock_query_job.result.return_value = []
+        mock_client.query.return_value = mock_query_job
+
+        result = get_user_posts("u999")
+
+        assert result == []
+
+    @patch("data_fetcher.bigquery.Client")
+    def test_get_user_friends_returns_friends(self, mock_client_class):
+        mock_client = Mock()
+        mock_client_class.return_value = mock_client
+
+        row1 = Mock()
+        row1.user_id = "u2"
+
+        row2 = Mock()
+        row2.user_id = "u3"
+
+        mock_query_job = Mock()
+        mock_query_job.result.return_value = [row1, row2]
+        mock_client.query.return_value = mock_query_job
+
+        result = get_user_friends("u1")
+
+        assert result == [
+            {"user_id": "u2"},
+            {"user_id": "u3"},
+        ]
+
+        mock_client.query.assert_called_once()
+
+    @patch("data_fetcher.bigquery.Client")
+    def test_get_user_friends_returns_empty_list_when_no_friends(self, mock_client_class):
+        mock_client = Mock()
+        mock_client_class.return_value = mock_client
+
+        mock_query_job = Mock()
+        mock_query_job.result.return_value = []
+        mock_client.query.return_value = mock_query_job
+
+        result = get_user_friends("u999")
+
+        assert result == []
 
 if __name__ == "__main__":
     unittest.main()

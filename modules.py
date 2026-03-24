@@ -42,7 +42,7 @@ def display_post(username, user_image, timestamp, content, post_image):
         'POST_IMAGE': post_image,
     }
     html_file_name = "posts"
-    create_component(data, html_file_name, height= 500, scrolling=True)
+    create_component(data, html_file_name, height= 300, scrolling=True)
 
 def display_activity_summary(workouts_list):
     """

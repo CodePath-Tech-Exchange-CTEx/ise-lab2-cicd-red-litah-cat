@@ -155,21 +155,75 @@ def get_user_profile(user_id):
 
 
 def get_user_posts(user_id):
-    """Returns a list of a user's posts.
+    """Returns a list of posts for the given user."""
+    client = bigquery.Client(project=PROJECT_ID)
 
-    This function currently returns random data. You will re-write it in Unit 3.
+    query = f"""
+        SELECT
+            AuthorId AS user_id,
+            PostId AS post_id,
+            Timestamp AS timestamp,
+            Content AS content,
+            ImageUrl AS image
+        FROM `{PROJECT_ID}.{COURSE_CODE}.Posts`
+        WHERE AuthorId = @user_id
     """
-    content = random.choice([
-        'Had a great workout today!',
-        'The AI really motivated me to push myself further, I ran 10 miles!',
-    ])
-    return [{
-        'user_id': user_id,
-        'post_id': 'post1',
-        'timestamp': '2024-01-01 00:00:00',
-        'content': content,
-        'image': 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT60baWEUwB0o7DAwGBl6ZQL5Gti3JXRuDVrK_HuwZDmgSxXy13gj2cMRMJHZohn4jojrery_SmHIu3AXRcJHjXdkGGIZ4oL8LTHurv-J8L&s=10',
-    }]
+
+    job_config = bigquery.QueryJobConfig(
+        query_parameters=[
+            bigquery.ScalarQueryParameter("user_id", "STRING", user_id)
+        ]
+    )
+
+    query_job = client.query(query, job_config=job_config)
+    results = query_job.result()
+
+    posts = []
+    for row in results:
+        post_dict = {
+            "user_id": row.user_id,
+            "post_id": row.post_id,
+            "timestamp": row.timestamp,
+            "content": row.content,
+            "image": row.image
+        }
+        posts.append(post_dict)
+
+    return posts
+
+def get_user_friends(user_id):
+    """Returns a user's friends"""
+    client = bigquery.Client(project=PROJECT_ID)
+
+    query = f"""
+        SELECT UserId2 AS user_id
+        FROM `{PROJECT_ID}.{COURSE_CODE}.Friends`
+        WHERE UserId1 = @user_id
+
+        UNION DISTINCT
+
+        SELECT UserId1 AS user_id
+        FROM `{PROJECT_ID}.{COURSE_CODE}.Friends`
+        WHERE UserId2 = @user_id
+    """
+
+    job_config = bigquery.QueryJobConfig(
+        query_parameters=[
+            bigquery.ScalarQueryParameter("user_id", "STRING", user_id)
+        ]
+    )
+
+    query_job = client.query(query, job_config=job_config)
+    results = query_job.result()
+
+    friends = []
+    for row in results:
+        friend_dict = {
+            "user_id": row.user_id
+        }
+        friends.append(friend_dict)
+
+    return friends
 
 
 def get_genai_advice(user_id):
