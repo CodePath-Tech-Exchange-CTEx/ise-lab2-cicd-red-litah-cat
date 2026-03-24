@@ -48,8 +48,6 @@ users = {
 
 
 
-# PROJECT_ID = "godswill-ogbonna-fisk"
-# COURSE_CODE = "ISE"
 
 def get_user_sensor_data(user_id, workout_id):
     """Returns a list of timestamped information for a given workout."""
