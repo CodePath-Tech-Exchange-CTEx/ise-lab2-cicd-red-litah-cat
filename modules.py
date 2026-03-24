@@ -138,5 +138,5 @@ def display_genai_advice(timestamp, content, image):
             'IMAGE': image}
 
     html_file_name = 'display_genai_advice_component'
-    create_component(data, html_file_name, height=250, scrolling=True)
+    create_component(data, html_file_name, height=300, scrolling=True)
     
