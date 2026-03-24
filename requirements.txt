@@ -1,2 +1,5 @@
 streamlit
 google-cloud-bigquery
+python-dotenv
+google-genai
+requests
