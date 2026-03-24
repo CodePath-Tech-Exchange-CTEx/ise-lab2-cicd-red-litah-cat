@@ -285,11 +285,14 @@ def get_genai_advice(user_id):
         ),
     )
 
-    ai_response = json.loads(response.text)
-    print(ai_response["content"])
+    try:
+        ai_response = json.loads(response.text)
+    except json.JSONDecodeError:
+        # Fallback if Gemini hallucinates non-JSON text
+        ai_response = {"content": "Great job on your workout!", "image_keywords": "gym"}
 
-    image_url = None
-    #image_url = get_image_url_genai_advice(ai_response)
+
+    image_url = get_image_url_genai_advice(ai_response)
 
     unique_id = uuid.uuid4().hex[:8] # Line written by Gemini
     advice_id = f"ADV-{unique_id.upper()}" # Line written by Gemini

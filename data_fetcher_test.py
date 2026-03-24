@@ -6,9 +6,12 @@
 # You will write these tests in Unit 3.
 #############################################################################
 import unittest
+import re
+import json
 from unittest.mock import MagicMock, patch, Mock
-from data_fetcher import get_user_workouts, insert_post, get_user_sensor_data, get_user_posts
+from data_fetcher import get_user_workouts, insert_post, get_user_sensor_data, get_user_posts, get_user_friends, get_genai_advice, get_image_url_genai_advice
 from datetime import datetime
+
 class TestDataFetcher(unittest.TestCase):
 
     @patch('data_fetcher.bigquery.Client')
@@ -357,6 +360,192 @@ class TestGetUserSensorData(unittest.TestCase):
         result = get_user_friends("u999")
 
         assert result == []
+
+# Written by Gemini
+class TestGenAIAdvice(unittest.TestCase):
+
+    @patch('data_fetcher.get_user_workouts')
+    def test_get_genai_advice_no_workouts(self, mock_get_workouts):
+        """Tests that the function returns a default dictionary if no workouts exist."""
+        # Mock the workout fetcher to return an empty list
+        mock_get_workouts.return_value = []
+
+        result = get_genai_advice("user_no_workouts")
+
+        # Verify the fallback response
+        self.assertIsNone(result["advice_id"])
+        self.assertIsNone(result["image"])
+        self.assertEqual(result["content"], "No workouts found yet. Let's get moving!")
+        self.assertIn("timestamp", result)
+
+    @patch('data_fetcher.get_image_url_genai_advice')
+    @patch('data_fetcher.GenerativeModel')
+    @patch('data_fetcher.vertexai.init')
+    @patch('data_fetcher.get_user_workouts')
+    def test_get_genai_advice_success(self, mock_get_workouts, mock_vertex_init, mock_gen_model, mock_get_image):
+        """Tests the happy path where workouts exist and Gemini returns valid JSON."""
+        # 1. Mock the workout data
+        mock_get_workouts.return_value = [{
+            'start_timestamp': '2026-03-24 07:00:00',
+            'end_timestamp': '2026-03-24 08:00:00',
+            'distance': 5.0,
+            'steps': 8000,
+            'calories_burned': 450
+        }]
+
+        # 2. Mock the Gemini API Response
+        mock_model_instance = MagicMock()
+        mock_gen_model.return_value = mock_model_instance
+        
+        mock_api_response = MagicMock()
+        # Simulate the JSON string that Gemini returns
+        mock_api_response.text = json.dumps({
+            "content": "Incredible job running 5 miles!",
+            "image_keywords": "running outside sunny"
+        })
+        mock_model_instance.generate_content.return_value = mock_api_response
+
+        # 3. Mock the Unsplash Helper
+        mock_get_image.return_value = "https://images.unsplash.com/fake-photo.jpg"
+
+        # Execute
+        result = get_genai_advice("user_123")
+
+        # Verify Vertex AI was initialized
+        mock_vertex_init.assert_called_once()
+        
+        # Verify the structure of the returned dictionary
+        self.assertIsNotNone(result["advice_id"])
+        self.assertTrue(result["advice_id"].startswith("ADV-"))
+        self.assertEqual(result["content"], "Incredible job running 5 miles!")
+        self.assertEqual(result["image"], "https://images.unsplash.com/fake-photo.jpg")
+        self.assertIsNotNone(result["timestamp"])
+
+    @patch('data_fetcher.get_user_workouts')
+    @patch('data_fetcher.GenerativeModel')
+    @patch('data_fetcher.vertexai.init')
+    def test_get_genai_advice_invalid_json(self, mock_vertex_init, mock_gen_model, mock_get_workouts):
+        """Tests that the function handles malformed JSON from the Gemini API safely."""
+        mock_get_workouts.return_value = [{'start_timestamp': '2026-03-24', 'distance': 5, 'steps': 5000, 'calories_burned': 200}]
+        
+        mock_model_instance = MagicMock()
+        mock_gen_model.return_value = mock_model_instance
+        
+        mock_api_response = MagicMock()
+        # Simulate a glitch where the AI returns conversational text instead of JSON
+        mock_api_response.text = "Here is your advice: {'content': 'Keep it up'}" 
+        mock_model_instance.generate_content.return_value = mock_api_response
+
+        # Execute
+        result = get_genai_advice("user_123")
+
+        # Verify it caught the JSONDecodeError and used the fallback content
+        self.assertEqual(result["content"], "Great job on your workout!")
+
+    @patch('data_fetcher.get_user_workouts')
+    @patch('data_fetcher.GenerativeModel')
+    @patch('data_fetcher.vertexai.init')
+    @patch('data_fetcher.get_image_url_genai_advice')
+    def test_get_genai_advice_id_format(self, mock_get_image, mock_vertex_init, mock_gen_model, mock_get_workouts):
+        """Tests that the generated advice_id matches the expected ADV-XXXXXXXX format."""
+        mock_get_workouts.return_value = [{'start_timestamp': '2026-03-24', 'distance': 5, 'steps': 5000, 'calories_burned': 200}]
+        mock_get_image.return_value = None
+        
+        mock_model_instance = MagicMock()
+        mock_gen_model.return_value = mock_model_instance
+        mock_api_response = MagicMock()
+        mock_api_response.text = '{"content": "Good job", "image_keywords": "run"}'
+        mock_model_instance.generate_content.return_value = mock_api_response
+
+        result = get_genai_advice("user_123")
+
+        # Regex check: Starts with ADV-, followed by exactly 8 uppercase hex characters
+        self.assertRegex(result["advice_id"], r"^ADV-[0-9A-F]{8}$")
+
+# Written By Gemini
+class TestGetImageUrlGenaiAdvice(unittest.TestCase):
+
+    @patch('data_fetcher.requests.get')
+    @patch('data_fetcher.os.environ.get')
+    @patch('data_fetcher.random.random')
+    def test_get_image_url_success(self, mock_random, mock_env, mock_requests):
+        """Tests successful retrieval of an image URL from the Unsplash API."""
+        # Force the random roll to succeed (greater than 0)
+        mock_random.return_value = 0.5 
+        mock_env.return_value = "FAKE_API_KEY"
+
+        # Mock the Unsplash JSON response
+        mock_response = MagicMock()
+        mock_response.json.return_value = {
+            'urls': {
+                'regular': 'https://images.unsplash.com/real-photo.jpg'
+            }
+        }
+        mock_requests.return_value = mock_response
+
+        # Execute
+        ai_response = {"image_keywords": "running,shoes"}
+        result = get_image_url_genai_advice(ai_response)
+
+        # Assertions
+        self.assertEqual(result, 'https://images.unsplash.com/real-photo.jpg')
+        mock_requests.assert_called_once()
+        
+        # Verify the URL was formatted correctly
+        called_url = mock_requests.call_args[0][0]
+        self.assertIn("query=running,shoes", called_url)
+        self.assertIn("client_id=FAKE_API_KEY", called_url)
+
+    @patch('data_fetcher.requests.get')
+    @patch('data_fetcher.os.environ.get')
+    @patch('data_fetcher.random.random')
+    def test_get_image_url_api_failure(self, mock_random, mock_env, mock_requests):
+        """Tests that the function safely handles an Unsplash API crash/timeout."""
+        mock_random.return_value = 0.5
+        mock_env.return_value = "FAKE_API_KEY"
+
+        # Simulate a network crash
+        mock_requests.side_effect = Exception("Connection Timeout")
+
+        ai_response = {"image_keywords": "weights"}
+        
+        # Execute (It should not crash, it should catch the exception)
+        result = get_image_url_genai_advice(ai_response)
+
+        # Should safely return None
+        self.assertIsNone(result)
+
+    @patch('data_fetcher.random.random')
+    def test_get_image_url_random_roll_fails(self, mock_random):
+        """Tests the scenario where the random chance determines no image should be fetched."""
+        # Force the random roll to fail
+        mock_random.return_value = 0.0 
+
+        ai_response = {"image_keywords": "yoga"}
+        result = get_image_url_genai_advice(ai_response)
+
+        # Should immediately return None without calling the API
+        self.assertIsNone(result)
+
+    @patch('data_fetcher.requests.get')
+    @patch('data_fetcher.os.environ.get')
+    @patch('data_fetcher.random.random')
+    def test_get_image_url_unauthorized_api_key(self, mock_random, mock_env, mock_requests):
+        """Tests Unsplash returning a 401 Unauthorized error (Bad API Key)."""
+        mock_random.return_value = 0.5
+        mock_env.return_value = "INVALID_KEY"
+
+        mock_response = MagicMock()
+        mock_response.status_code = 401
+        # Unsplash usually returns an 'errors' list when unauthorized, not a 'urls' dict
+        mock_response.json.return_value = {"errors": ["OAuth error: The access token is invalid"]}
+        mock_requests.return_value = mock_response
+
+        ai_response = {"image_keywords": "running"}
+        result = get_image_url_genai_advice(ai_response)
+
+        # Because your code uses .get('urls', {}).get('regular'), it gracefully handles missing keys
+        self.assertIsNone(result)
 
 if __name__ == "__main__":
     unittest.main()

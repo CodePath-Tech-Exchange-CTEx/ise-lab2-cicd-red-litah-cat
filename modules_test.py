@@ -250,7 +250,7 @@ class TestDisplayGenAiAdvice(unittest.TestCase):
         mock_create.assert_called_once_with(
             expected_data,
             'display_genai_advice_component',
-            height=250,
+            height=300,
             scrolling=True
         )
 
@@ -268,7 +268,7 @@ class TestDisplayGenAiAdvice(unittest.TestCase):
         mock_create.assert_called_once_with(
             expected_data,
             'display_genai_advice_component',
-            height=250,
+            height=300,
             scrolling=True
         )
 
@@ -286,7 +286,7 @@ class TestDisplayGenAiAdvice(unittest.TestCase):
         mock_create.assert_called_once_with(
             expected_data,
             'display_genai_advice_component',
-            height=250,
+            height=300,
             scrolling=True
         )
 
@@ -310,7 +310,7 @@ class TestDisplayGenAiAdvice(unittest.TestCase):
         mock_create.assert_called_once_with(
             expected_data,
             'display_genai_advice_component',
-            height=250,
+            height=300,
             scrolling=True
         )
 
