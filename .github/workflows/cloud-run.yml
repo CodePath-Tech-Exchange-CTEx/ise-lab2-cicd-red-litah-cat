@@ -11,7 +11,9 @@ on:
 
 env:
   # TODO: Paste output from setup.sh below.
-  PROJECT_ID: 'shamshad-ansari-fisk'
+  PROJECT_ID: '${{ secrets.PROJECT_ID }}'
+  UNSPLASH_ACCESS_KEY: '${{ secrets.UNSPLASH_ACCESS_KEY }}'
+  COURSE_CODE: '${{ secrets.COURSE_CODE }}'
   SERVICE_NAME: 'ise-lab2-cicd-red-litah-cat'
   SERVICE_REGION: 'us-central1'
   SERVICE_ACCOUNT: '323558921612-compute@developer.gserviceaccount.com'
