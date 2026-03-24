@@ -4,13 +4,20 @@
 # This file contains functions to fetch data needed for the app.
 #############################################################################
 
+import os
 import random
 import uuid
 from datetime import datetime
 from google.cloud import bigquery
 
-PROJECT_ID = "shamshad-ansari-fisk"
-COURSE_CODE = "ISE"
+
+# TODO: Rename ".env.template" to ".env" and add your project ID to it.
+from dotenv import load_dotenv
+
+load_dotenv()
+
+PROJECT_ID = os.environ.get("PROJECT_ID")
+COURSE_CODE = os.environ.get("COURSE_CODE")
 
 
 users = {
@@ -45,11 +52,6 @@ users = {
 }
 
 
-
-
-
-# PROJECT_ID = "godswill-ogbonna-fisk"
-# COURSE_CODE = "ISE"
 
 def get_user_sensor_data(user_id, workout_id):
     """Returns a list of timestamped information for a given workout."""
@@ -147,11 +149,46 @@ def get_user_workouts(user_id):
 def get_user_profile(user_id):
     """Returns information about the given user.
 
-    This function currently returns random data. You will re-write it in Unit 3.
     """
-    if user_id not in users:
-        raise ValueError(f'User {user_id} not found.')
-    return users[user_id]
+    client = bigquery.Client(project=PROJECT_ID)
+
+    # Line written by Gemini
+    query = f"""
+        WITH all_friendships AS (
+            SELECT UserId1 AS user_id, UserId2 AS friend_id FROM `{PROJECT_ID}.{COURSE_CODE}.Friends`
+            UNION DISTINCT
+            SELECT UserId2 AS user_id, UserId1 AS friend_id FROM `{PROJECT_ID}.{COURSE_CODE}.Friends`
+        )
+
+        SELECT
+            u.Name AS full_name,
+            u.Username AS username,
+            u.DateOfBirth AS date_of_birth,
+            u.ImageUrl AS profile_image,
+            ARRAY_AGG(f.friend_id IGNORE NULLS) AS friends
+        FROM
+            `{PROJECT_ID}.{COURSE_CODE}.Users` AS u
+        LEFT JOIN
+            all_friendships AS f ON u.UserId = f.user_id
+        WHERE u.UserId = @target_id
+        GROUP BY
+            u.UserId, u.Name, u.Username, u.DateOfBirth, u.ImageUrl
+    """
+    
+    # Line written by Gemini
+    job_config = bigquery.QueryJobConfig(
+        query_parameters=[
+            bigquery.ScalarQueryParameter("target_id", "STRING", user_id)
+        ]
+    )
+
+    query_job = client.query(query, job_config=job_config)
+    results = query_job.result()
+
+    for row in results:
+        return dict(row)
+
+    raise ValueError(f'User {user_id} not found.')
 
 
 def get_user_posts(user_id):
@@ -225,11 +262,88 @@ def get_user_friends(user_id):
 
     return friends
 
+    job_config = bigquery.QueryJobConfig(
+        query_parameters=[
+            bigquery.ScalarQueryParameter("user_id", "STRING", user_id)
+        ]
+    )
+
+    query_job = client.query(query, job_config=job_config)
+    results = query_job.result()
+
+    posts = []
+    for row in results:
+        post_dict = {
+            "user_id": row.user_id,
+            "post_id": row.post_id,
+            "timestamp": row.timestamp,
+            "content": row.content,
+            "image": row.image
+        }
+        posts.append(post_dict)
+
+    return posts
+
+def get_user_friends(user_id):
+    """Returns a user's friends"""
+    client = bigquery.Client(project=PROJECT_ID)
+
+    query = f"""
+        SELECT UserId2 AS user_id
+        FROM `{PROJECT_ID}.{COURSE_CODE}.Friends`
+        WHERE UserId1 = @user_id
+
+        UNION DISTINCT
+
+        SELECT UserId1 AS user_id
+        FROM `{PROJECT_ID}.{COURSE_CODE}.Friends`
+        WHERE UserId2 = @user_id
+    """
+
+    job_config = bigquery.QueryJobConfig(
+        query_parameters=[
+            bigquery.ScalarQueryParameter("user_id", "STRING", user_id)
+        ]
+    )
+
+    query_job = client.query(query, job_config=job_config)
+    results = query_job.result()
+
+    friends = []
+    for row in results:
+        friend_dict = {
+            "user_id": row.user_id
+        }
+        friends.append(friend_dict)
+
+    return friends
+
+    job_config = bigquery.QueryJobConfig(
+        query_parameters=[
+            bigquery.ScalarQueryParameter("user_id", "STRING", user_id)
+        ]
+    )
+
+    query_job = client.query(query, job_config=job_config)
+    results = query_job.result()
+
+    posts = []
+    for row in results:
+        post_dict = {
+            "user_id": row.user_id,
+            "post_id": row.post_id,
+            "timestamp": row.timestamp,
+            "content": row.content,
+            "image": row.image
+        }
+        posts.append(post_dict)
+
+    return posts
 
 def get_genai_advice(user_id):
     """Returns the most recent advice from the genai model.
 
-    This function currently returns random data. You will re-write it in Unit 3.
+
     """
     advice = random.choice([
         'Your heart rate indicates you can push yourself further. You got this!',
