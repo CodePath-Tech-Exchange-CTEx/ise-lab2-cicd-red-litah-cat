@@ -4,13 +4,20 @@
 # This file contains functions to fetch data needed for the app.
 #############################################################################
 
+import os
 import random
 import uuid
 from datetime import datetime
 from google.cloud import bigquery
 
-PROJECT_ID = "jonathan-king-hu"
-COURSE_CODE = "ISE"
+
+# TODO: Rename ".env.template" to ".env" and add your project ID to it.
+from dotenv import load_dotenv
+
+load_dotenv()
+
+PROJECT_ID = os.environ.get("PROJECT_ID")
+COURSE_CODE = os.environ.get("COURSE_CODE")
 
 
 users = {
@@ -43,9 +50,6 @@ users = {
         'friends': ['user1', 'user3'],
     },
 }
-
-
-
 
 
 
