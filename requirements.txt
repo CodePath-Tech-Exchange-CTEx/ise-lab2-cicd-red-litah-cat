@@ -1,5 +1,5 @@
 streamlit
 google-cloud-bigquery
 python-dotenv
-google-genai
+google-cloud-aiplatform
 requests
