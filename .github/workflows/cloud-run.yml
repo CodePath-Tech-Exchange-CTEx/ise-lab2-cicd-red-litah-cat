@@ -11,9 +11,9 @@ on:
 
 env:
   # TODO: Paste output from setup.sh below.
-  PROJECT_ID: '${{ secrets.PROJECT_ID }}'
-  UNSPLASH_ACCESS_KEY: '${{ secrets.UNSPLASH_ACCESS_KEY }}'
-  COURSE_CODE: '${{ secrets.COURSE_CODE }}'
+  PROJECT_ID: ${{ secrets.PROJECT_ID }}
+  UNSPLASH_ACCESS_KEY: ${{ secrets.UNSPLASH_ACCESS_KEY }}
+  COURSE_CODE: ${{ secrets.COURSE_CODE }}
   SERVICE_NAME: 'ise-lab2-cicd-red-litah-cat'
   SERVICE_REGION: 'us-central1'
   SERVICE_ACCOUNT: '323558921612-compute@developer.gserviceaccount.com'
@@ -64,9 +64,9 @@ jobs:
         image: 'gcr.io/${{ env.PROJECT_ID }}/${{ env.SERVICE_NAME }}:latest'
         region: '${{ env.SERVICE_REGION }}'
         env_vars: |
-          PROJECT_ID='${{ env.PROJECT_ID }}'
-          UNSPLASH_ACCESS_KEY='${{ env.UNSPLASH_ACCESS_KEY }}'
-          COURSE_CODE='${{ env.COURSE_CODE }}'
+          PROJECT_ID=${{ env.PROJECT_ID }}
+          UNSPLASH_ACCESS_KEY=${{ env.UNSPLASH_ACCESS_KEY }}
+          COURSE_CODE=${{ env.COURSE_CODE }}
 
     - name: 'Display deployed app URL'
       run: 'curl "${{ steps.deploy.outputs.url }}"'
