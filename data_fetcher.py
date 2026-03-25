@@ -7,6 +7,11 @@
 import os
 import random
 import uuid
+import os
+import json
+import requests
+import vertexai
+from vertexai.generative_models import GenerativeModel, GenerationConfig
 from datetime import datetime
 from google.cloud import bigquery
 
@@ -15,10 +20,8 @@ from google.cloud import bigquery
 from dotenv import load_dotenv
 
 load_dotenv()
-
 PROJECT_ID = os.environ.get("PROJECT_ID")
 COURSE_CODE = os.environ.get("COURSE_CODE")
-
 
 users = {
     'user1': {
@@ -50,8 +53,6 @@ users = {
         'friends': ['user1', 'user3'],
     },
 }
-
-
 
 def get_user_sensor_data(user_id, workout_id):
     """Returns a list of timestamped information for a given workout."""
@@ -116,6 +117,7 @@ def get_user_workouts(user_id):
             CaloriesBurned
         FROM `{PROJECT_ID}.{COURSE_CODE}.Workouts`
         WHERE UserId = @user_id
+        ORDER BY StartTimestamp DESC
     """
     
     # We use parameterized queries to prevent SQL injection.
@@ -262,105 +264,109 @@ def get_user_friends(user_id):
 
     return friends
 
-    job_config = bigquery.QueryJobConfig(
-        query_parameters=[
-            bigquery.ScalarQueryParameter("user_id", "STRING", user_id)
-        ]
-    )
-
-    query_job = client.query(query, job_config=job_config)
-    results = query_job.result()
-
-    posts = []
-    for row in results:
-        post_dict = {
-            "user_id": row.user_id,
-            "post_id": row.post_id,
-            "timestamp": row.timestamp,
-            "content": row.content,
-            "image": row.image
-        }
-        posts.append(post_dict)
-
-    return posts
-
-def get_user_friends(user_id):
-    """Returns a user's friends"""
-    client = bigquery.Client(project=PROJECT_ID)
-
-    query = f"""
-        SELECT UserId2 AS user_id
-        FROM `{PROJECT_ID}.{COURSE_CODE}.Friends`
-        WHERE UserId1 = @user_id
-
-        UNION DISTINCT
-
-        SELECT UserId1 AS user_id
-        FROM `{PROJECT_ID}.{COURSE_CODE}.Friends`
-        WHERE UserId2 = @user_id
-    """
-
-    job_config = bigquery.QueryJobConfig(
-        query_parameters=[
-            bigquery.ScalarQueryParameter("user_id", "STRING", user_id)
-        ]
-    )
-
-    query_job = client.query(query, job_config=job_config)
-    results = query_job.result()
-
-    friends = []
-    for row in results:
-        friend_dict = {
-            "user_id": row.user_id
-        }
-        friends.append(friend_dict)
-
-    return friends
-
-    job_config = bigquery.QueryJobConfig(
-        query_parameters=[
-            bigquery.ScalarQueryParameter("user_id", "STRING", user_id)
-        ]
-    )
-
-    query_job = client.query(query, job_config=job_config)
-    results = query_job.result()
-
-    posts = []
-    for row in results:
-        post_dict = {
-            "user_id": row.user_id,
-            "post_id": row.post_id,
-            "timestamp": row.timestamp,
-            "content": row.content,
-            "image": row.image
-        }
-        posts.append(post_dict)
-
-    return posts
-
 def get_genai_advice(user_id):
     """Returns the most recent advice from the genai model.
 
+    """
+
+    # Gets all workouts
+    workouts = get_user_workouts(user_id)
+
+    # Return if no workouts found
+    if not workouts:
+        return {
+            "advice_id": None,
+            "timestamp": datetime.now().isoformat(),
+            "content": "No workouts found yet. Let's get moving!",
+            "image": None
+        }
+
+    latest_workout = workouts[0]
+
+    vertexai.init(project=PROJECT_ID, location="us-central1")
+    
+    
+    model = GenerativeModel("gemini-2.5-flash-lite",
+                            system_instruction="You are a helpful and encouraging workout coach.")
+    
+    prompt = f"""
+            The user just finished a workout with these stats:
+            - Start Time: {latest_workout.get('start_timestamp')} 
+            - End Time: {latest_workout.get('end_timestamp')}
+            - Distance: {latest_workout.get('distance')} miles
+            - Steps: {latest_workout.get('steps')} steps
+            - Calories: {latest_workout.get('calories_burned')} calories
+    
+            Provide one to two sentence of expert, encouraging fitness advice based on these specific numbers.
+            Also, provide 3 keywords for a matching stock photo (e.g., 'running shoes asphalt').
+    """
+    
+    # Line Written By Gemini
+    response = model.generate_content(
+        prompt,
+        generation_config=GenerationConfig(
+            response_mime_type="application/json",
+            response_schema={
+            "type": "OBJECT",
+            "properties": {
+                "content": {"type": "STRING"},
+                "image_keywords": {
+                    "type": "STRING", 
+                    "description": "3 to 5 single keywords separated ONLY by spaces. No commas, no phrases."
+                }
+            },
+            "required": ["content", "image_keywords"]
+        },
+        ),
+    )
+
+    try:
+        ai_response = json.loads(response.text)
+    except json.JSONDecodeError:
+        # Fallback if Gemini hallucinates non-JSON text
+        ai_response = {"content": "Great job on your workout!", "image_keywords": "gym"}
+
+
+    image_url = get_image_url_genai_advice(ai_response)
+
+    unique_id = uuid.uuid4().hex[:8] # Line written by Gemini
+    advice_id = f"ADV-{unique_id.upper()}" # Line written by Gemini
+
+    return {"advice_id": advice_id,
+            "timestamp": datetime.now(),
+            "content": ai_response["content"],
+            "image": image_url
+            }
+
+def get_image_url_genai_advice(ai_response):
+    """
+    Gets image for genai advice using unplash API.
 
     """
-    advice = random.choice([
-        'Your heart rate indicates you can push yourself further. You got this!',
-        "You're doing great! Keep up the good work.",
-        'You worked hard yesterday, take it easy today.',
-        'You have burned 100 calories so far today!',
-    ])
-    image = random.choice([
-        'https://plus.unsplash.com/premium_photo-1669048780129-051d670fa2d1?q=80&w=3870&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
-        None,
-    ])
-    return {
-        'advice_id': 'advice1',
-        'timestamp': '2024-01-01 00:00:00',
-        'content': advice,
-        'image': image,
-    }
+    UNSPLASH_ACCESS_KEY = os.environ.get("UNSPLASH_ACCESS_KEY")
+
+    # Line written by Gemini
+    image_url = None
+    if random.random() > 0: # 70% chance of an image
+        search_terms = ai_response["image_keywords"].replace(" ", ",")
+
+        unsplash_url = f"https://api.unsplash.com/photos/random?query={search_terms}&client_id={UNSPLASH_ACCESS_KEY}"
+
+        try:
+            response = requests.get(unsplash_url)
+            # 2. Convert the response into a Python dictionary
+            data = response.json()
+            
+            # 3. Index into the dictionary to find the 'regular' size image URL
+            # The structure is: data -> 'urls' -> 'regular'
+            image_url = data.get('urls', {}).get('regular')
+            
+        except Exception as e:
+            print(f"Unsplash Error: {e}")
+    
+    return image_url
+
+
 
 def insert_post(user_id, content):
     """Inserts a new post into the BigQuery Posts table.
