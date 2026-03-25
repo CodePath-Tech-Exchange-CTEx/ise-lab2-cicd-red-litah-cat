@@ -98,7 +98,6 @@ class TestDataFetcher(unittest.TestCase):
         self.assertEqual(result, [])
         self.assertIsInstance(result, list)
 
-    
     @patch('data_fetcher.bigquery.Client')
     def test_insert_post_executes_query(self, mock_client_class):
         """Tests that insert_post calls BigQuery with the correct parameters."""

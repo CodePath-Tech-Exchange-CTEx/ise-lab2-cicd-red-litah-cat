@@ -267,7 +267,6 @@ def get_user_friends(user_id):
 def get_genai_advice(user_id):
     """Returns the most recent advice from the genai model.
 
-
     """
 
     # Gets all workouts
