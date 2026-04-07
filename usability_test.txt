@@ -1,0 +1,127 @@
+
+workout log feature:
+Task Difficulty
+
+The participant found the task fairly easy overall, especially once they understood the layout. However, the initial experience was slightly confusing, which slowed them down at the start.
+
+“Once I figured it out, it was easy, but at first I didn’t know where to go.”
+
+Confusions & Why They Happened
+
+
+1. Navigation Tabs Were Confusing
+
+Confusion:
+The participant struggled to choose between “Goals,” “Workout Plans,” and “Log Workouts.”
+
+Why:
+These tabs felt similar and lacked descriptions or visual differences.
+
+“I don’t know which one shows my workouts for today.”
+
+2. Logging vs Completing Workouts
+
+Confusion:
+The participant thought checking a box meant logging a workout.
+
+Why:
+The checkbox was unclear and not labeled, making it look like the main action.
+
+“I thought this would log it, but I guess it doesn’t?”
+
+3. Hidden Actions (Start Workout / Share)
+
+Confusion:
+The participant didn’t notice key actions like “Stare with friend” or sharing to the community.
+
+Why:
+These actions were hidden behind interactions (expand cards or “•••” menu).
+
+“I didn’t even see a stare icon.”
+“I wouldn’t think to click the three dots for that.”
+
+4. Back Navigation Unclear
+
+Confusion:
+The participant didn’t know where the back arrow would take them.
+
+Why:
+There was no context or label explaining the navigation.
+
+“I don’t know where this goes back to.”
+
+Results: Issues, Hypotheses, and Remedies
+Issue 1: Unclear Navigation Tabs
+Hypothesis: Tabs are too similar and lack visual guidance
+Remedy: Add short descriptions and icons; use a bottom navigation bar
+Issue 2: Confusing Checkbox Function
+Hypothesis: Checkbox is not labeled and mimics a key action
+Remedy: Add label (“Done?”) or replace with “Mark as done” button
+Issue 3: Hidden Key Actions
+Hypothesis: Important actions are buried in menus or expansions
+Remedy: Surface actions like “Share to friend”” and “Share to Community” as visible buttons or add a share icon
+Issue 4: Poor Navigation Context
+Hypothesis: Back navigation lacks hierarchy and context
+Remedy: Add labels (e.g., “← This week”) or home icon
+Summary:
+
+While the interface is generally easy to use, the main challenges come from unclear navigation, hidden actions, and lack of guidance. Improving visibility and clarity of key actions will significantly enhance the user experience.
+
+
+
+
+
+AI recommnedation feature
+Tasks
+Task 1: Getting Started
+
+“You’ve just opened this app for the first time and want to begin using it. Show me what you would do first.”
+
+Task 2: Viewing Your Information
+
+“You want to check your personal information in the app. Show me how you would find it.”
+
+Task 3: Exploring Recommendations
+
+“You’re interested in seeing what the app suggests or recommends for you. Show me how you would find that.”
+
+Notes
+Participant hesitated when first landing on the page.
+They scanned multiple areas before deciding where to click.
+There was no clear visual cue indicating a starting point.
+The collapsible profile section was overlooked.
+Participant showed uncertainty when trying to locate their personal information.
+The layout made it difficult to distinguish between profile content and AI recommendations.
+
+Feedback
+Ease of Use:
+The participant found navigation generally easy once they got started.
+Confusions:
+“I’m not really sure where I’m supposed to start.”
+“There’s a lot here, but I don’t know what I should click first.”
+
+Reasons for Confusion:
+Lack of a clear entry point
+Weak visual hierarchy
+Important information not immediately visible
+
+Suggested Improvements:
+“It would help if something stood out more as the first step.”
+“It would feel more personal if I could actually see my name here.”
+Results
+Issue 1: Collapsible Profile Section
+Problem:
+The profile section was not immediately visible and was overlooked.
+“I didn’t even notice the profile section at first.”
+Hypothesis:
+Important information hidden behind collapsible UI reduces discoverability.
+Remedy:
+Remove the collapsible design and move the profile to a dedicated page.
+Issue 2: Lack of Personalization Visibility
+Problem:
+The user’s identity was not clearly displayed.
+“I don’t feel like this is my account.”
+Hypothesis:
+Missing identity cues reduce engagement and sense of ownership.
+Remedy:
+Display the user’s name prominently in the profile or header section.
