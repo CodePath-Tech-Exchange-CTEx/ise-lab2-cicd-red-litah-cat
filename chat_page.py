@@ -7,7 +7,7 @@ from modules import display_chat_history, display_ai_trainer_hero
 
 _ICON_USER = """
 <svg width="{size}" height="{size}" viewBox="0 0 24 24" fill="none"
-     stroke="#00cc66" stroke-width="1.6"
+     stroke="#f97316" stroke-width="1.6"
      stroke-linecap="round" stroke-linejoin="round">
   <circle cx="12" cy="8" r="4"/>
   <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
@@ -18,44 +18,26 @@ _ICON_USER = """
 
 _PAGE_CSS = """
 <style>
-/* ── Shared dark background for this tab ── */
-section[data-testid="stMain"] > div {
-    background: #0e1117;
-}
-
-/* ── Profile button: styled via the key attribute on its wrapper ── */
-div[data-testid="stButton"].profile-action > button {
-    background: transparent !important;
-    border: 1.5px solid #1a3a20 !important;
-    color: #22c55e !important;
-    border-radius: 12px !important;
-    padding: 6px 18px !important;
-    font-size: 14px !important;
-    font-weight: 600 !important;
-    letter-spacing: 0.3px !important;
+/* ── Profile button ── */
+div[data-testid="stButton"] > button {
     transition: border-color 0.2s, background 0.2s, box-shadow 0.2s !important;
-}
-div[data-testid="stButton"].profile-action > button:hover {
-    border-color: #22c55e !important;
-    background: rgba(34, 197, 94, 0.07) !important;
-    box-shadow: 0 0 14px rgba(0, 255, 136, 0.12) !important;
 }
 
 /* ── Chat input bar ── */
 div[data-testid="stChatInput"] textarea {
-    background: #0c1a0e !important;
-    border: 1.5px solid #1a3a20 !important;
+    background: #1a1a1a !important;
+    border: 1.5px solid #333333 !important;
     border-radius: 16px !important;
-    color: #d1d5db !important;
+    color: #ffffff !important;
     font-size: 0.97em !important;
     padding: 14px 18px !important;
 }
 div[data-testid="stChatInput"] textarea:focus {
-    border-color: #22c55e !important;
-    box-shadow: 0 0 16px rgba(0, 255, 136, 0.08) !important;
+    border-color: #f97316 !important;
+    box-shadow: 0 0 16px rgba(249, 115, 22, 0.12) !important;
 }
 div[data-testid="stChatInput"] textarea::placeholder {
-    color: #3d6b4a !important;
+    color: #6b7280 !important;
 }
 
 /* ── Subtle back-button ── */
