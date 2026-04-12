@@ -1,20 +1,84 @@
 import streamlit as st
-from data_fetcher import get_chat_history, chat_with_ai, get_fitness_profile, save_fitness_profile
-from modules import display_chat_history
+from data_fetcher import get_chat_history, chat_with_ai, get_fitness_profile, save_fitness_profile, get_user_profile
+from modules import display_chat_history, display_ai_trainer_hero
 
+
+# ── Lucide SVG snippets used across the page ──────────────────────────────────
+
+_ICON_USER = """
+<svg width="{size}" height="{size}" viewBox="0 0 24 24" fill="none"
+     stroke="#00cc66" stroke-width="1.6"
+     stroke-linecap="round" stroke-linejoin="round">
+  <circle cx="12" cy="8" r="4"/>
+  <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
+</svg>
+"""
+
+# ── CSS injected once per page load ───────────────────────────────────────────
+
+_PAGE_CSS = """
+<style>
+/* ── Shared dark background for this tab ── */
+section[data-testid="stMain"] > div {
+    background: #0e1117;
+}
+
+/* ── Profile button: styled via the key attribute on its wrapper ── */
+div[data-testid="stButton"].profile-action > button {
+    background: transparent !important;
+    border: 1.5px solid #1a3a20 !important;
+    color: #22c55e !important;
+    border-radius: 12px !important;
+    padding: 6px 18px !important;
+    font-size: 14px !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.3px !important;
+    transition: border-color 0.2s, background 0.2s, box-shadow 0.2s !important;
+}
+div[data-testid="stButton"].profile-action > button:hover {
+    border-color: #22c55e !important;
+    background: rgba(34, 197, 94, 0.07) !important;
+    box-shadow: 0 0 14px rgba(0, 255, 136, 0.12) !important;
+}
+
+/* ── Chat input bar ── */
+div[data-testid="stChatInput"] textarea {
+    background: #0c1a0e !important;
+    border: 1.5px solid #1a3a20 !important;
+    border-radius: 16px !important;
+    color: #d1d5db !important;
+    font-size: 0.97em !important;
+    padding: 14px 18px !important;
+}
+div[data-testid="stChatInput"] textarea:focus {
+    border-color: #22c55e !important;
+    box-shadow: 0 0 16px rgba(0, 255, 136, 0.08) !important;
+}
+div[data-testid="stChatInput"] textarea::placeholder {
+    color: #3d6b4a !important;
+}
+
+/* ── Subtle back-button ── */
+button[kind="secondary"] {
+    color: #6b7280 !important;
+}
+</style>
+"""
+
+
+# ── Profile form (unchanged logic, small visual polish) ───────────────────────
 
 def _display_profile_form(user_id):
-    """Renders the profile form inline. Returns True if the user pressed Back."""
-
+    """Renders the fitness profile form. Returns to chat on 'Back'."""
     col_back, col_title = st.columns([1, 6])
     with col_back:
-        if st.button("← Back to Chat"):
+        if st.button("← Back"):
             st.session_state.show_profile = False
             st.rerun()
     with col_title:
-        st.subheader("My Profile")
+        st.subheader("My Fitness Profile")
 
-    st.markdown("Your profile helps Coach AI personalise advice for you.")
+    st.markdown("Your profile helps Arnold personalise advice for you.")
     st.divider()
 
     saved = get_fitness_profile(user_id) or {}
@@ -99,49 +163,71 @@ def _display_profile_form(user_id):
                 st.error(f"Could not save profile: {e}")
 
 
+# ── Profile button rendered with Lucide icon above ────────────────────────────
+
+def _render_profile_button(user_id):
+    """Renders the profile button with a Lucide user icon above the label."""
+    col_btn, _ = st.columns([1.4, 5])
+    with col_btn:
+        # Lucide 'User' icon rendered via inline HTML
+        st.markdown(
+            f"""<div style="display:flex;justify-content:center;margin-bottom:2px;">
+                  {_ICON_USER.format(size=32)}
+                </div>""",
+            unsafe_allow_html=True,
+        )
+        # Actual clickable Streamlit button for session-state integration
+        fitness_profile = get_fitness_profile(user_id)
+        label = "Profile" if fitness_profile else "Set up Profile"
+        if st.button(label, key="profile_btn", use_container_width=True):
+            st.session_state.show_profile = True
+            st.rerun()
+
+
+# ── Main page ─────────────────────────────────────────────────────────────────
+
 def display_chat_page(user_id):
-    # Initialise session state for profile view toggle.
+    # Inject page-level CSS once
+    st.markdown(_PAGE_CSS, unsafe_allow_html=True)
+
+    # Initialise session state
     if "show_profile" not in st.session_state:
         st.session_state.show_profile = False
 
-    # --- Profile view ---
+    # ── Profile view ──
     if st.session_state.show_profile:
         _display_profile_form(user_id)
         return
 
-    # --- Chat view ---
-    # Header row: title on left, profile button on right.
-    col_title, col_profile_btn = st.columns([5, 1])
-    with col_title:
-        st.header("Coach AI")
-    with col_profile_btn:
-        # Vertical spacer to align button with header.
-        st.write("")
-        profile = get_fitness_profile(user_id)
-        btn_label = "👤 Profile" if profile else "👤 Set up profile"
-        if st.button(btn_label, use_container_width=True):
-            st.session_state.show_profile = True
-            st.rerun()
+    # ── Resolve display name for greeting ──
+    fitness_profile = get_fitness_profile(user_id)
+    if fitness_profile and fitness_profile.get("first_name"):
+        display_name = fitness_profile["first_name"]
+    else:
+        user_profile = get_user_profile(user_id)
+        display_name = user_profile.get("full_name", "there")
 
-    if not profile:
-        st.caption("Complete your profile so Coach AI can give personalised advice.")
+    # ── Chat history ──
+    history = get_chat_history(user_id)
 
-    # Persistent chat input pinned to bottom by Streamlit automatically.
-    prompt = st.chat_input("Message Coach AI...")
+    # ── Hero greeting (shown only when no messages yet) ──
+    if not history:
+        display_ai_trainer_hero(display_name)
+
+    # ── Persistent chat input (Streamlit pins this to the bottom) ──
+    prompt = st.chat_input("Ask Arnold anything related to training...")
     if prompt:
-        with st.spinner("Coach AI is typing..."):
+        with st.spinner("Arnold is thinking..."):
             try:
                 chat_with_ai(user_id, prompt)
             except Exception as e:
-                st.error(f"Error communicating with AI: {e}")
+                st.error(f"Error communicating with Arnold: {e}")
         st.rerun()
 
-    # Render the conversation history.
-    history = get_chat_history(user_id)
-    if not history:
-        st.markdown(
-            "<p style='color:#6b7280; font-size:0.9em;'>No messages yet — send one below to start.</p>",
-            unsafe_allow_html=True,
-        )
-    else:
+    # ── Conversation history ──
+    if history:
         display_chat_history(history)
+
+    # ── Profile button — bottom-left, with Lucide icon ──
+    st.markdown("<div style='margin-top: 28px;'></div>", unsafe_allow_html=True)
+    _render_profile_button(user_id)

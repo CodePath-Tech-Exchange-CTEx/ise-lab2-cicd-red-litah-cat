@@ -141,6 +141,21 @@ def display_genai_advice(timestamp, content, image):
     create_component(data, html_file_name, height=300, scrolling=True)
     
 
+def display_ai_trainer_hero(user_name):
+    """Displays the elegant hero greeting and prompt area for the AI Trainer page.
+
+    Renders a centred greeting ("Hello, <name>!!") and a large decorative
+    chat-box that mirrors the Claude welcome-screen aesthetic.  The actual
+    functional input is Streamlit's st.chat_input, rendered separately.
+
+    Args:
+        user_name (str): The user's first name (or display name) to show in
+                         the greeting.
+    """
+    data = {'USER_NAME': user_name}
+    create_component(data, "ai_trainer_hero", height=330)
+
+
 def display_chat_history(messages):
     """
     Renders the full chat history as a single HTML component to avoid

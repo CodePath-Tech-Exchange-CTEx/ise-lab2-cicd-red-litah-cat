@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: transparent;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 32px 20px 16px;
+    min-height: 100%;
+  }
+
+  /* ── Greeting ── */
+  .greeting {
+    font-size: 2.6em;
+    font-weight: 700;
+    color: #00ff88;
+    text-align: center;
+    letter-spacing: -0.025em;
+    line-height: 1.15;
+    margin-bottom: 40px;
+    text-shadow: 0 0 48px rgba(0, 255, 136, 0.22);
+  }
+
+  /* ── Large chat prompt box (visual only — mirrors Claude's welcome box) ── */
+  .chat-box {
+    width: 100%;
+    max-width: 700px;
+    background: #0c1a0e;
+    border: 1.5px solid #1a3a20;
+    border-radius: 20px;
+    padding: 22px 24px 18px;
+    min-height: 130px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    transition: border-color 0.25s ease, box-shadow 0.25s ease;
+    box-shadow: 0 4px 32px rgba(0, 0, 0, 0.45);
+  }
+
+  .chat-box:hover {
+    border-color: #22c55e;
+    box-shadow: 0 4px 32px rgba(0, 255, 136, 0.07);
+  }
+
+  .placeholder-text {
+    color: #3d6b4a;
+    font-size: 1.05em;
+    line-height: 1.6;
+    flex: 1;
+  }
+
+  /* ── Send button row ── */
+  .send-row {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    margin-top: 18px;
+  }
+
+  .send-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 2px solid #22c55e;
+    background: transparent;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0.5;
+    cursor: pointer;
+    transition: opacity 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+    flex-shrink: 0;
+  }
+
+  .send-btn:hover {
+    opacity: 1;
+    background: rgba(34, 197, 94, 0.1);
+    box-shadow: 0 0 14px rgba(0, 255, 136, 0.18);
+  }
+</style>
+</head>
+<body>
+  <!-- Greeting -->
+  <div class="greeting">Hello, {{USER_NAME}}!!</div>
+
+  <!-- Large prompt box (decorative — actual input is Streamlit's chat_input) -->
+  <div class="chat-box">
+    <div class="placeholder-text">Ask Arnold anything related to training!</div>
+    <div class="send-row">
+      <div class="send-btn">
+        <!-- Lucide ArrowUp icon -->
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+             stroke="#22c55e" stroke-width="2.5"
+             stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 19V5"/>
+          <path d="M5 12l7-7 7 7"/>
+        </svg>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
