@@ -171,19 +171,36 @@ def display_chat_history(messages):
 
         assembled_html += bubble + "\n"
 
-    wrapper = f"""
-    <div style="
-        background-color: #1a1a1a;
-        padding: 12px;
-        display: flex;
-        flex-direction: column;
-        gap: 8px;
-        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    ">
-        {assembled_html}
-    </div>
-    """
+    wrapper = f"""<!DOCTYPE html>
+<html>
+<head>
+<style>
+  * {{ box-sizing: border-box; margin: 0; padding: 0; }}
+  body {{
+    background: #0e1117;
+    margin: 0;
+    padding: 8px 4px;
+  }}
+  .chat-feed {{
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }}
+  /* Thin divider between AI turn and user turn */
+  .turn-divider {{
+    height: 1px;
+    background: rgba(255,255,255,0.04);
+    margin: 4px 0;
+  }}
+</style>
+</head>
+<body>
+  <div class="chat-feed">
+    {assembled_html}
+  </div>
+</body>
+</html>"""
 
     import streamlit.components.v1 as components
-    height = max(300, min(len(messages) * 110, 700))
+    height = max(300, min(len(messages) * 100, 700))
     components.html(wrapper, height=height, scrolling=True)
