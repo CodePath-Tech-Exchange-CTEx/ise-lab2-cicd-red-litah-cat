@@ -18,9 +18,31 @@ _ICON_USER = """
 
 _PAGE_CSS = """
 <style>
-/* ── Profile button ── */
-div[data-testid="stButton"] > button {
-    transition: border-color 0.2s, background 0.2s, box-shadow 0.2s !important;
+/* ── Profile trigger ── */
+div[data-testid="stButton"] > button[kind="secondary"] {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    color: #ffffff !important;
+    padding: 0 !important;
+    min-height: auto !important;
+    font-size: 0.72rem !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.08em !important;
+    text-transform: uppercase !important;
+    transition: color 0.2s ease !important;
+}
+
+div[data-testid="stButton"] > button[kind="secondary"]:hover {
+    background: transparent !important;
+    border: none !important;
+    color: #f97316 !important;
+}
+
+div[data-testid="stButton"] > button[kind="secondary"]:focus,
+div[data-testid="stButton"] > button[kind="secondary"]:focus-visible {
+    outline: none !important;
+    box-shadow: none !important;
 }
 
 /* ── Chat input bar ── */
@@ -148,19 +170,20 @@ def _display_profile_form(user_id):
 # ── Profile button rendered with Lucide icon above ────────────────────────────
 
 def _render_profile_button(user_id):
-    """Renders the profile button with a Lucide user icon above the label."""
+    """Renders the profile trigger with a Lucide user icon above the label."""
     col_btn, _ = st.columns([1.4, 5])
     with col_btn:
-        # Lucide 'User' icon rendered via inline HTML
+        fitness_profile = get_fitness_profile(user_id)
+        label = "Profile" if fitness_profile else "Set up Profile"
+
         st.markdown(
-            f"""<div style="display:flex;justify-content:center;margin-bottom:2px;">
+            f"""<div style="display:flex;flex-direction:column;align-items:center;gap:6px;margin-top:8px;">
+                  <div style="display:flex;justify-content:center;">
                   {_ICON_USER.format(size=32)}
+                  </div>
                 </div>""",
             unsafe_allow_html=True,
         )
-        # Actual clickable Streamlit button for session-state integration
-        fitness_profile = get_fitness_profile(user_id)
-        label = "Profile" if fitness_profile else "Set up Profile"
         if st.button(label, key="profile_btn", use_container_width=True):
             st.session_state.show_profile = True
             st.rerun()
@@ -210,6 +233,6 @@ def display_chat_page(user_id):
     if history:
         display_chat_history(history)
 
-    # ── Profile button — bottom-left, with Lucide icon ──
-    st.markdown("<div style='margin-top: 28px;'></div>", unsafe_allow_html=True)
+    # ── Profile trigger — bottom-left, nav-like text treatment ──
+    st.write("")
     _render_profile_button(user_id)
