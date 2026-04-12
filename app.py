@@ -65,8 +65,8 @@ def inject_navbar_styles():
 
     /* Tab container */
     [data-baseweb="tab-list"] {
-        background-color: #111111 !important;
-        border-bottom: 1px solid #2a2a2a !important;
+        background: transparent !important;
+        border-bottom: none !important;
         padding: 0 !important;
         gap: 0 !important;
         justify-content: space-around !important;
@@ -80,7 +80,7 @@ def inject_navbar_styles():
         align-items: center !important;
         justify-content: center !important;
         padding: 14px 4px 10px !important;
-        color: #6b7280 !important;
+        color: #ffffff !important;
         font-size: 10px !important;
         font-weight: 600 !important;
         letter-spacing: 0.5px !important;
@@ -94,21 +94,19 @@ def inject_navbar_styles():
 
     /* Hover state */
     [data-baseweb="tab"]:hover {
-        color: #f97316 !important;
-        background-color: #1a1a1a !important;
+        color: #ffffff !important;
+        background: transparent !important;
     }
 
     /* Active tab */
     [aria-selected="true"][data-baseweb="tab"] {
         color: #f97316 !important;
-        background-color: #1a1a1a !important;
+        background: transparent !important;
     }
 
     /* Active underline indicator */
     [data-baseweb="tab-highlight"] {
-        background-color: #f97316 !important;
-        height: 3px !important;
-        border-radius: 3px 3px 0 0 !important;
+        display: none !important;
     }
 
     /* Hide default tab border */
@@ -135,14 +133,14 @@ def inject_navbar_styles():
         background-size: contain;
         background-repeat: no-repeat;
         background-position: center;
-        opacity: 0.45;
-        transition: opacity 0.2s ease, filter 0.2s ease;
+        opacity: 0.95;
+        transition: opacity 0.2s ease;
         flex-shrink: 0;
     }
 
     [aria-selected="true"][data-baseweb="tab"]::before {
         opacity: 1;
-        filter: drop-shadow(0 0 4px rgba(249, 115, 22, 0.45));
+        filter: none !important;
     }
 
     /* Home icon — house */
