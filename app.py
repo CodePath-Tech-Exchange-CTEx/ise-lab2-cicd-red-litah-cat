@@ -10,6 +10,8 @@ from modules import display_my_custom_component, display_post, display_genai_adv
 from data_fetcher import get_user_posts, get_genai_advice, get_user_profile, get_user_sensor_data, get_user_workouts
 from activity_page import display_activity_page
 from community_page import display_community_page
+from chat_page import display_chat_page
+from profile_page import display_profile_page
 import datetime
  
 userId = 'user1'
@@ -58,13 +60,21 @@ def display_app_page():
  
 # This is the starting point for your app. You do not need to change these lines
 if __name__ == '__main__':
-    home_tab, activity_tab, community_tab = st.tabs(["Home", "Activity", "Community"])
- 
+    home_tab, activity_tab, community_tab, chat_tab, profile_tab = st.tabs(
+        ["Home", "Activity", "Community", "AI Chat", "Profile"]
+    )
+
     with home_tab:
         display_app_page()
-    
+
     with community_tab:
         display_community_page()
- 
+
     with activity_tab:
         display_activity_page()
+
+    with chat_tab:
+        display_chat_page(userId)
+
+    with profile_tab:
+        display_profile_page(userId)

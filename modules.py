@@ -7,7 +7,7 @@
 # function other than the example.
 #############################################################################
 
-from internals import create_component
+from internals import create_component, safe_string, load_html_file
 import streamlit as st
 from datetime import datetime
 
@@ -140,3 +140,50 @@ def display_genai_advice(timestamp, content, image):
     html_file_name = 'display_genai_advice_component'
     create_component(data, html_file_name, height=300, scrolling=True)
     
+
+def display_chat_history(messages):
+    """
+    Renders the full chat history as a single HTML component to avoid
+    creating one iframe per message. Iterates the messages list in Python,
+    builds one HTML string, and passes it as a single template variable.
+
+    Args:
+        messages (list): List of message dicts with keys 'role', 'content', 'timestamp'.
+                         Role must be 'user' or 'model'.
+    """
+    user_tmpl = load_html_file('custom_components/chat_message_user.html')
+    ai_tmpl = load_html_file('custom_components/chat_message_ai.html')
+
+    assembled_html = ""
+    for msg in messages:
+        timestamp_str = (
+            msg['timestamp'].strftime('%Y-%m-%d %H:%M')
+            if hasattr(msg['timestamp'], 'strftime')
+            else str(msg['timestamp'])
+        )
+        content_safe = safe_string(str(msg['content']))
+        timestamp_safe = safe_string(timestamp_str)
+
+        if msg['role'] == 'user':
+            bubble = user_tmpl.replace('{{CONTENT}}', content_safe).replace('{{TIMESTAMP}}', timestamp_safe)
+        else:
+            bubble = ai_tmpl.replace('{{CONTENT}}', content_safe).replace('{{TIMESTAMP}}', timestamp_safe)
+
+        assembled_html += bubble + "\n"
+
+    wrapper = f"""
+    <div style="
+        background-color: #1a1a1a;
+        padding: 12px;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    ">
+        {assembled_html}
+    </div>
+    """
+
+    import streamlit.components.v1 as components
+    height = max(300, min(len(messages) * 110, 700))
+    components.html(wrapper, height=height, scrolling=True)
