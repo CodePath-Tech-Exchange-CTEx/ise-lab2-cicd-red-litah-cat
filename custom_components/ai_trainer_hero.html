@@ -9,10 +9,9 @@
     background: transparent;
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     display: flex;
-    flex-direction: column;
     align-items: center;
-    justify-content: flex-start;
-    padding: 32px 20px 16px;
+    justify-content: center;
+    padding: 32px 20px 8px;
     min-height: 100%;
   }
 
@@ -24,85 +23,10 @@
     text-align: center;
     letter-spacing: -0.025em;
     line-height: 1.15;
-    margin-bottom: 40px;
-  }
-
-  /* ── Large chat prompt box (visual only — mirrors Claude's welcome box) ── */
-  .chat-box {
-    width: 100%;
-    max-width: 700px;
-    background: #1a1a1a;
-    border: 1.5px solid #333333;
-    border-radius: 20px;
-    padding: 22px 24px 18px;
-    min-height: 130px;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    transition: border-color 0.25s ease, box-shadow 0.25s ease;
-    box-shadow: 0 4px 32px rgba(0, 0, 0, 0.5);
-  }
-
-  .chat-box:hover {
-    border-color: #f97316;
-    box-shadow: 0 4px 32px rgba(249, 115, 22, 0.1);
-  }
-
-  .placeholder-text {
-    color: #6b7280;
-    font-size: 1.05em;
-    line-height: 1.6;
-    flex: 1;
-  }
-
-  /* ── Send button row ── */
-  .send-row {
-    display: flex;
-    justify-content: flex-end;
-    align-items: center;
-    margin-top: 18px;
-  }
-
-  .send-btn {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    border: 2px solid #f97316;
-    background: transparent;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    opacity: 0.55;
-    cursor: pointer;
-    transition: opacity 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
-    flex-shrink: 0;
-  }
-
-  .send-btn:hover {
-    opacity: 1;
-    background: rgba(249, 115, 22, 0.12);
-    box-shadow: 0 0 14px rgba(249, 115, 22, 0.25);
   }
 </style>
 </head>
 <body>
-  <!-- Greeting -->
   <div class="greeting">Hello, {{USER_NAME}}!!</div>
-
-  <!-- Large prompt box (decorative — actual input is Streamlit's chat_input) -->
-  <div class="chat-box">
-    <div class="placeholder-text">Ask Arnold anything related to training!</div>
-    <div class="send-row">
-      <div class="send-btn">
-        <!-- Lucide ArrowUp icon -->
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
-             stroke="#f97316" stroke-width="2.5"
-             stroke-linecap="round" stroke-linejoin="round">
-          <path d="M12 19V5"/>
-          <path d="M5 12l7-7 7 7"/>
-        </svg>
-      </div>
-    </div>
-  </div>
 </body>
 </html>

@@ -46,20 +46,61 @@ div[data-testid="stButton"] > button[kind="secondary"]:focus-visible {
 }
 
 /* ── Chat input bar ── */
-div[data-testid="stChatInput"] textarea {
+div[data-testid="stChatInput"] {
+    background: transparent !important;
+}
+
+div[data-testid="stChatInput"] > div {
     background: #1a1a1a !important;
     border: 1.5px solid #333333 !important;
-    border-radius: 16px !important;
-    color: #ffffff !important;
-    font-size: 0.97em !important;
-    padding: 14px 18px !important;
+    border-radius: 28px !important;
+    padding: 12px 14px !important;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.32) !important;
+    transition: border-color 0.25s ease, box-shadow 0.25s ease !important;
 }
-div[data-testid="stChatInput"] textarea:focus {
+
+div[data-testid="stChatInput"]:focus-within > div {
     border-color: #f97316 !important;
-    box-shadow: 0 0 16px rgba(249, 115, 22, 0.12) !important;
+    box-shadow: 0 12px 40px rgba(249, 115, 22, 0.12) !important;
 }
+
+div[data-testid="stChatInput"] textarea {
+    background: transparent !important;
+    border: none !important;
+    color: #ffffff !important;
+    font-size: 1.02rem !important;
+    line-height: 1.5 !important;
+    min-height: 112px !important;
+    padding: 10px 12px !important;
+}
+
+div[data-testid="stChatInput"] textarea:focus {
+    border: none !important;
+    box-shadow: none !important;
+}
+
 div[data-testid="stChatInput"] textarea::placeholder {
     color: #6b7280 !important;
+}
+
+div[data-testid="stChatInput"] button {
+    width: 48px !important;
+    height: 48px !important;
+    border-radius: 999px !important;
+    border: 2px solid #f97316 !important;
+    background: transparent !important;
+    color: #f97316 !important;
+    transition: background 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease !important;
+}
+
+div[data-testid="stChatInput"] button:hover {
+    background: rgba(249, 115, 22, 0.12) !important;
+    box-shadow: 0 0 14px rgba(249, 115, 22, 0.22) !important;
+    transform: translateY(-1px);
+}
+
+div[data-testid="stChatInput"] button:disabled {
+    opacity: 0.5 !important;
 }
 
 /* ── Subtle back-button ── */
