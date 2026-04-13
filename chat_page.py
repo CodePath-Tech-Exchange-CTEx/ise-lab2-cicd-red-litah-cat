@@ -49,6 +49,20 @@ button[kind="secondary"] {
     z-index: 998;
 }
 
+.trainer-profile-icon {
+    position: fixed;
+    left: calc(1rem + 34px);
+    bottom: calc(0.2rem + 48px);
+    width: 22px;
+    height: 22px;
+    pointer-events: none;
+    z-index: 1000;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23f97316' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2'/%3E%3Ccircle cx='12' cy='7' r='4'/%3E%3C/svg%3E");
+}
+
 .trainer-profile-anchor + div[data-testid="stButton"] {
     position: fixed;
     left: 1rem;
@@ -63,25 +77,14 @@ button[kind="secondary"] {
     display: flex !important;
     flex-direction: column !important;
     align-items: center !important;
-    justify-content: center !important;
+    justify-content: flex-end !important;
     gap: 6px !important;
-    padding: 10px 6px 8px !important;
+    padding: 38px 6px 8px !important;
     color: #ffffff !important;
     font-size: 10px !important;
     font-weight: 600 !important;
     letter-spacing: 0.5px !important;
     text-transform: uppercase !important;
-}
-
-.trainer-profile-anchor + div[data-testid="stButton"] > button::before {
-    content: "";
-    display: block;
-    width: 22px;
-    height: 22px;
-    background-size: contain;
-    background-repeat: no-repeat;
-    background-position: center;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23f97316' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2'/%3E%3Ccircle cx='9' cy='7' r='4'/%3E%3Cpath d='M23 21v-2a4 4 0 0 0-3-3.87'/%3E%3Cpath d='M16 3.13a4 4 0 0 1 0 7.75'/%3E%3C/svg%3E");
 }
 
 .trainer-profile-anchor + div[data-testid="stButton"] > button:hover {
@@ -95,9 +98,15 @@ button[kind="secondary"] {
         bottom: 0.1rem;
     }
 
+    .trainer-profile-icon {
+        left: calc(0.5rem + 28px);
+        bottom: calc(0.1rem + 42px);
+    }
+
     .trainer-profile-anchor + div[data-testid="stButton"] > button {
         width: 78px !important;
         min-height: 78px !important;
+        padding-top: 34px !important;
         font-size: 9px !important;
     }
 }
@@ -207,6 +216,7 @@ def _display_profile_form(user_id):
 def _render_profile_button(user_id):
     """Renders a fixed profile trigger styled like the main nav icons."""
     st.markdown('<div class="trainer-profile-anchor"></div>', unsafe_allow_html=True)
+    st.markdown('<div class="trainer-profile-icon"></div>', unsafe_allow_html=True)
     if st.button("Profile", key="profile_btn"):
         st.session_state.show_profile = True
         st.rerun()
