@@ -2,23 +2,11 @@ import streamlit as st
 from data_fetcher import get_chat_history, chat_with_ai, get_fitness_profile, save_fitness_profile, get_user_profile
 from modules import display_chat_history, display_ai_trainer_hero
 
-
-# ── Lucide SVG snippets used across the page ──────────────────────────────────
-
-_ICON_USER = """
-<svg width="{size}" height="{size}" viewBox="0 0 24 24" fill="none"
-     stroke="#f97316" stroke-width="1.6"
-     stroke-linecap="round" stroke-linejoin="round">
-  <circle cx="12" cy="8" r="4"/>
-  <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
-</svg>
-"""
-
 # ── CSS injected once per page load ───────────────────────────────────────────
 
 _PAGE_CSS = """
 <style>
-/* ── Profile trigger ── */
+/* ── Shared secondary button cleanup ── */
 div[data-testid="stButton"] > button[kind="secondary"] {
     background: transparent !important;
     border: none !important;
@@ -48,6 +36,70 @@ div[data-testid="stButton"] > button[kind="secondary"]:focus-visible {
 /* ── Subtle back-button ── */
 button[kind="secondary"] {
     color: #6b7280 !important;
+}
+
+/* ── Floating profile nav item ── */
+.trainer-profile-anchor {
+    position: fixed;
+    left: 1rem;
+    bottom: 0.2rem;
+    width: 90px;
+    height: 88px;
+    pointer-events: none;
+    z-index: 998;
+}
+
+.trainer-profile-anchor + div[data-testid="stButton"] {
+    position: fixed;
+    left: 1rem;
+    bottom: 0.2rem;
+    width: 90px;
+    z-index: 999;
+}
+
+.trainer-profile-anchor + div[data-testid="stButton"] > button {
+    width: 90px !important;
+    min-height: 88px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 6px !important;
+    padding: 10px 6px 8px !important;
+    color: #ffffff !important;
+    font-size: 10px !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.5px !important;
+    text-transform: uppercase !important;
+}
+
+.trainer-profile-anchor + div[data-testid="stButton"] > button::before {
+    content: "";
+    display: block;
+    width: 22px;
+    height: 22px;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23f97316' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2'/%3E%3Ccircle cx='9' cy='7' r='4'/%3E%3Cpath d='M23 21v-2a4 4 0 0 0-3-3.87'/%3E%3Cpath d='M16 3.13a4 4 0 0 1 0 7.75'/%3E%3C/svg%3E");
+}
+
+.trainer-profile-anchor + div[data-testid="stButton"] > button:hover {
+    color: #f97316 !important;
+}
+
+@media (max-width: 768px) {
+    .trainer-profile-anchor,
+    .trainer-profile-anchor + div[data-testid="stButton"] {
+        left: 0.5rem;
+        bottom: 0.1rem;
+    }
+
+    .trainer-profile-anchor + div[data-testid="stButton"] > button {
+        width: 78px !important;
+        min-height: 78px !important;
+        font-size: 9px !important;
+    }
 }
 </style>
 """
@@ -153,27 +205,11 @@ def _display_profile_form(user_id):
 # ── Profile button rendered with Lucide icon above ────────────────────────────
 
 def _render_profile_button(user_id):
-    """Renders the profile trigger with a Lucide user icon above the label."""
-    col_left, col_btn, col_right = st.columns([2.2, 1.6, 2.2])
-    with col_left:
-        st.empty()
-    with col_btn:
-        fitness_profile = get_fitness_profile(user_id)
-        label = "Profile" if fitness_profile else "Set up Profile"
-
-        st.markdown(
-            f"""<div style="display:flex;flex-direction:column;align-items:center;gap:6px;margin-top:8px;margin-bottom:4px;">
-                  <div style="display:flex;justify-content:center;">
-                  {_ICON_USER.format(size=32)}
-                  </div>
-                </div>""",
-            unsafe_allow_html=True,
-        )
-        if st.button(label, key="profile_btn", use_container_width=True):
-            st.session_state.show_profile = True
-            st.rerun()
-    with col_right:
-        st.empty()
+    """Renders a fixed profile trigger styled like the main nav icons."""
+    st.markdown('<div class="trainer-profile-anchor"></div>', unsafe_allow_html=True)
+    if st.button("Profile", key="profile_btn"):
+        st.session_state.show_profile = True
+        st.rerun()
 
 
 # ── Main page ─────────────────────────────────────────────────────────────────
@@ -202,10 +238,9 @@ def display_chat_page(user_id):
     # ── Chat history ──
     history = get_chat_history(user_id)
 
-    # ── Hero greeting and profile entry for empty state ──
+    # ── Hero greeting for empty state ──
     if not history:
         display_ai_trainer_hero(display_name)
-        _render_profile_button(user_id)
 
     # ── Persistent chat input (Streamlit pins this to the bottom) ──
     prompt = st.chat_input("Ask Arnold anything related to training...")
@@ -221,7 +256,5 @@ def display_chat_page(user_id):
     if history:
         display_chat_history(history)
 
-    # ── Profile trigger for active conversations ──
-    if history:
-        st.write("")
-        _render_profile_button(user_id)
+    # ── Persistent profile trigger ──
+    _render_profile_button(user_id)
