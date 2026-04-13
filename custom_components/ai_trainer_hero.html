@@ -1,32 +1,14 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 <meta charset="UTF-8">
-<style>
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-
-  body {
-    background: transparent;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 32px 20px 8px;
-    min-height: 100%;
-  }
-
-  /* ── Greeting ── */
-  .greeting {
-    font-size: 2.6em;
-    font-weight: 700;
-    color: #ffffff;
-    text-align: center;
-    letter-spacing: -0.025em;
-    line-height: 1.15;
-  }
-</style>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Trainer</title>
 </head>
 <body>
-  <div class="greeting">Hello, {{USER_NAME}}!!</div>
+<div class="hero-root">
+    <div class="hero-greeting">Hello, <span class="name">{{USER_NAME}}</span>!!</div>
+    <p class="hero-sub">Ask anything in the chat below — personalised training advice from Arnold.</p>
+</div>
 </body>
 </html>

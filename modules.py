@@ -185,35 +185,12 @@ def display_chat_history(messages):
 
         assembled_html += bubble + "\n"
 
-    wrapper = f"""<!DOCTYPE html>
-<html>
-<head>
-<style>
-  * {{ box-sizing: border-box; margin: 0; padding: 0; }}
-  body {{
-    background: #0e1117;
-    margin: 0;
-    padding: 8px 4px;
-  }}
-  .chat-feed {{
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-  }}
-  /* Thin divider between AI turn and user turn */
-  .turn-divider {{
-    height: 1px;
-    background: rgba(255,255,255,0.04);
-    margin: 4px 0;
-  }}
-</style>
-</head>
-<body>
-  <div class="chat-feed">
-    {assembled_html}
-  </div>
-</body>
-</html>"""
+    base_css = load_html_file("iframe_base.css")
+    shell = load_html_file("chat_feed_wrapper.html")
+    wrapper = (
+        shell.replace("{{IFRAME_BASE_CSS}}", base_css)
+        .replace("{{INNER_HTML}}", assembled_html)
+    )
 
     import streamlit.components.v1 as components
     height = max(300, min(len(messages) * 100, 700))

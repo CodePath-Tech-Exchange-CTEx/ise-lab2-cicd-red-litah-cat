@@ -1,55 +1,23 @@
 <!DOCTYPE html>
-<html>
-    <style>
-        .advice-card {
-            background-color: #1c1f26;
-            padding: 30px;
-            border-radius: 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            gap: 30px;
-        }
-       
-        .advice-text {
-            flex: 2;
-            font-size: 1.12rem;
-            font-family: sans-serif;
-            color: #FFF;
-            margin-top: -10px
-            
-        }
-
-        .advice-image {
-            flex: 1;
-            margin-top: 15px
-        }
-
-        .advice-image img {
-            width: 100%;
-            border-radius: 10px;
-        }
-
-        .timestamp {
-            font-size: 0.8rem;
-            color: #a0a0a0;
-            margin-top: 20px;
-        }
-    </style>
-
-        <div class="advice-card">
-            <div class="advice-text">
-                <h3>💬 AI Coach Says:</h3>
-                <p>{{CONTENT}}</p>
-                <div class="timestamp">
-                    Generated on {{TIMESTAMP}}<br>
-                    GenAI can make mistakes.
-                </div>
-            </div>
-
-            <div class="advice-image">
-                <img src="{{IMAGE}}" />
-            </div>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Advice</title>
+</head>
+<body>
+<div class="advice-card">
+    <div class="advice-text">
+        <h3>AI Coach Says</h3>
+        <p>{{CONTENT}}</p>
+        <div class="timestamp">
+            Generated on {{TIMESTAMP}}<br>
+            GenAI can make mistakes.
         </div>
-
+    </div>
+    <div class="advice-image">
+        <img src="{{IMAGE}}" alt="" />
+    </div>
+</div>
+</body>
 </html>

@@ -1,97 +1,7 @@
 import streamlit as st
+from internals import inject_streamlit_global_styles
 from data_fetcher import get_chat_history, chat_with_ai, get_fitness_profile, save_fitness_profile, get_user_profile
 from modules import display_chat_history, display_ai_trainer_hero
-
-# ── CSS injected once per page load ───────────────────────────────────────────
-
-_PAGE_CSS = """
-<style>
-/* ── Shared secondary button cleanup ── */
-div[data-testid="stButton"] > button[kind="secondary"] {
-    background: transparent !important;
-    border: none !important;
-    box-shadow: none !important;
-    color: #ffffff !important;
-    padding: 0 !important;
-    min-height: auto !important;
-    font-size: 0.72rem !important;
-    font-weight: 600 !important;
-    letter-spacing: 0.08em !important;
-    text-transform: uppercase !important;
-    transition: color 0.2s ease !important;
-}
-
-div[data-testid="stButton"] > button[kind="secondary"]:hover {
-    background: transparent !important;
-    border: none !important;
-    color: #f97316 !important;
-}
-
-div[data-testid="stButton"] > button[kind="secondary"]:focus,
-div[data-testid="stButton"] > button[kind="secondary"]:focus-visible {
-    outline: none !important;
-    box-shadow: none !important;
-}
-
-/* ── Subtle back-button ── */
-button[kind="secondary"] {
-    color: #6b7280 !important;
-}
-
-/* ── Profile nav item — single unit matching the navbar tabs ── */
-div[data-testid="stVerticalBlock"]:has(.profile-btn-hook) div[data-testid="stButton"] > button {
-    display: flex !important;
-    flex-direction: column !important;
-    align-items: center !important;
-    justify-content: center !important;
-    gap: 6px !important;
-    padding: 14px 4px 10px !important;
-    min-height: 74px !important;
-    width: 96px !important;
-    background: transparent !important;
-    border: none !important;
-    box-shadow: none !important;
-    color: #ffffff !important;
-    font-size: 10px !important;
-    font-weight: 600 !important;
-    letter-spacing: 0.5px !important;
-    text-transform: uppercase !important;
-    transition: color 0.2s ease !important;
-    cursor: pointer !important;
-}
-
-/* Icon as ::before — same technique as the navbar tabs */
-div[data-testid="stVerticalBlock"]:has(.profile-btn-hook) div[data-testid="stButton"] > button::before {
-    content: '';
-    display: block;
-    width: 22px;
-    height: 22px;
-    background-size: contain;
-    background-repeat: no-repeat;
-    background-position: center;
-    flex-shrink: 0;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23f97316' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2'/%3E%3Ccircle cx='12' cy='7' r='4'/%3E%3C/svg%3E");
-}
-
-/* Hover — brighten the orange slightly */
-div[data-testid="stVerticalBlock"]:has(.profile-btn-hook) div[data-testid="stButton"] > button:hover {
-    color: #f97316 !important;
-    background: transparent !important;
-}
-
-div[data-testid="stVerticalBlock"]:has(.profile-btn-hook) div[data-testid="stButton"] > button:hover::before {
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23f97316' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2'/%3E%3Ccircle cx='12' cy='7' r='4'/%3E%3C/svg%3E");
-}
-
-@media (max-width: 768px) {
-    div[data-testid="stVerticalBlock"]:has(.profile-btn-hook) div[data-testid="stButton"] > button {
-        width: 84px !important;
-        font-size: 9px !important;
-    }
-}
-</style>
-"""
-
 
 # ── Profile form (unchanged logic, small visual polish) ───────────────────────
 
@@ -205,8 +115,7 @@ def _render_profile_button(user_id):
 # ── Main page ─────────────────────────────────────────────────────────────────
 
 def display_chat_page(user_id):
-    # Inject page-level CSS once
-    st.markdown(_PAGE_CSS, unsafe_allow_html=True)
+    inject_streamlit_global_styles()
 
     # Initialise session state
     if "show_profile" not in st.session_state:
