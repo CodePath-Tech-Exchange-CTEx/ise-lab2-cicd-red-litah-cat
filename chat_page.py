@@ -7,13 +7,9 @@ from modules import display_chat_history, display_ai_trainer_hero
 
 def _display_profile_form(user_id):
     """Renders the fitness profile form. Returns to chat on 'Back'."""
-    col_back, col_title = st.columns([1, 6])
-    with col_back:
-        if st.button("← Back"):
-            st.session_state.show_profile = False
-            st.rerun()
-    with col_title:
-        st.subheader("My Fitness Profile")
+    if st.button("← Back"):
+        st.session_state.show_profile = False
+        st.rerun()
 
     st.markdown("Your profile helps Arnold personalise advice for you.")
     st.divider()
@@ -74,7 +70,7 @@ def _display_profile_form(user_id):
             label_visibility="collapsed"
         )
 
-        submitted = st.form_submit_button("Save Profile")
+        submitted = st.form_submit_button("Save Profile", type="secondary")
 
     if submitted:
         if not first_name or not last_name:

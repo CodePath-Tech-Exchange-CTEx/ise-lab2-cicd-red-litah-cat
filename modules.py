@@ -91,7 +91,8 @@ def display_activity_summary(workouts_list):
     }
 
     html_file_name = "activity_summary"
-    create_component(data, html_file_name)
+    # Iframe default height is 150px; this card is taller — size it to fit without scrolling.
+    create_component(data, html_file_name, height=520, scrolling=False)
 
 def display_recent_workouts(workouts_list):
     """
@@ -188,7 +189,7 @@ def display_chat_history(messages):
     base_css = load_html_file("iframe_base.css")
     shell = load_html_file("chat_feed_wrapper.html")
     wrapper = (
-        shell.replace("{{IFRAME_BASE_CSS}}", base_css)
+        shell.replace("/*__CHAT_FEED_WRAPPER_IFRAME_BASE_CSS__*/", base_css)
         .replace("{{INNER_HTML}}", assembled_html)
     )
 

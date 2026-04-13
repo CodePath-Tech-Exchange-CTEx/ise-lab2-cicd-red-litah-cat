@@ -184,24 +184,19 @@
   margin-bottom: 16px;
 }
 
-[data-testid="stRadio"] > div > div:first-child {
-  display: none !important;
-}
-
-[data-testid="stRadio"] [role="radiogroup"],
-[data-testid="stRadio"] > div > div:last-child > div {
+/* Goal cards: only style labels inside the radiogroup, not the collapsed field label (global label rules used to force display:flex and drew an empty box). */
+[data-testid="stRadio"] [role="radiogroup"] {
   display: flex !important;
   flex-direction: row !important;
   gap: 12px !important;
   width: 100% !important;
 }
 
-[data-testid="stRadio"] [role="radiogroup"] > div,
-[data-testid="stRadio"] > div > div:last-child > div > div {
+[data-testid="stRadio"] [role="radiogroup"] > div {
   flex: 1 !important;
 }
 
-[data-testid="stRadio"] label {
+[data-testid="stRadio"] [role="radiogroup"] label {
   display: flex !important;
   flex-direction: column !important;
   align-items: flex-start !important;
@@ -214,23 +209,33 @@
   width: 100% !important;
   transition: border-color 0.15s ease !important;
 }
-[data-testid="stRadio"] label:hover {
+[data-testid="stRadio"] [role="radiogroup"] label:hover {
   border-color: #555 !important;
 }
 
-[data-testid="stRadio"] label:has(input[type="radio"]:checked) {
+[data-testid="stRadio"] [role="radiogroup"] label:has(input[type="radio"]:checked) {
   border-color: #ffffff !important;
   background: #232323 !important;
 }
 
-[data-testid="stRadio"] label > div:first-child {
-  order: 3 !important;
-  margin-left: auto !important;
-  align-self: flex-start !important;
+/* Hide Base Web radio circle / dot; selection is shown only by the label border */
+[data-testid="stRadio"] [role="radiogroup"] label > div:first-child {
+  display: none !important;
+}
+[data-testid="stRadio"] [role="radiogroup"] label input[type="radio"] {
+  position: absolute !important;
+  opacity: 0 !important;
+  width: 0 !important;
+  height: 0 !important;
+  margin: 0 !important;
+}
+[data-testid="stRadio"] [role="radiogroup"] label:has(input:focus-visible) {
+  outline: 2px solid var(--st-accent) !important;
+  outline-offset: 2px !important;
 }
 
-[data-testid="stRadio"] label > div:last-child,
-[data-testid="stRadio"] label > p {
+[data-testid="stRadio"] [role="radiogroup"] label > div:last-child,
+[data-testid="stRadio"] [role="radiogroup"] label > p {
   order: 1 !important;
   color: #ffffff !important;
   font-size: 14px !important;
@@ -238,18 +243,30 @@
 }
 
 [data-testid="stFormSubmitButton"] button {
-  background-color: #ffffff !important;
-  color: #000000 !important;
-  border: none !important;
+  background-color: transparent !important;
+  color: var(--st-text) !important;
+  border: 1px solid #444 !important;
   border-radius: 6px !important;
   font-size: 14px !important;
-  font-weight: 600 !important;
+  font-weight: 500 !important;
   padding: 10px 24px !important;
   cursor: pointer !important;
-  transition: background-color 0.15s ease !important;
+  box-shadow: none !important;
+  transition:
+    border-color 0.15s ease,
+    background-color 0.15s ease,
+    color 0.15s ease !important;
 }
 [data-testid="stFormSubmitButton"] button:hover {
-  background-color: #e0e0e0 !important;
+  border-color: var(--st-accent) !important;
+  background-color: var(--st-accent) !important;
+  color: #ffffff !important;
+}
+[data-testid="stFormSubmitButton"] button:focus,
+[data-testid="stFormSubmitButton"] button:focus-visible {
+  outline: 2px solid var(--st-accent) !important;
+  outline-offset: 2px !important;
+  box-shadow: none !important;
 }
 
 [data-testid="stButton"] > button {

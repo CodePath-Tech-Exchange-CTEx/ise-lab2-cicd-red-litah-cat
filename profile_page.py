@@ -144,7 +144,7 @@ def display_profile_page(user_id):
         _, col_submit = st.columns([3, 1])
         with col_submit:
             submitted = st.form_submit_button(
-                "Save Profile", use_container_width=True
+                "Save Profile", type="secondary", use_container_width=True
             )
 
     if submitted:

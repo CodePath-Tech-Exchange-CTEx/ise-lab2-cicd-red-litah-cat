@@ -263,13 +263,6 @@ body {
 .hero-greeting .name {
   color: var(--cc-accent);
 }
-.hero-sub {
-  margin-top: 12px;
-  font-size: 0.88rem;
-  color: var(--cc-text-muted);
-  max-width: 340px;
-  line-height: 1.45;
-}
 
 .activity-doc body {
   background: var(--cc-bg-app);
