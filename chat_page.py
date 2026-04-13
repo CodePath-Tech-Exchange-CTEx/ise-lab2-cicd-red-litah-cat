@@ -38,63 +38,53 @@ button[kind="secondary"] {
     color: #6b7280 !important;
 }
 
-/* ── Inline profile nav item ── */
-.trainer-profile-inline {
-    display: flex;
-    justify-content: flex-start;
-    margin-top: 1.25rem;
-}
-
-.trainer-profile-inline-icon {
-    width: 22px;
-    height: 22px;
-    margin: 0 auto 0.35rem;
-    background-size: contain;
-    background-repeat: no-repeat;
-    background-position: center;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23f97316' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2'/%3E%3Ccircle cx='12' cy='7' r='4'/%3E%3C/svg%3E");
-}
-
-.trainer-profile-inline-item {
-    width: 96px;
-    text-align: center;
-}
-
-.trainer-profile-inline-item + div[data-testid="stButton"] {
-    width: 96px;
-}
-
-.trainer-profile-inline-item + div[data-testid="stButton"] > button {
-    width: 96px !important;
-    min-height: auto !important;
+/* ── Profile nav item — single unit matching the navbar tabs ── */
+div[data-testid="stVerticalBlock"]:has(.profile-btn-hook) div[data-testid="stButton"] > button {
     display: flex !important;
     flex-direction: column !important;
     align-items: center !important;
     justify-content: center !important;
-    gap: 0 !important;
-    padding: 0 !important;
+    gap: 6px !important;
+    padding: 14px 4px 10px !important;
+    min-height: 74px !important;
+    width: 96px !important;
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
     color: #ffffff !important;
     font-size: 10px !important;
     font-weight: 600 !important;
     letter-spacing: 0.5px !important;
     text-transform: uppercase !important;
+    transition: color 0.2s ease !important;
+    cursor: pointer !important;
 }
 
-.trainer-profile-inline-item + div[data-testid="stButton"] > button:hover {
+/* Icon as ::before — same technique as the navbar tabs */
+div[data-testid="stVerticalBlock"]:has(.profile-btn-hook) div[data-testid="stButton"] > button::before {
+    content: '';
+    display: block;
+    width: 22px;
+    height: 22px;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    flex-shrink: 0;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23ffffff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2'/%3E%3Ccircle cx='12' cy='7' r='4'/%3E%3C/svg%3E");
+}
+
+/* Hover — both icon and text change to accent together */
+div[data-testid="stVerticalBlock"]:has(.profile-btn-hook) div[data-testid="stButton"] > button:hover {
     color: #f97316 !important;
+    background: transparent !important;
+}
+
+div[data-testid="stVerticalBlock"]:has(.profile-btn-hook) div[data-testid="stButton"] > button:hover::before {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23f97316' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2'/%3E%3Ccircle cx='12' cy='7' r='4'/%3E%3C/svg%3E");
 }
 
 @media (max-width: 768px) {
-    .trainer-profile-inline {
-        margin-top: 1rem;
-    }
-
-    .trainer-profile-inline-item,
-    .trainer-profile-inline-item + div[data-testid="stButton"] {
-        width: 84px;
-    }
-
-    .trainer-profile-inline-item + div[data-testid="stButton"] > button {
+    div[data-testid="stVerticalBlock"]:has(.profile-btn-hook) div[data-testid="stButton"] > button {
         width: 84px !important;
         font-size: 9px !important;
     }
@@ -206,17 +196,8 @@ def _render_profile_button(user_id):
     """Renders an inline profile trigger styled like the main nav icons."""
     profile_col, _ = st.columns([1, 6])
     with profile_col:
-        st.markdown(
-            """
-            <div class="trainer-profile-inline">
-              <div class="trainer-profile-inline-item">
-                <div class="trainer-profile-inline-icon"></div>
-              </div>
-            </div>
-            """,
-            unsafe_allow_html=True,
-        )
-        if st.button("Profile", key="profile_btn"):
+        st.markdown('<div class="profile-btn-hook"></div>', unsafe_allow_html=True)
+        if st.button("PROFILE", key="profile_btn"):
             st.session_state.show_profile = True
             st.rerun()
 
