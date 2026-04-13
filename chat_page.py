@@ -45,64 +45,6 @@ div[data-testid="stButton"] > button[kind="secondary"]:focus-visible {
     box-shadow: none !important;
 }
 
-/* ── Chat input bar ── */
-div[data-testid="stChatInput"] {
-    background: transparent !important;
-}
-
-div[data-testid="stChatInput"] > div {
-    background: #1a1a1a !important;
-    border: 1.5px solid #333333 !important;
-    border-radius: 28px !important;
-    padding: 12px 14px !important;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.32) !important;
-    transition: border-color 0.25s ease, box-shadow 0.25s ease !important;
-}
-
-div[data-testid="stChatInput"]:focus-within > div {
-    border-color: #f97316 !important;
-    box-shadow: 0 12px 40px rgba(249, 115, 22, 0.12) !important;
-}
-
-div[data-testid="stChatInput"] textarea {
-    background: transparent !important;
-    border: none !important;
-    color: #ffffff !important;
-    font-size: 1.02rem !important;
-    line-height: 1.5 !important;
-    min-height: 112px !important;
-    padding: 10px 12px !important;
-}
-
-div[data-testid="stChatInput"] textarea:focus {
-    border: none !important;
-    box-shadow: none !important;
-}
-
-div[data-testid="stChatInput"] textarea::placeholder {
-    color: #6b7280 !important;
-}
-
-div[data-testid="stChatInput"] button {
-    width: 48px !important;
-    height: 48px !important;
-    border-radius: 999px !important;
-    border: 2px solid #f97316 !important;
-    background: transparent !important;
-    color: #f97316 !important;
-    transition: background 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease !important;
-}
-
-div[data-testid="stChatInput"] button:hover {
-    background: rgba(249, 115, 22, 0.12) !important;
-    box-shadow: 0 0 14px rgba(249, 115, 22, 0.22) !important;
-    transform: translateY(-1px);
-}
-
-div[data-testid="stChatInput"] button:disabled {
-    opacity: 0.5 !important;
-}
-
 /* ── Subtle back-button ── */
 button[kind="secondary"] {
     color: #6b7280 !important;
@@ -212,13 +154,15 @@ def _display_profile_form(user_id):
 
 def _render_profile_button(user_id):
     """Renders the profile trigger with a Lucide user icon above the label."""
-    col_btn, _ = st.columns([1.4, 5])
+    col_left, col_btn, col_right = st.columns([2.2, 1.6, 2.2])
+    with col_left:
+        st.empty()
     with col_btn:
         fitness_profile = get_fitness_profile(user_id)
         label = "Profile" if fitness_profile else "Set up Profile"
 
         st.markdown(
-            f"""<div style="display:flex;flex-direction:column;align-items:center;gap:6px;margin-top:8px;">
+            f"""<div style="display:flex;flex-direction:column;align-items:center;gap:6px;margin-top:8px;margin-bottom:4px;">
                   <div style="display:flex;justify-content:center;">
                   {_ICON_USER.format(size=32)}
                   </div>
@@ -228,6 +172,8 @@ def _render_profile_button(user_id):
         if st.button(label, key="profile_btn", use_container_width=True):
             st.session_state.show_profile = True
             st.rerun()
+    with col_right:
+        st.empty()
 
 
 # ── Main page ─────────────────────────────────────────────────────────────────
@@ -256,9 +202,10 @@ def display_chat_page(user_id):
     # ── Chat history ──
     history = get_chat_history(user_id)
 
-    # ── Hero greeting (shown only when no messages yet) ──
+    # ── Hero greeting and profile entry for empty state ──
     if not history:
         display_ai_trainer_hero(display_name)
+        _render_profile_button(user_id)
 
     # ── Persistent chat input (Streamlit pins this to the bottom) ──
     prompt = st.chat_input("Ask Arnold anything related to training...")
@@ -274,6 +221,7 @@ def display_chat_page(user_id):
     if history:
         display_chat_history(history)
 
-    # ── Profile trigger — bottom-left, nav-like text treatment ──
-    st.write("")
-    _render_profile_button(user_id)
+    # ── Profile trigger for active conversations ──
+    if history:
+        st.write("")
+        _render_profile_button(user_id)
