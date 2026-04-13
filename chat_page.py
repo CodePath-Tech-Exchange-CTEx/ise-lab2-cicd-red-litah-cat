@@ -51,7 +51,7 @@ div[data-testid="stVerticalBlock"]:has(.profile-btn-hook) div[data-testid="stBut
     background: transparent !important;
     border: none !important;
     box-shadow: none !important;
-    color: #f97316 !important;
+    color: #ffffff !important;
     font-size: 10px !important;
     font-weight: 600 !important;
     letter-spacing: 0.5px !important;
@@ -75,7 +75,7 @@ div[data-testid="stVerticalBlock"]:has(.profile-btn-hook) div[data-testid="stBut
 
 /* Hover — brighten the orange slightly */
 div[data-testid="stVerticalBlock"]:has(.profile-btn-hook) div[data-testid="stButton"] > button:hover {
-    color: #fb923c !important;
+    color: #f97316 !important;
     background: transparent !important;
 }
 
