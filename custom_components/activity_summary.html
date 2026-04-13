@@ -13,7 +13,10 @@
 <div class="card">
   <div class="header">
     <div class="header-left">
-      <div class="icon-box" aria-hidden="true">&#127939;</div>
+      <div class="icon-box" aria-hidden="true">
+        <!-- Lucide "activity" -->
+        <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+      </div>
       <div class="header-text">
         <h1>ACTIVITY SUMMARY</h1>
       </div>
@@ -39,17 +42,25 @@
   <div class="goal-section">
     <div class="goal-header">
       <span>WEEKLY GOAL</span>
-      <span style="color: var(--cc-accent, #f97316);">{{GOAL_DAYS}} / 7 days</span>
+      <span class="goal-count">{{GOAL_DAYS}} / 7 days</span>
     </div>
     <div class="progress-bar">
-      <div class="progress" style="width: {{GOAL_PCT}}%;"></div>
+      <div class="progress" data-goal-pct="{{GOAL_PCT}}"></div>
     </div>
   </div>
 
   <div class="footer">
     <div class="footer-dot"></div>
-    <span>Activity synced · weekly goal progress</span>
+    <span>Activity synced - weekly goal progress</span>
   </div>
 </div>
+<script>
+(function () {
+  var el = document.querySelector('.activity-doc .progress[data-goal-pct]');
+  if (!el) return;
+  var v = el.getAttribute('data-goal-pct');
+  if (v !== null && v !== '') el.style.width = String(v).trim() + '%';
+})();
+</script>
 </body>
 </html>

@@ -153,16 +153,17 @@ body {
 
 .wc-root {
   max-width: 420px;
-  border-radius: 18px;
+  border-radius: 8px;
   overflow: hidden;
   background: var(--cc-bg-card);
   border: 1px solid var(--cc-border);
-  box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+  box-shadow: none;
 }
 .wc-header {
-  background: linear-gradient(135deg, #1a3d2e, var(--cc-success));
-  color: white;
+  background: var(--cc-bg-elevated);
+  color: var(--cc-text);
   padding: 18px 20px;
+  border-bottom: 1px solid var(--cc-border);
 }
 .wc-header h2 {
   margin: 0;
@@ -172,7 +173,7 @@ body {
 .wc-header .subtitle {
   margin: 6px 0 0 0;
   font-size: 0.9em;
-  opacity: 0.92;
+  color: var(--cc-text-muted);
 }
 .wc-body {
   padding: 20px;
@@ -184,10 +185,27 @@ body {
   gap: 10px;
   margin-bottom: 18px;
 }
+.wc-metric {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+.wc-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--cc-accent);
+  line-height: 0;
+}
+.wc-icon svg {
+  width: 20px;
+  height: 20px;
+}
 .wc-metrics .val {
   font-size: 1.35em;
   font-weight: 600;
-  color: var(--cc-success);
+  color: var(--cc-accent);
 }
 .wc-metrics .lbl {
   font-size: 0.75em;
@@ -274,11 +292,11 @@ body {
 }
 .activity-doc .card {
   width: min(900px, 100%);
-  background: linear-gradient(135deg, #0f1a2f, #0c1425);
-  border-radius: 20px;
+  background: var(--cc-bg-card);
+  border-radius: 8px;
   padding: 24px;
-  color: #ffffff;
-  box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+  color: var(--cc-text);
+  box-shadow: none;
   border: 1px solid var(--cc-border);
 }
 .activity-doc .header {
@@ -296,12 +314,16 @@ body {
 .activity-doc .icon-box {
   width: 56px;
   height: 56px;
-  background: var(--cc-accent-secondary);
-  border-radius: 14px;
+  background: var(--cc-bg-elevated);
+  border: 1px solid var(--cc-border);
+  border-radius: 6px;
   display: flex;
   justify-content: center;
   align-items: center;
-  font-size: 26px;
+  color: var(--cc-accent);
+}
+.activity-doc .icon-box svg {
+  flex-shrink: 0;
 }
 .activity-doc .header-text h1 {
   font-size: 1.25rem;
@@ -310,7 +332,7 @@ body {
 }
 .activity-doc .badge {
   padding: 8px 16px;
-  border-radius: 999px;
+  border-radius: 6px;
   border: 1px solid var(--cc-accent);
   color: var(--cc-accent);
   font-weight: 600;
@@ -321,52 +343,54 @@ body {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   text-align: center;
-  border-top: 1px solid #1e2a44;
-  border-bottom: 1px solid #1e2a44;
+  border-top: 1px solid var(--cc-border);
+  border-bottom: 1px solid var(--cc-border);
 }
 .activity-doc .stat {
   padding: 28px 8px;
 }
 .activity-doc .stat:not(:last-child) {
-  border-right: 1px solid #1e2a44;
+  border-right: 1px solid var(--cc-border);
 }
 .activity-doc .stat h2 {
   font-size: clamp(1.5rem, 5vw, 2.5rem);
   margin-bottom: 8px;
+  color: var(--cc-accent);
 }
 .activity-doc .stat p {
-  color: #8d99b8;
+  color: var(--cc-text-muted);
   letter-spacing: 0.12em;
   font-size: 0.7rem;
 }
-.activity-doc .workouts h2 { color: var(--cc-accent-secondary); }
-.activity-doc .calories h2 { color: var(--cc-stat-coral); }
-.activity-doc .minutes h2 { color: var(--cc-stat-blue); }
 .activity-doc .goal-section { margin-top: 24px; }
 .activity-doc .goal-header {
   display: flex;
   justify-content: space-between;
   margin-bottom: 12px;
-  color: #9aa5bd;
+  color: var(--cc-text-muted);
   font-weight: 600;
   letter-spacing: 0.06em;
   font-size: 0.8rem;
 }
+.activity-doc .goal-count {
+  color: var(--cc-accent);
+}
 .activity-doc .progress-bar {
-  height: 12px;
-  background: #1c2742;
-  border-radius: 10px;
+  height: 10px;
+  background: var(--cc-bg-elevated);
+  border-radius: 4px;
   overflow: hidden;
+  border: 1px solid var(--cc-border);
 }
 .activity-doc .progress {
   height: 100%;
-  background: linear-gradient(to right, var(--cc-stat-blue), var(--cc-accent-secondary));
-  border-radius: 10px;
+  background: var(--cc-accent);
+  border-radius: 3px;
   transition: width 0.8s ease;
 }
 .activity-doc .footer {
   margin-top: 20px;
-  color: #7d8aaa;
+  color: var(--cc-text-muted);
   display: flex;
   align-items: center;
   gap: 10px;
@@ -375,6 +399,6 @@ body {
 .activity-doc .footer-dot {
   width: 8px;
   height: 8px;
-  background: var(--cc-accent-secondary);
+  background: var(--cc-accent);
   border-radius: 50%;
 }

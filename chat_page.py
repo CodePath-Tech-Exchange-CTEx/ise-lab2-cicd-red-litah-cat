@@ -70,7 +70,7 @@ def _display_profile_form(user_id):
             label_visibility="collapsed"
         )
 
-        submitted = st.form_submit_button("Save Profile", type="secondary")
+        submitted = st.form_submit_button("Save Profile")
 
     if submitted:
         if not first_name or not last_name:
@@ -100,12 +100,10 @@ def _display_profile_form(user_id):
 
 def _render_profile_button(user_id):
     """Renders an inline profile trigger styled like the main nav icons."""
-    profile_col, _ = st.columns([1, 6])
-    with profile_col:
-        st.markdown('<div class="profile-btn-hook"></div>', unsafe_allow_html=True)
-        if st.button("PROFILE", key="profile_btn"):
-            st.session_state.show_profile = True
-            st.rerun()
+    st.markdown('<div class="profile-btn-hook"></div>', unsafe_allow_html=True)
+    if st.button("PROFILE", key="profile_btn"):
+        st.session_state.show_profile = True
+        st.rerun()
 
 
 # ── Main page ─────────────────────────────────────────────────────────────────

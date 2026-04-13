@@ -13,11 +13,12 @@
   border-bottom: none !important;
   padding: 0 !important;
   gap: 0 !important;
-  justify-content: space-around !important;
+  justify-content: space-between !important;
+  width: 100% !important;
 }
 
 [data-baseweb="tab"] {
-  flex: 1 !important;
+  flex: 0 1 auto !important;
   display: flex !important;
   flex-direction: column !important;
   align-items: center !important;
@@ -33,6 +34,14 @@
   min-height: 74px !important;
   text-transform: uppercase !important;
   transition: color 0.2s ease !important;
+}
+
+[data-baseweb="tab"]:first-child {
+  align-items: flex-start !important;
+}
+
+[data-baseweb="tab"]:last-child {
+  align-items: flex-end !important;
 }
 
 [data-baseweb="tab"]:hover {
@@ -285,7 +294,7 @@
   background-color: var(--st-bg-elevated) !important;
 }
 
-/* AI TRAINER / CHAT */
+/* AI TRAINER / CHAT — bottom bar: nudge inset from the left */
 div[data-testid="stButton"] > button[kind="secondary"] {
   background: transparent !important;
   border: none !important;
@@ -324,7 +333,7 @@ div[data-testid="stVerticalBlock"]:has(.profile-btn-hook) div[data-testid="stBut
   gap: 6px !important;
   padding: 14px 4px 10px !important;
   min-height: 74px !important;
-  width: 96px !important;
+  width: 72px !important;
   background: transparent !important;
   border: none !important;
   box-shadow: none !important;
@@ -360,7 +369,7 @@ div[data-testid="stVerticalBlock"]:has(.profile-btn-hook) div[data-testid="stBut
 
 @media (max-width: 768px) {
   div[data-testid="stVerticalBlock"]:has(.profile-btn-hook) div[data-testid="stButton"] > button {
-    width: 84px !important;
+    width: 72px !important;
     font-size: 9px !important;
   }
 }

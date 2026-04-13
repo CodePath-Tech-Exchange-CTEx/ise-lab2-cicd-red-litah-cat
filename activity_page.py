@@ -32,6 +32,7 @@ def display_activity_page():
 
     # --- Share Button ---
     st.divider()
+    st.markdown('<div class="share-activity-btn-hook"></div>', unsafe_allow_html=True)
     if st.button("Share My Activity"):
         if recent_workouts:
             latest = recent_workouts[0]
