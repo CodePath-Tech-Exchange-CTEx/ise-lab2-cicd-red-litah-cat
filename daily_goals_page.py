@@ -3,21 +3,17 @@ from datetime import datetime
 from modules import display_goals
 from data_fetcher import get_daily_goals, get_user_profile, update_goal_status, save_new_goal
 
+user_id = 'user4'
+
 def load_workout_css():
     with open("custom_components/streamlit_global.css") as f:
         st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
 
-def display_workout_header(go_to):
+def display_workout_header():
     user_profile = get_user_profile(user_id)
     profile_image = user_profile["profile_image"]
 
     left, middle, right = st.columns([1, 5, 1])
-
-    with left:
-        st.markdown('<div class="home-button-wrap">', unsafe_allow_html=True)
-        if st.button("⌂", key="workout_home_button"):
-            go_to("home")
-        st.markdown('</div>', unsafe_allow_html=True)
 
     with middle:
         st.markdown(
@@ -84,7 +80,7 @@ def display_add_goal_modal():
 
 def display_daily_goals_page():
     load_workout_css()
-    display_workout_header(go_to)
+    display_workout_header()
 
     st.markdown(
         '<div class="section-label">View your daily goals:</div>',

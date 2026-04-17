@@ -57,7 +57,7 @@ def display_app_page():
     image = gen_ai_advice['image']
  
     display_genai_advice(timestamp, content, image)
- 
+
  
 # This is the starting point for your app. You do not need to change these lines
 if __name__ == '__main__':

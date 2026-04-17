@@ -12,7 +12,7 @@ import json
 import requests
 import vertexai
 from vertexai.generative_models import GenerativeModel, GenerationConfig
-from datetime import datetime
+from datetime import datetime, date
 from google.cloud import bigquery
 
 
