@@ -8,6 +8,7 @@
 }
 
 /* ===== CUSTOM NAVIGATION BAR ===== */
+
 [data-baseweb="tab-list"] {
   background: transparent !important;
   border-bottom: none !important;
@@ -116,6 +117,7 @@
 
 
 /* PROFILE PAGE */
+
 .pf-label {
   color: var(--st-text);
   font-size: 13px;
@@ -299,6 +301,7 @@
 }
 
 /* AI TRAINER / CHAT — profile button */
+
 div[data-testid="stButton"] > button[kind="secondary"] {
   background: transparent !important;
   border: none !important;
@@ -329,6 +332,7 @@ button[kind="secondary"] {
   color: var(--st-text-muted) !important;
 }
 
+/*
 div[data-testid="stVerticalBlock"]:has(.profile-btn-hook) div[data-testid="stButton"] > button {
   display: flex !important;
   flex-direction: column !important;
@@ -369,11 +373,10 @@ div[data-testid="stVerticalBlock"]:has(.profile-btn-hook) div[data-testid="stBut
 
 div[data-testid="stVerticalBlock"]:has(.profile-btn-hook) div[data-testid="stButton"] > button:hover::before {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23f97316' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2'/%3E%3Ccircle cx='12' cy='7' r='4'/%3E%3C/svg%3E");
-}
-
+} 
 @media (max-width: 768px) {
   div[data-testid="stVerticalBlock"]:has(.profile-btn-hook) div[data-testid="stButton"] > button {
     width: 72px !important;
     font-size: 9px !important;
   }
-}
+} */

@@ -161,8 +161,4 @@ div[data-testid="stDialog"] div[data-baseweb="notification"] {
     font-family: 'Outfit', sans-serif !important;
 }
 
-.st-key-add_goal_button_wrap div[data-testid="stButton"] > button::before {
-  content: none !important;
-  background-image: none !important;
-  
-}
+
