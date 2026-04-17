@@ -195,3 +195,15 @@ def display_chat_history(messages):
 
     height = max(400, min(len(messages) * 150, 650))
     components.html(wrapper, height=height, scrolling=True)
+
+def display_goals(goal_name, duration, status):
+    duration = f"{duration} min"
+    check_mark = "✓" if status else ""
+
+    data = {
+        "GOAL_NAME": goal_name,
+        "DURATION": duration,
+        "CHECK_MARK": check_mark
+    }
+
+    create_component(data, "daily_goals", height=120, scrolling=False)
