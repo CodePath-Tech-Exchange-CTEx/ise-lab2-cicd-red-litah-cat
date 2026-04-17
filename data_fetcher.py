@@ -659,3 +659,82 @@ def chat_with_ai(user_id, user_message):
     insert_chat_message(user_id, 'model', ai_text)
 
     return ai_text
+
+def get_daily_goals(user_id):
+    """Displays daily workout goals."""
+    client = bigquery.Client(project=PROJECT_ID)
+    goal_date = date.today()
+
+    query = f"""
+        SELECT
+            GoalId AS goal_id,
+            UserId AS user_id,
+            GoalName AS goal_name,
+            Duration AS duration,
+            Status AS status,
+            GoalDate AS goal_date
+        FROM `{PROJECT_ID}.{COURSE_CODE}.DailyGoals`
+        WHERE UserId = @user_id AND GoalDate = @goal_date
+        ORDER BY goal_name
+    """
+
+    job_config = bigquery.QueryJobConfig(
+        query_parameters=[
+            bigquery.ScalarQueryParameter("user_id", "STRING", user_id),
+            bigquery.ScalarQueryParameter("goal_date", "DATE", goal_date),
+        ]
+    )
+
+    query_job = client.query(query, job_config=job_config)
+    results = query_job.result()
+
+    daily_goals = []
+    for row in results:
+        daily_goals.append({
+            "goal_id": row.goal_id,
+            "user_id": row.user_id,
+            "goal_name": row.goal_name,
+            "duration": row.duration,
+            "status": row.status,
+            "goal_date": row.goal_date,
+        })
+
+    return daily_goals
+
+def save_new_goal(user_id: str, goal_name: str, duration: int):
+    client = bigquery.Client(project=PROJECT_ID)
+
+    query = f"""
+        INSERT INTO `{PROJECT_ID}.{COURSE_CODE}.DailyGoals`
+            (GoalId, UserId, GoalName, Duration, Status, GoalDate)
+        VALUES (@goal_id, @user_id, @goal_name, @duration, FALSE, @goal_date)
+    """
+
+    job_config = bigquery.QueryJobConfig(
+        query_parameters=[
+            bigquery.ScalarQueryParameter("goal_id", "STRING", str(uuid.uuid4())),
+            bigquery.ScalarQueryParameter("user_id", "STRING", user_id),
+            bigquery.ScalarQueryParameter("goal_name", "STRING", goal_name),
+            bigquery.ScalarQueryParameter("duration", "INT64", duration),
+            bigquery.ScalarQueryParameter("goal_date", "DATE", date.today()),
+        ]
+    )
+
+    client.query(query, job_config=job_config).result()
+    
+def update_goal_status(goal_id: str, completed: bool):
+    """Updates the completion status of a goal."""
+    client = bigquery.Client(project=PROJECT_ID)
+
+    query = f"""
+        UPDATE `{PROJECT_ID}.{COURSE_CODE}.DailyGoals`
+        SET Status = @completed
+        WHERE GoalId = @goal_id
+    """
+    job_config = bigquery.QueryJobConfig(
+        query_parameters=[
+            bigquery.ScalarQueryParameter("goal_id", "STRING", goal_id),
+            bigquery.ScalarQueryParameter("completed", "BOOL", completed),
+        ]
+    )
+    client.query(query, job_config=job_config).result()
