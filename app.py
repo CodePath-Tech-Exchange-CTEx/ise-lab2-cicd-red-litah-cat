@@ -10,6 +10,7 @@ from modules import display_my_custom_component, display_post, display_genai_adv
 from data_fetcher import get_user_posts, get_genai_advice, get_user_profile, get_user_sensor_data, get_user_workouts
 from activity_page import display_activity_page
 from community_page import display_community_page
+from daily_goals_page import display_daily_goals_page
 from chat_page import display_chat_page
 from log_workout_page import display_log_workout_page
 import datetime
@@ -74,10 +75,10 @@ if __name__ == '__main__':
         display_activity_page()
 
     with log_workout_tab:
-        display_daily_goals_page()
+        display_log_workout_page()
 
     with daily_goals_tab:
-        display_log_workout_page()
+        display_daily_goals_page()
         
     with ai_trainer_tab:
         display_chat_page(userId)

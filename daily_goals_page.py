@@ -4,7 +4,7 @@ from modules import display_goals
 from data_fetcher import get_daily_goals, get_user_profile, update_goal_status, save_new_goal
 
 def load_workout_css():
-    with open("CSS/daily_goals.css") as f:
+    with open("custom_components/streamlit_global.css") as f:
         st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
 
 def display_workout_header(go_to):
@@ -82,7 +82,7 @@ def display_add_goal_modal():
             save_new_goal(user_id, clean_name, duration)
             st.rerun()
 
-def display_goals_page():
+def display_daily_goals_page():
     load_workout_css()
     display_workout_header(go_to)
 
