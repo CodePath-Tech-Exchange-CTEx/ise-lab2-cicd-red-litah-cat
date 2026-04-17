@@ -15,13 +15,10 @@ def display_activity_page():
     """Displays the activity page, including recent workouts, an activity
     summary, and a button to share a workout stat with the community."""
 
-    st.header("My Activity")
-
     user_workouts = get_user_workouts(userId)
     recent_workouts = user_workouts[:3]
 
     # --- Activity Summary ---
-    st.divider()
     st.subheader("Activity Summary")
     display_activity_summary(user_workouts)
 
@@ -32,8 +29,9 @@ def display_activity_page():
 
     # --- Share Button ---
     st.divider()
-    st.markdown('<div class="share-activity-btn-hook"></div>', unsafe_allow_html=True)
-    if st.button("Share My Activity"):
+    with st.form("share_activity_form"):
+        submitted = st.form_submit_button("Share My Activity")
+    if submitted:
         if recent_workouts:
             latest = recent_workouts[0]
             steps = latest.get('steps')

@@ -34,20 +34,20 @@ def display_app_page():
     display_post(username, user_image, timestamp, content, post_image)
  
     # --- Activity Summary Logic ---
-    st.divider()
+    # st.divider()
     st.header("Activity Summary")
  
     user_workouts = get_user_workouts(userId)
     display_activity_summary(user_workouts)
  
     # --- Recent Workouts Logic ---
-    st.divider()
+    # st.divider()
     st.header("Recent Activity")
     
     display_recent_workouts(user_workouts)
  
     # --- GenAI Logic ---
-    st.divider()
+    # st.divider()
     st.markdown("## 🤖 AI Advice")
     
     gen_ai_advice = get_genai_advice(userId)
@@ -64,7 +64,7 @@ if __name__ == '__main__':
         st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
 
     home_tab, activity_tab, log_workout_tab, ai_trainer_tab, community_tab = st.tabs(
-        ["Home", "Activity", "Log Workout", "AI Trainer", "Community"]
+        ["Home", "Activity", "Workout", "AI Trainer", "Community"]
     )
 
     with home_tab:

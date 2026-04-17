@@ -9,9 +9,6 @@ def display_community_page():
     First 10 posts from a user’s friends ordered by timestamp
     One piece of GenAI advice and encouragement
 """
-    st.header("Community")
-
-    st.divider()
     st.header("POSTS")
 
     #POSTS

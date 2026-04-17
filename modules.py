@@ -11,6 +11,7 @@ from internals import create_component, load_html_file, safe_string
 import streamlit as st
 import streamlit.components.v1 as components
 from datetime import datetime
+import html as _html
 
 
 # This one has been written for you as an example. You may change it as wanted.
@@ -175,8 +176,8 @@ def display_chat_history(messages):
             if hasattr(msg['timestamp'], 'strftime')
             else str(msg['timestamp'])
         )
-        content_safe = safe_string(str(msg['content']))
-        timestamp_safe = safe_string(timestamp_str)
+        content_safe = _html.escape(str(msg['content']))
+        timestamp_safe = _html.escape(timestamp_str)
 
         if msg['role'] == 'user':
             bubble = (user_tmpl
@@ -192,5 +193,5 @@ def display_chat_history(messages):
     wrapper = load_html_file('custom_components/chat_feed_wrapper.html')
     wrapper = wrapper.replace('{{INNER_HTML}}', assembled_html)
 
-    height = max(300, min(len(messages) * 100, 700))
+    height = max(400, min(len(messages) * 150, 650))
     components.html(wrapper, height=height, scrolling=True)

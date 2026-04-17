@@ -134,6 +134,8 @@ def display_chat_page(user_id):
 
     if not history:
         display_ai_trainer_hero(display_name)
+    else:
+        display_chat_history(history)
 
     prompt = st.chat_input("Ask Arnold anything related to training...")
     if prompt:
@@ -143,8 +145,5 @@ def display_chat_page(user_id):
             except Exception as e:
                 st.error(f"Error communicating with Arnold: {e}")
         st.rerun()
-
-    if history:
-        display_chat_history(history)
 
     _render_profile_button(user_id)

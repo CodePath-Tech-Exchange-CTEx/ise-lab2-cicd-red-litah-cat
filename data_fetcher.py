@@ -264,6 +264,25 @@ def get_user_friends(user_id):
 
     return friends
 
+def _strip_markdown(text: str) -> str:
+    """Removes common markdown formatting and escape sequences from a string,
+    returning clean plain text suitable for display in HTML."""
+    import re
+    # Unescape backslash-escaped characters (e.g. \' -> ')
+    text = text.replace("\\'", "'").replace('\\"', '"').replace("\\n", " ").replace("\\t", " ")
+    # Remove bold/italic markers: **, *, __, _
+    text = re.sub(r'\*{1,3}|_{1,3}', '', text)
+    # Remove inline code backticks
+    text = re.sub(r'`+', '', text)
+    # Remove markdown headings (# Heading)
+    text = re.sub(r'^\s*#{1,6}\s+', '', text, flags=re.MULTILINE)
+    # Remove markdown links [text](url) -> text
+    text = re.sub(r'\[([^\]]+)\]\([^)]*\)', r'\1', text)
+    # Collapse multiple spaces
+    text = re.sub(r'  +', ' ', text)
+    return text.strip()
+
+
 def get_genai_advice(user_id):
     """Returns the most recent advice from the genai model.
 
@@ -286,8 +305,14 @@ def get_genai_advice(user_id):
     vertexai.init(project=PROJECT_ID, location="us-central1")
     
     
-    model = GenerativeModel("gemini-2.5-flash-lite",
-                            system_instruction="You are a helpful and encouraging workout coach.")
+    model = GenerativeModel(
+        "gemini-2.5-flash-lite",
+        system_instruction=(
+            "You are a helpful and encouraging workout coach. "
+            "Respond in plain text only. Do not use markdown formatting, "
+            "asterisks, bold, italics, bullet points, or any escape characters."
+        )
+    )
     
     prompt = f"""
             The user just finished a workout with these stats:
@@ -334,7 +359,7 @@ def get_genai_advice(user_id):
 
     return {"advice_id": advice_id,
             "timestamp": datetime.now(),
-            "content": ai_response["content"],
+            "content": _strip_markdown(ai_response["content"]),
             "image": image_url
             }
 
@@ -430,7 +455,7 @@ def get_chat_history(user_id):
             "user_id": row.UserId,
             "timestamp": row.Timestamp,
             "role": row.Role,
-            "content": row.Content
+            "content": _strip_markdown(row.Content or "")
         })
 
     return history
@@ -621,12 +646,15 @@ def chat_with_ai(user_id, user_message):
             "Tone: Direct, motivating, and knowledgeable. Like a real personal trainer who "
             "genuinely cares about results. Be concise — 2-4 sentences unless the user "
             "explicitly asks for detail or a full plan.\n\n"
-            "Never break character. Never answer non-fitness questions even if the user insists."
+            "Never break character. Never answer non-fitness questions even if the user insists.\n\n"
+            "IMPORTANT: Respond in plain text only. Do not use markdown formatting of any kind — "
+            "no asterisks, no bold, no italics, no bullet point dashes, no headers, no backticks, "
+            "and no escape characters such as \\' or \\\"."
         )
     )
 
     response = model.generate_content(contents=contents)
-    ai_text = response.text
+    ai_text = _strip_markdown(response.text)
 
     insert_chat_message(user_id, 'model', ai_text)
 
