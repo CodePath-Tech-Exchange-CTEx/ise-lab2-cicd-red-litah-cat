@@ -1,7 +1,7 @@
 import streamlit as st
 from datetime import datetime
 from modules import display_goals
-from data_fetcher import get_daily_goals, get_user_profile, update_goal_status
+from data_fetcher import get_daily_goals, get_user_profile, update_goal_status, save_new_goal
 
 def load_workout_css():
     with open("CSS/daily_goals.css") as f:
@@ -30,6 +30,57 @@ def display_workout_header(go_to):
 
     st.divider()
 
+@st.dialog(" ")
+def display_add_goal_modal():
+    st.markdown('<div class="custom-modal-title">Add New Goal</div>', unsafe_allow_html=True)
+
+    st.markdown('<div class="modal-field-label">Goal Name</div>', unsafe_allow_html=True)
+    goal_name = st.text_input(
+        label="Goal Name",
+        label_visibility="collapsed",
+        placeholder="e.g Push-ups, Running",
+        key="new_goal_name"
+    )
+
+    st.markdown('<div class="modal-field-label">Duration (minutes)</div>', unsafe_allow_html=True)
+    duration_text = st.text_input(
+        label="Duration (minutes)",
+        label_visibility="collapsed",
+        placeholder="e.g 20",
+        key="new_goal_duration"
+    )
+
+    col1, col2 = st.columns(2)
+
+    with col1:
+        if st.button("Cancel", key="cancel_add_goal", use_container_width=True):
+            st.rerun()
+
+    with col2:
+        if st.button("Save", key="save_add_goal", type="primary", use_container_width=True):
+            clean_name = goal_name.strip()
+            clean_duration = duration_text.strip()
+
+            if clean_name == "":
+                st.warning("Please enter a goal name.")
+                return
+
+            if clean_duration == "":
+                st.warning("Please enter a duration.")
+                return
+
+            if not clean_duration.isdigit():
+                st.warning("Duration must be a whole number in minutes.")
+                return
+
+            duration = int(clean_duration)
+
+            if duration <= 0:
+                st.warning("Duration must be greater than 0.")
+                return
+
+            save_new_goal(user_id, clean_name, duration)
+            st.rerun()
 
 def display_goals_page():
     load_workout_css()
