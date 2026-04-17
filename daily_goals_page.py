@@ -3,7 +3,7 @@ from datetime import datetime
 from modules import display_goals
 from data_fetcher import get_daily_goals, get_user_profile, update_goal_status, save_new_goal
 
-user_id = 'user4'
+user_id = 'user1'
 
 def load_workout_css():
     with open("custom_components/streamlit_global.css") as f:
