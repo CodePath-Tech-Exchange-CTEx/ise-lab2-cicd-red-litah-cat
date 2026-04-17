@@ -6,7 +6,158 @@
 <title>Workout Summary</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
-.activity-doc { font-family: "Inter", var(--cc-font), sans-serif; }
+:root {
+  --cc-bg-app: #0e1117;
+  --cc-bg-card: #161b22;
+  --cc-bg-elevated: #1c1f26;
+  --cc-border: #30363d;
+  --cc-text: #e6edf3;
+  --cc-text-muted: #8b949e;
+  --cc-accent: #f97316;
+  --cc-font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+.activity-doc {
+  font-family: "Inter", var(--cc-font), sans-serif;
+}
+
+.activity-doc body {
+  background: var(--cc-bg-app);
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  min-height: 100vh;
+  padding: 12px 8px;
+  color: var(--cc-text);
+}
+
+.activity-doc .card {
+  width: min(900px, 100%);
+  background: var(--cc-bg-card);
+  border-radius: 8px;
+  padding: 24px;
+  color: var(--cc-text);
+  border: 1px solid var(--cc-border);
+}
+
+.activity-doc .header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.activity-doc .header-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.activity-doc .icon-box {
+  width: 56px;
+  height: 56px;
+  background: var(--cc-bg-elevated);
+  border: 1px solid var(--cc-border);
+  border-radius: 6px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: var(--cc-accent);
+}
+
+.activity-doc .header-text h1 {
+  font-size: 1.25rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+}
+
+.activity-doc .badge {
+  padding: 8px 16px;
+  border-radius: 6px;
+  border: 1px solid var(--cc-accent);
+  color: var(--cc-accent);
+  font-weight: 600;
+  font-size: 0.75rem;
+}
+
+.activity-doc .stats {
+  margin-top: 28px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  text-align: center;
+  border-top: 1px solid var(--cc-border);
+  border-bottom: 1px solid var(--cc-border);
+}
+
+.activity-doc .stat {
+  padding: 28px 8px;
+}
+
+.activity-doc .stat:not(:last-child) {
+  border-right: 1px solid var(--cc-border);
+}
+
+.activity-doc .stat h2 {
+  font-size: clamp(1.5rem, 5vw, 2.5rem);
+  margin-bottom: 8px;
+  color: var(--cc-accent);
+}
+
+.activity-doc .stat p {
+  color: var(--cc-text-muted);
+  letter-spacing: 0.12em;
+  font-size: 0.7rem;
+}
+
+.activity-doc .goal-section { margin-top: 24px; }
+
+.activity-doc .goal-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  color: var(--cc-text-muted);
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  font-size: 0.8rem;
+}
+
+.activity-doc .goal-count {
+  color: var(--cc-accent);
+}
+
+.activity-doc .progress-bar {
+  height: 10px;
+  background: var(--cc-bg-elevated);
+  border-radius: 4px;
+  overflow: hidden;
+  border: 1px solid var(--cc-border);
+}
+
+.activity-doc .progress {
+  height: 100%;
+  background: var(--cc-accent);
+  border-radius: 3px;
+  transition: width 0.8s ease;
+}
+
+.activity-doc .footer {
+  margin-top: 20px;
+  color: var(--cc-text-muted);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.75rem;
+}
+
+.activity-doc .footer-dot {
+  width: 8px;
+  height: 8px;
+  background: var(--cc-accent);
+  border-radius: 50%;
+}
 </style>
 </head>
 <body>
@@ -14,7 +165,6 @@
   <div class="header">
     <div class="header-left">
       <div class="icon-box" aria-hidden="true">
-        <!-- Lucide "activity" -->
         <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
       </div>
       <div class="header-text">

@@ -12,7 +12,6 @@ from activity_page import display_activity_page
 from community_page import display_community_page
 from chat_page import display_chat_page
 from log_workout_page import display_log_workout_page
-from internals import inject_streamlit_global_styles
 import datetime
  
 userId = 'user1'
@@ -58,10 +57,11 @@ def display_app_page():
  
     display_genai_advice(timestamp, content, image)
  
-
+ 
 # This is the starting point for your app. You do not need to change these lines
 if __name__ == '__main__':
-    inject_streamlit_global_styles()
+    with open('custom_components/streamlit_global.css') as f:
+        st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
 
     home_tab, activity_tab, log_workout_tab, ai_trainer_tab, community_tab = st.tabs(
         ["Home", "Activity", "Log Workout", "AI Trainer", "Community"]

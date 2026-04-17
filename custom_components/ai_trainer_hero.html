@@ -4,10 +4,47 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>AI Trainer</title>
+<style>
+:root {
+  --cc-bg-app: #0e1117;
+  --cc-accent: #f97316;
+  --cc-font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  margin: 0;
+  font-family: var(--cc-font);
+  background: var(--cc-bg-app);
+}
+
+.hero-root {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 28px 20px 16px;
+  text-align: center;
+  background: transparent;
+}
+
+.hero-greeting {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #ffffff;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+}
+
+.hero-greeting .name {
+  color: var(--cc-accent);
+}
+</style>
 </head>
 <body>
 <div class="hero-root">
-    <div class="hero-greeting">Hello, <span class="name">{{USER_NAME}}</span>!!</div>
+  <div class="hero-greeting">Hello, <span class="name">{{USER_NAME}}</span>!!</div>
 </div>
 </body>
 </html>

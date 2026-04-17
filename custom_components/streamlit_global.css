@@ -193,7 +193,6 @@
   margin-bottom: 16px;
 }
 
-/* Goal cards: only style labels inside the radiogroup, not the collapsed field label (global label rules used to force display:flex and drew an empty box). */
 [data-testid="stRadio"] [role="radiogroup"] {
   display: flex !important;
   flex-direction: row !important;
@@ -227,7 +226,6 @@
   background: #232323 !important;
 }
 
-/* Hide Base Web radio circle / dot; selection is shown only by the label border */
 [data-testid="stRadio"] [role="radiogroup"] label > div:first-child {
   display: none !important;
 }
@@ -294,7 +292,7 @@
   background-color: var(--st-bg-elevated) !important;
 }
 
-/* AI TRAINER / CHAT — bottom bar: nudge inset from the left */
+/* AI TRAINER / CHAT — profile button */
 div[data-testid="stButton"] > button[kind="secondary"] {
   background: transparent !important;
   border: none !important;

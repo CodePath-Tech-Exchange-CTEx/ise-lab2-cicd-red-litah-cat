@@ -1,9 +1,14 @@
+#############################################################################
+# chat_page.py
+#
+# This file contains the AI Trainer chat page.
+#############################################################################
+
 import streamlit as st
-from internals import inject_streamlit_global_styles
-from data_fetcher import get_chat_history, chat_with_ai, get_fitness_profile, save_fitness_profile, get_user_profile
+from data_fetcher import (get_chat_history, chat_with_ai, get_fitness_profile,
+                          save_fitness_profile, get_user_profile)
 from modules import display_chat_history, display_ai_trainer_hero
 
-# ── Profile form (unchanged logic, small visual polish) ───────────────────────
 
 def _display_profile_form(user_id):
     """Renders the fitness profile form. Returns to chat on 'Back'."""
@@ -96,8 +101,6 @@ def _display_profile_form(user_id):
                 st.error(f"Could not save profile: {e}")
 
 
-# ── Profile button rendered with Lucide icon above ────────────────────────────
-
 def _render_profile_button(user_id):
     """Renders an inline profile trigger styled like the main nav icons."""
     st.markdown('<div class="profile-btn-hook"></div>', unsafe_allow_html=True)
@@ -106,21 +109,20 @@ def _render_profile_button(user_id):
         st.rerun()
 
 
-# ── Main page ─────────────────────────────────────────────────────────────────
-
 def display_chat_page(user_id):
-    inject_streamlit_global_styles()
+    """Displays the AI Trainer chat page with conversation history,
+    a persistent chat input, and an optional fitness profile form.
 
-    # Initialise session state
+    Args:
+        user_id (str): The ID of the current user.
+    """
     if "show_profile" not in st.session_state:
         st.session_state.show_profile = False
 
-    # ── Profile view ──
     if st.session_state.show_profile:
         _display_profile_form(user_id)
         return
 
-    # ── Resolve display name for greeting ──
     fitness_profile = get_fitness_profile(user_id)
     if fitness_profile and fitness_profile.get("first_name"):
         display_name = fitness_profile["first_name"]
@@ -128,14 +130,11 @@ def display_chat_page(user_id):
         user_profile = get_user_profile(user_id)
         display_name = user_profile.get("full_name", "there")
 
-    # ── Chat history ──
     history = get_chat_history(user_id)
 
-    # ── Hero greeting for empty state ──
     if not history:
         display_ai_trainer_hero(display_name)
 
-    # ── Persistent chat input (Streamlit pins this to the bottom) ──
     prompt = st.chat_input("Ask Arnold anything related to training...")
     if prompt:
         with st.spinner("Arnold is thinking..."):
@@ -145,9 +144,7 @@ def display_chat_page(user_id):
                 st.error(f"Error communicating with Arnold: {e}")
         st.rerun()
 
-    # ── Conversation history ──
     if history:
         display_chat_history(history)
 
-    # ── Persistent profile trigger ──
     _render_profile_button(user_id)
