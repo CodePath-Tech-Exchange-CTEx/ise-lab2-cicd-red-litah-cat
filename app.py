@@ -63,8 +63,8 @@ if __name__ == '__main__':
     with open('custom_components/streamlit_global.css') as f:
         st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
 
-    home_tab, activity_tab, log_workout_tab, ai_trainer_tab, community_tab = st.tabs(
-        ["Home", "Activity", "Workout", "AI Trainer", "Community"]
+    home_tab, activity_tab, log_workout_tab, daily_goals_tab, ai_trainer_tab, community_tab = st.tabs(
+        ["Home", "Activity", "Workout", "Daily Goals", "AI Trainer", "Community"]
     )
 
     with home_tab:
@@ -74,8 +74,11 @@ if __name__ == '__main__':
         display_activity_page()
 
     with log_workout_tab:
-        display_log_workout_page()
+        display_daily_goals_page()
 
+    with daily_goals_tab:
+        display_log_workout_page()
+        
     with ai_trainer_tab:
         display_chat_page(userId)
 
