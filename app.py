@@ -64,8 +64,8 @@ def display_app_page():
 if __name__ == '__main__':
     inject_streamlit_global_styles()
 
-    home_tab, activity_tab, log_workout_tab, ai_trainer_tab, community_tab = st.tabs(
-        ["Home", "Activity", "Log Workout", "AI Trainer", "Community"]
+    home_tab, activity_tab, workout_plans_tab, log_workout_tab, ai_trainer_tab, community_tab = st.tabs(
+        ["Home", "Activity", "Workout Plans", "Log Workout", "AI Trainer", "Community"]
     )
 
     with home_tab:
@@ -73,6 +73,9 @@ if __name__ == '__main__':
 
     with activity_tab:
         display_activity_page()
+
+    with workout_plans_tab:
+        display_workout_plan_page()
 
     with log_workout_tab:
         display_log_workout_page()

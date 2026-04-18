@@ -85,7 +85,9 @@ users = {
 
 def get_user_sensor_data(user_id, workout_id):
     """Returns a list of timestamped information for a given workout."""
-    client = bigquery.Client(project=PROJECT_ID)
+    client = _get_bigquery_client()
+    if client is None:
+        return []
 
     query = f"""
         SELECT 
@@ -127,11 +129,32 @@ def get_user_workouts(user_id):
     Fetches all workout records for a specific user from the BigQuery Workouts table.
     """
 
+    client = _get_bigquery_client()
+    if client is None:
+        return [
+            {
+                "workout_id": "w1",
+                "start_timestamp": "2026-04-18 09:00:00",
+                "end_timestamp": "2026-04-18 09:30:00",
+                "start_lat_lng": (37.7749, -122.4194),
+                "end_lat_lng": (37.7758, -122.4188),
+                "distance": 4.2,
+                "steps": 5200,
+                "calories_burned": 250,
+            },
+            {
+                "workout_id": "w2",
+                "start_timestamp": "2026-04-17 18:15:00",
+                "end_timestamp": "2026-04-17 18:45:00",
+                "start_lat_lng": (37.7749, -122.4194),
+                "end_lat_lng": (37.7758, -122.4188),
+                "distance": 3.0,
+                "steps": 4300,
+                "calories_burned": 210,
+            },
+        ]
+
     # Line written by Gemini.
-    client = bigquery.Client(project=PROJECT_ID)
-
-
-    # The query retrieves workout metrics for the specific user from the Workouts table. Line written by Gemini.
     query = f"""
         SELECT 
             WorkoutId, 
@@ -177,11 +200,68 @@ def get_user_workouts(user_id):
     return workouts
 
 
+def get_user_workout_plans(user_id):
+    """Returns the user's saved structured workout plans."""
+    # This is a sample implementation for saved workout plans.
+    # In a full app, plans would come from a data store.
+    return [
+        {
+            "plan_id": "plan_1",
+            "name": "Full Body Strength",
+            "duration": 35,
+            "goal": "Build strength",
+            "workout_count": 5,
+            "exercises": [
+                {"name": "Warm-up jog", "duration": "5 min"},
+                {"name": "Squats", "sets_reps": "3x12", "rest": "60 sec"},
+                {"name": "Push-ups", "sets_reps": "3x10", "rest": "45 sec"},
+                {"name": "Dumbbell rows", "sets_reps": "3x12", "rest": "60 sec"},
+                {"name": "Plank", "duration": "2 min", "notes": "Hold with core engaged."},
+            ],
+        },
+        {
+            "plan_id": "plan_2",
+            "name": "Cardio & Core",
+            "duration": 25,
+            "goal": "Increase endurance",
+            "workout_count": 4,
+            "exercises": [
+                {"name": "Jump rope", "duration": "5 min"},
+                {"name": "High knees", "sets_reps": "3x45 sec", "rest": "30 sec"},
+                {"name": "Mountain climbers", "sets_reps": "3x40 sec", "rest": "30 sec"},
+                {"name": "Bicycle crunches", "sets_reps": "3x20", "rest": "30 sec"},
+            ],
+        },
+        {
+            "plan_id": "plan_3",
+            "name": "Push Day Focus",
+            "duration": 40,
+            "goal": "Upper body strength",
+            "workout_count": 5,
+            "exercises": [
+                {"name": "Dynamic warm-up", "duration": "5 min"},
+                {"name": "Bench press", "sets_reps": "4x8", "rest": "90 sec"},
+                {"name": "Overhead press", "sets_reps": "3x10", "rest": "75 sec"},
+                {"name": "Tricep dips", "sets_reps": "3x12", "rest": "60 sec"},
+                {"name": "Core stretch", "duration": "5 min"},
+            ],
+        },
+    ]
+
+
 def get_user_profile(user_id):
     """Returns information about the given user.
 
     """
-    client = bigquery.Client(project=PROJECT_ID)
+    client = _get_bigquery_client()
+    if client is None:
+        return {
+            'full_name': 'Remi',
+            'username': 'remi_the_rems',
+            'date_of_birth': '1990-01-01',
+            'profile_image': 'https://upload.wikimedia.org/wikipedia/commons/c/c8/Puma_shoes.jpg',
+            'friends': ['user2', 'user3', 'user4'],
+        }
 
     # Line written by Gemini
     query = f"""
@@ -224,7 +304,17 @@ def get_user_profile(user_id):
 
 def get_user_posts(user_id):
     """Returns a list of posts for the given user."""
-    client = bigquery.Client(project=PROJECT_ID)
+    client = _get_bigquery_client()
+    if client is None:
+        return [
+            {
+                "user_id": user_id,
+                "post_id": "p1",
+                "timestamp": "2026-04-18 08:00:00",
+                "content": "Feeling strong after my workout today!",
+                "image": "https://upload.wikimedia.org/wikipedia/commons/c/c8/Puma_shoes.jpg",
+            }
+        ]
 
     query = f"""
         SELECT
@@ -261,7 +351,9 @@ def get_user_posts(user_id):
 
 def get_user_friends(user_id):
     """Returns a user's friends"""
-    client = bigquery.Client(project=PROJECT_ID)
+    client = _get_bigquery_client()
+    if client is None:
+        return [{"user_id": friend} for friend in users.get(user_id, {}).get('friends', [])]
 
     query = f"""
         SELECT UserId2 AS user_id
@@ -312,9 +404,14 @@ def get_genai_advice(user_id):
 
     latest_workout = workouts[0]
 
-    vertexai.init(project=PROJECT_ID, location="us-central1")
-    
-    
+    if not _safe_vertex_ai_init():
+        return {
+            "advice_id": "ADV-LOCAL",
+            "timestamp": datetime.now(),
+            "content": "Nice work! Keep up the momentum and hydrate after your workout.",
+            "image": None,
+        }
+
     model = GenerativeModel("gemini-2.5-flash-lite",
                             system_instruction="You are a helpful and encouraging workout coach.")
     
@@ -404,7 +501,9 @@ def insert_post(user_id, content):
         user_id: The ID of the user creating the post.
         content: The text content of the post.
     """
-    client = bigquery.Client(project=PROJECT_ID)
+    client = _get_bigquery_client()
+    if client is None:
+        return
  
     post_id = str(uuid.uuid4())
     timestamp = datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')
@@ -429,7 +528,9 @@ def insert_post(user_id, content):
 
 def get_chat_history(user_id):
     """Returns chat history for a given user from BigQuery."""
-    client = bigquery.Client(project=PROJECT_ID)
+    client = _get_bigquery_client()
+    if client is None:
+        return []
 
     query = f"""
         SELECT MessageId, UserId, Timestamp, Role, Content
@@ -466,7 +567,9 @@ def get_chat_history(user_id):
 
 def insert_chat_message(user_id, role, content):
     """Inserts a new chat message into the BigQuery ChatHistory table."""
-    client = bigquery.Client(project=PROJECT_ID)
+    client = _get_bigquery_client()
+    if client is None:
+        return
 
     message_id = str(uuid.uuid4())
     timestamp = datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')
@@ -493,7 +596,9 @@ def get_fitness_profile(user_id):
     """Returns the saved fitness profile for a given user from BigQuery.
     Returns None if no profile has been saved yet.
     """
-    client = bigquery.Client(project=PROJECT_ID)
+    client = _get_bigquery_client()
+    if client is None:
+        return None
 
     query = f"""
         SELECT
@@ -539,7 +644,9 @@ def save_fitness_profile(user_id, first_name, last_name, age, sex, height,
     Uses a MERGE statement so repeated saves update the existing row rather
     than inserting duplicates.
     """
-    client = bigquery.Client(project=PROJECT_ID)
+    client = _get_bigquery_client()
+    if client is None:
+        return
     updated_at = datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')
 
     # BigQuery MERGE (upsert) — insert if not exists, update if exists.
