@@ -1,0 +1,375 @@
+/* ===== Design tokens (Streamlit main document) ===== */
+:root {
+  --st-accent: #f97316;
+  --st-bg-elevated: #1c1c1c;
+  --st-border: #383838;
+  --st-text: #e8e8e8;
+  --st-text-muted: #6b7280;
+}
+
+/* ===== CUSTOM NAVIGATION BAR ===== */
+[data-baseweb="tab-list"] {
+  background: transparent !important;
+  border-bottom: none !important;
+  padding: 0 !important;
+  gap: 0 !important;
+  justify-content: space-between !important;
+  width: 100% !important;
+}
+
+[data-baseweb="tab"] {
+  flex: 0 1 auto !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 14px 4px 10px !important;
+  color: #ffffff !important;
+  font-size: 10px !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.5px !important;
+  border: none !important;
+  background: transparent !important;
+  gap: 6px !important;
+  min-height: 74px !important;
+  text-transform: uppercase !important;
+  transition: color 0.2s ease !important;
+}
+
+[data-baseweb="tab"]:first-child {
+  align-items: flex-start !important;
+}
+
+[data-baseweb="tab"]:last-child {
+  align-items: flex-end !important;
+}
+
+[data-baseweb="tab"]:hover {
+  color: #ffffff !important;
+  background: transparent !important;
+}
+
+[aria-selected="true"][data-baseweb="tab"] {
+  color: var(--st-accent) !important;
+  background: transparent !important;
+}
+
+[data-baseweb="tab-highlight"] {
+  display: none !important;
+}
+
+[data-baseweb="tab-border"] {
+  display: none !important;
+}
+
+[data-baseweb="tab"] p {
+  margin: 0 !important;
+  padding: 0 !important;
+  font-size: 10px !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.5px !important;
+  text-transform: uppercase !important;
+}
+
+[data-baseweb="tab"]::before {
+  content: '';
+  display: block;
+  width: 22px;
+  height: 22px;
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  opacity: 0.95;
+  transition: opacity 0.2s ease;
+  flex-shrink: 0;
+}
+
+[aria-selected="true"][data-baseweb="tab"]::before {
+  opacity: 1;
+  filter: none !important;
+}
+
+[data-baseweb="tab"]:nth-child(1)::before {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23f97316' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z'/%3E%3Cpolyline points='9 22 9 12 15 12 15 22'/%3E%3C/svg%3E");
+}
+
+[data-baseweb="tab"]:nth-child(2)::before {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23f97316' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='22 12 18 12 15 21 9 3 6 12 2 12'/%3E%3C/svg%3E");
+}
+
+[data-baseweb="tab"]:nth-child(3)::before {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23f97316' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='10'/%3E%3Cpath d='M12 8v8'/%3E%3Cpath d='M8 12h8'/%3E%3C/svg%3E");
+}
+
+[data-baseweb="tab"]:nth-child(4)::before {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23f97316' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 8V4H8'/%3E%3Crect width='16' height='12' x='4' y='8' rx='2'/%3E%3Cpath d='M2 14h2'/%3E%3Cpath d='M20 14h2'/%3E%3Cpath d='M15 13v2'/%3E%3Cpath d='M9 13v2'/%3E%3C/svg%3E");
+}
+
+[data-baseweb="tab"]:nth-child(5)::before {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23f97316' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2'/%3E%3Ccircle cx='9' cy='7' r='4'/%3E%3Cpath d='M23 21v-2a4 4 0 0 0-3-3.87'/%3E%3Cpath d='M16 3.13a4 4 0 0 1 0 7.75'/%3E%3C/svg%3E");
+}
+
+/* PROFILE PAGE */
+.pf-label {
+  color: var(--st-text);
+  font-size: 13px;
+  font-weight: 500;
+  margin-bottom: 4px;
+  display: block;
+}
+.pf-label .required {
+  color: #f04c4c;
+  margin-left: 2px;
+}
+
+[data-testid="stTextInput"] input,
+[data-testid="stNumberInput"] input {
+  background-color: var(--st-bg-elevated) !important;
+  border: 1px solid var(--st-border) !important;
+  border-radius: 6px !important;
+  color: #ffffff !important;
+  padding: 10px 14px !important;
+  font-size: 14px !important;
+  transition: border-color 0.15s ease !important;
+}
+[data-testid="stTextInput"] input:focus,
+[data-testid="stNumberInput"] input:focus {
+  border-color: #666 !important;
+  box-shadow: none !important;
+}
+[data-testid="stTextInput"] input::placeholder,
+[data-testid="stNumberInput"] input::placeholder {
+  color: #555 !important;
+}
+
+[data-testid="stTextArea"] textarea {
+  background-color: var(--st-bg-elevated) !important;
+  border: 1px solid var(--st-border) !important;
+  border-radius: 6px !important;
+  color: #ffffff !important;
+  font-size: 14px !important;
+  transition: border-color 0.15s ease !important;
+}
+[data-testid="stTextArea"] textarea:focus {
+  border-color: #666 !important;
+  box-shadow: none !important;
+}
+[data-testid="stTextArea"] textarea::placeholder {
+  color: #555 !important;
+}
+
+[data-testid="stSelectbox"] > div > div {
+  background-color: var(--st-bg-elevated) !important;
+  border: 1px solid var(--st-border) !important;
+  border-radius: 6px !important;
+  color: #ffffff !important;
+}
+[data-testid="stSelectbox"] svg {
+  fill: #888 !important;
+}
+
+[data-testid="stTextInput"]  > label,
+[data-testid="stNumberInput"] > label,
+[data-testid="stTextArea"]   > label,
+[data-testid="stSelectbox"]  > label {
+  display: none !important;
+}
+
+[data-testid="stForm"] {
+  border: none !important;
+  padding: 0 !important;
+}
+
+.pf-divider {
+  border: none;
+  border-top: 1px solid #2e2e2e;
+  margin: 24px 0;
+}
+
+.pf-section-title {
+  color: var(--st-text);
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 16px;
+}
+
+/* Goal cards: only style labels inside the radiogroup, not the collapsed field label (global label rules used to force display:flex and drew an empty box). */
+[data-testid="stRadio"] [role="radiogroup"] {
+  display: flex !important;
+  flex-direction: row !important;
+  gap: 12px !important;
+  width: 100% !important;
+}
+
+[data-testid="stRadio"] [role="radiogroup"] > div {
+  flex: 1 !important;
+}
+
+[data-testid="stRadio"] [role="radiogroup"] label {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: flex-start !important;
+  gap: 8px !important;
+  background: var(--st-bg-elevated) !important;
+  border: 1.5px solid var(--st-border) !important;
+  border-radius: 10px !important;
+  padding: 16px !important;
+  cursor: pointer !important;
+  width: 100% !important;
+  transition: border-color 0.15s ease !important;
+}
+[data-testid="stRadio"] [role="radiogroup"] label:hover {
+  border-color: #555 !important;
+}
+
+[data-testid="stRadio"] [role="radiogroup"] label:has(input[type="radio"]:checked) {
+  border-color: #ffffff !important;
+  background: #232323 !important;
+}
+
+/* Hide Base Web radio circle / dot; selection is shown only by the label border */
+[data-testid="stRadio"] [role="radiogroup"] label > div:first-child {
+  display: none !important;
+}
+[data-testid="stRadio"] [role="radiogroup"] label input[type="radio"] {
+  position: absolute !important;
+  opacity: 0 !important;
+  width: 0 !important;
+  height: 0 !important;
+  margin: 0 !important;
+}
+[data-testid="stRadio"] [role="radiogroup"] label:has(input:focus-visible) {
+  outline: 2px solid var(--st-accent) !important;
+  outline-offset: 2px !important;
+}
+
+[data-testid="stRadio"] [role="radiogroup"] label > div:last-child,
+[data-testid="stRadio"] [role="radiogroup"] label > p {
+  order: 1 !important;
+  color: #ffffff !important;
+  font-size: 14px !important;
+  font-weight: 600 !important;
+}
+
+[data-testid="stFormSubmitButton"] button {
+  background-color: transparent !important;
+  color: var(--st-text) !important;
+  border: 1px solid #444 !important;
+  border-radius: 6px !important;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  padding: 10px 24px !important;
+  cursor: pointer !important;
+  box-shadow: none !important;
+  transition:
+    border-color 0.15s ease,
+    background-color 0.15s ease,
+    color 0.15s ease !important;
+}
+[data-testid="stFormSubmitButton"] button:hover {
+  border-color: var(--st-accent) !important;
+  background-color: var(--st-accent) !important;
+  color: #ffffff !important;
+}
+[data-testid="stFormSubmitButton"] button:focus,
+[data-testid="stFormSubmitButton"] button:focus-visible {
+  outline: 2px solid var(--st-accent) !important;
+  outline-offset: 2px !important;
+  box-shadow: none !important;
+}
+
+[data-testid="stButton"] > button {
+  background-color: transparent !important;
+  color: var(--st-text) !important;
+  border: 1px solid #444 !important;
+  border-radius: 6px !important;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  padding: 10px 24px !important;
+  cursor: pointer !important;
+  transition: border-color 0.15s ease !important;
+}
+[data-testid="stButton"] > button:hover {
+  border-color: #888 !important;
+  background-color: var(--st-bg-elevated) !important;
+}
+
+/* AI TRAINER / CHAT — bottom bar: nudge inset from the left */
+div[data-testid="stButton"] > button[kind="secondary"] {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  color: #ffffff !important;
+  padding: 0 !important;
+  min-height: auto !important;
+  font-size: 0.72rem !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.08em !important;
+  text-transform: uppercase !important;
+  transition: color 0.2s ease !important;
+}
+
+div[data-testid="stButton"] > button[kind="secondary"]:hover {
+  background: transparent !important;
+  border: none !important;
+  color: var(--st-accent) !important;
+}
+
+div[data-testid="stButton"] > button[kind="secondary"]:focus,
+div[data-testid="stButton"] > button[kind="secondary"]:focus-visible {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+button[kind="secondary"] {
+  color: var(--st-text-muted) !important;
+}
+
+div[data-testid="stVerticalBlock"]:has(.profile-btn-hook) div[data-testid="stButton"] > button {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 6px !important;
+  padding: 14px 4px 10px !important;
+  min-height: 74px !important;
+  width: 72px !important;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  color: #ffffff !important;
+  font-size: 10px !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.5px !important;
+  text-transform: uppercase !important;
+  transition: color 0.2s ease !important;
+  cursor: pointer !important;
+}
+
+div[data-testid="stVerticalBlock"]:has(.profile-btn-hook) div[data-testid="stButton"] > button::before {
+  content: '';
+  display: block;
+  width: 22px;
+  height: 22px;
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  flex-shrink: 0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23f97316' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2'/%3E%3Ccircle cx='12' cy='7' r='4'/%3E%3C/svg%3E");
+}
+
+div[data-testid="stVerticalBlock"]:has(.profile-btn-hook) div[data-testid="stButton"] > button:hover {
+  color: var(--st-accent) !important;
+  background: transparent !important;
+}
+
+div[data-testid="stVerticalBlock"]:has(.profile-btn-hook) div[data-testid="stButton"] > button:hover::before {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23f97316' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2'/%3E%3Ccircle cx='12' cy='7' r='4'/%3E%3C/svg%3E");
+}
+
+@media (max-width: 768px) {
+  div[data-testid="stVerticalBlock"]:has(.profile-btn-hook) div[data-testid="stButton"] > button {
+    width: 72px !important;
+    font-size: 9px !important;
+  }
+}

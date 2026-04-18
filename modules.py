@@ -7,7 +7,7 @@
 # function other than the example.
 #############################################################################
 
-from internals import create_component
+from internals import create_component, safe_string, load_html_file
 import streamlit as st
 from datetime import datetime
 
@@ -91,7 +91,8 @@ def display_activity_summary(workouts_list):
     }
 
     html_file_name = "activity_summary"
-    create_component(data, html_file_name)
+    # Iframe default height is 150px; this card is taller — size it to fit without scrolling.
+    create_component(data, html_file_name, height=520, scrolling=False)
 
 def display_recent_workouts(workouts_list):
     """
@@ -140,3 +141,58 @@ def display_genai_advice(timestamp, content, image):
     html_file_name = 'display_genai_advice_component'
     create_component(data, html_file_name, height=300, scrolling=True)
     
+
+def display_ai_trainer_hero(user_name):
+    """Displays the hero greeting for the AI Trainer page.
+
+    Renders a centred greeting ("Hello, <name>!!"). The actual functional
+    input is Streamlit's ``st.chat_input``, styled separately in Python/CSS.
+
+    Args:
+        user_name (str): The user's first name (or display name) to show in
+                         the greeting.
+    """
+    data = {'USER_NAME': user_name}
+    create_component(data, "ai_trainer_hero", height=120)
+
+
+def display_chat_history(messages):
+    """
+    Renders the full chat history as a single HTML component to avoid
+    creating one iframe per message. Iterates the messages list in Python,
+    builds one HTML string, and passes it as a single template variable.
+
+    Args:
+        messages (list): List of message dicts with keys 'role', 'content', 'timestamp'.
+                         Role must be 'user' or 'model'.
+    """
+    user_tmpl = load_html_file('custom_components/chat_message_user.html')
+    ai_tmpl = load_html_file('custom_components/chat_message_ai.html')
+
+    assembled_html = ""
+    for msg in messages:
+        timestamp_str = (
+            msg['timestamp'].strftime('%Y-%m-%d %H:%M')
+            if hasattr(msg['timestamp'], 'strftime')
+            else str(msg['timestamp'])
+        )
+        content_safe = safe_string(str(msg['content']))
+        timestamp_safe = safe_string(timestamp_str)
+
+        if msg['role'] == 'user':
+            bubble = user_tmpl.replace('{{CONTENT}}', content_safe).replace('{{TIMESTAMP}}', timestamp_safe)
+        else:
+            bubble = ai_tmpl.replace('{{CONTENT}}', content_safe).replace('{{TIMESTAMP}}', timestamp_safe)
+
+        assembled_html += bubble + "\n"
+
+    base_css = load_html_file("iframe_base.css")
+    shell = load_html_file("chat_feed_wrapper.html")
+    wrapper = (
+        shell.replace("/*__CHAT_FEED_WRAPPER_IFRAME_BASE_CSS__*/", base_css)
+        .replace("{{INNER_HTML}}", assembled_html)
+    )
+
+    import streamlit.components.v1 as components
+    height = max(300, min(len(messages) * 100, 700))
+    components.html(wrapper, height=height, scrolling=True)

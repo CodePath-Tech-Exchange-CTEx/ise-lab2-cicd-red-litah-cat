@@ -23,6 +23,35 @@ load_dotenv()
 PROJECT_ID = os.environ.get("PROJECT_ID")
 COURSE_CODE = os.environ.get("COURSE_CODE")
 
+try:
+    from google.auth.exceptions import DefaultCredentialsError
+except ImportError:
+    DefaultCredentialsError = Exception
+
+
+def _get_bigquery_client():
+    """Return a BigQuery client if credentials are available, otherwise None."""
+    if not PROJECT_ID:
+        return None
+    try:
+        return bigquery.Client(project=PROJECT_ID)
+    except Exception as exc:
+        if isinstance(exc, DefaultCredentialsError) or "DefaultCredentialsError" in type(exc).__name__:
+            return None
+        if "Could not automatically determine credentials" in str(exc):
+            return None
+        raise
+
+
+def _safe_vertex_ai_init():
+    if not PROJECT_ID:
+        return False
+    try:
+        vertexai.init(project=PROJECT_ID, location="us-central1")
+        return True
+    except Exception:
+        return False
+
 users = {
     'user1': {
         'full_name': 'Remi',
@@ -56,7 +85,9 @@ users = {
 
 def get_user_sensor_data(user_id, workout_id):
     """Returns a list of timestamped information for a given workout."""
-    client = bigquery.Client(project=PROJECT_ID)
+    client = _get_bigquery_client()
+    if client is None:
+        return []
 
     query = f"""
         SELECT 
@@ -98,11 +129,32 @@ def get_user_workouts(user_id):
     Fetches all workout records for a specific user from the BigQuery Workouts table.
     """
 
+    client = _get_bigquery_client()
+    if client is None:
+        return [
+            {
+                "workout_id": "w1",
+                "start_timestamp": "2026-04-18 09:00:00",
+                "end_timestamp": "2026-04-18 09:30:00",
+                "start_lat_lng": (37.7749, -122.4194),
+                "end_lat_lng": (37.7758, -122.4188),
+                "distance": 4.2,
+                "steps": 5200,
+                "calories_burned": 250,
+            },
+            {
+                "workout_id": "w2",
+                "start_timestamp": "2026-04-17 18:15:00",
+                "end_timestamp": "2026-04-17 18:45:00",
+                "start_lat_lng": (37.7749, -122.4194),
+                "end_lat_lng": (37.7758, -122.4188),
+                "distance": 3.0,
+                "steps": 4300,
+                "calories_burned": 210,
+            },
+        ]
+
     # Line written by Gemini.
-    client = bigquery.Client(project=PROJECT_ID)
-
-
-    # The query retrieves workout metrics for the specific user from the Workouts table. Line written by Gemini.
     query = f"""
         SELECT 
             WorkoutId, 
@@ -148,11 +200,68 @@ def get_user_workouts(user_id):
     return workouts
 
 
+def get_user_workout_plans(user_id):
+    """Returns the user's saved structured workout plans."""
+    # This is a sample implementation for saved workout plans.
+    # In a full app, plans would come from a data store.
+    return [
+        {
+            "plan_id": "plan_1",
+            "name": "Full Body Strength",
+            "duration": 35,
+            "goal": "Build strength",
+            "workout_count": 5,
+            "exercises": [
+                {"name": "Warm-up jog", "duration": "5 min"},
+                {"name": "Squats", "sets_reps": "3x12", "rest": "60 sec"},
+                {"name": "Push-ups", "sets_reps": "3x10", "rest": "45 sec"},
+                {"name": "Dumbbell rows", "sets_reps": "3x12", "rest": "60 sec"},
+                {"name": "Plank", "duration": "2 min", "notes": "Hold with core engaged."},
+            ],
+        },
+        {
+            "plan_id": "plan_2",
+            "name": "Cardio & Core",
+            "duration": 25,
+            "goal": "Increase endurance",
+            "workout_count": 4,
+            "exercises": [
+                {"name": "Jump rope", "duration": "5 min"},
+                {"name": "High knees", "sets_reps": "3x45 sec", "rest": "30 sec"},
+                {"name": "Mountain climbers", "sets_reps": "3x40 sec", "rest": "30 sec"},
+                {"name": "Bicycle crunches", "sets_reps": "3x20", "rest": "30 sec"},
+            ],
+        },
+        {
+            "plan_id": "plan_3",
+            "name": "Push Day Focus",
+            "duration": 40,
+            "goal": "Upper body strength",
+            "workout_count": 5,
+            "exercises": [
+                {"name": "Dynamic warm-up", "duration": "5 min"},
+                {"name": "Bench press", "sets_reps": "4x8", "rest": "90 sec"},
+                {"name": "Overhead press", "sets_reps": "3x10", "rest": "75 sec"},
+                {"name": "Tricep dips", "sets_reps": "3x12", "rest": "60 sec"},
+                {"name": "Core stretch", "duration": "5 min"},
+            ],
+        },
+    ]
+
+
 def get_user_profile(user_id):
     """Returns information about the given user.
 
     """
-    client = bigquery.Client(project=PROJECT_ID)
+    client = _get_bigquery_client()
+    if client is None:
+        return {
+            'full_name': 'Remi',
+            'username': 'remi_the_rems',
+            'date_of_birth': '1990-01-01',
+            'profile_image': 'https://upload.wikimedia.org/wikipedia/commons/c/c8/Puma_shoes.jpg',
+            'friends': ['user2', 'user3', 'user4'],
+        }
 
     # Line written by Gemini
     query = f"""
@@ -195,7 +304,17 @@ def get_user_profile(user_id):
 
 def get_user_posts(user_id):
     """Returns a list of posts for the given user."""
-    client = bigquery.Client(project=PROJECT_ID)
+    client = _get_bigquery_client()
+    if client is None:
+        return [
+            {
+                "user_id": user_id,
+                "post_id": "p1",
+                "timestamp": "2026-04-18 08:00:00",
+                "content": "Feeling strong after my workout today!",
+                "image": "https://upload.wikimedia.org/wikipedia/commons/c/c8/Puma_shoes.jpg",
+            }
+        ]
 
     query = f"""
         SELECT
@@ -232,7 +351,9 @@ def get_user_posts(user_id):
 
 def get_user_friends(user_id):
     """Returns a user's friends"""
-    client = bigquery.Client(project=PROJECT_ID)
+    client = _get_bigquery_client()
+    if client is None:
+        return [{"user_id": friend} for friend in users.get(user_id, {}).get('friends', [])]
 
     query = f"""
         SELECT UserId2 AS user_id
@@ -283,9 +404,14 @@ def get_genai_advice(user_id):
 
     latest_workout = workouts[0]
 
-    vertexai.init(project=PROJECT_ID, location="us-central1")
-    
-    
+    if not _safe_vertex_ai_init():
+        return {
+            "advice_id": "ADV-LOCAL",
+            "timestamp": datetime.now(),
+            "content": "Nice work! Keep up the momentum and hydrate after your workout.",
+            "image": None,
+        }
+
     model = GenerativeModel("gemini-2.5-flash-lite",
                             system_instruction="You are a helpful and encouraging workout coach.")
     
@@ -375,7 +501,9 @@ def insert_post(user_id, content):
         user_id: The ID of the user creating the post.
         content: The text content of the post.
     """
-    client = bigquery.Client(project=PROJECT_ID)
+    client = _get_bigquery_client()
+    if client is None:
+        return
  
     post_id = str(uuid.uuid4())
     timestamp = datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')
@@ -397,3 +525,235 @@ def insert_post(user_id, content):
  
     query_job = client.query(query, job_config=job_config)
     query_job.result()
+
+def get_chat_history(user_id):
+    """Returns chat history for a given user from BigQuery."""
+    client = _get_bigquery_client()
+    if client is None:
+        return []
+
+    query = f"""
+        SELECT MessageId, UserId, Timestamp, Role, Content
+        FROM `{PROJECT_ID}.{COURSE_CODE}.ChatHistory`
+        WHERE UserId = @user_id
+        ORDER BY Timestamp ASC
+    """
+
+    job_config = bigquery.QueryJobConfig(
+        query_parameters=[
+            bigquery.ScalarQueryParameter("user_id", "STRING", user_id)
+        ]
+    )
+
+    query_job = client.query(query, job_config=job_config)
+    try:
+        results = query_job.result()
+    except Exception as e:
+        # Table might not exist yet; return empty list gracefully
+        print(f"Error fetching chat history: {e}")
+        return []
+
+    history = []
+    for row in results:
+        history.append({
+            "message_id": row.MessageId,
+            "user_id": row.UserId,
+            "timestamp": row.Timestamp,
+            "role": row.Role,
+            "content": row.Content
+        })
+
+    return history
+
+def insert_chat_message(user_id, role, content):
+    """Inserts a new chat message into the BigQuery ChatHistory table."""
+    client = _get_bigquery_client()
+    if client is None:
+        return
+
+    message_id = str(uuid.uuid4())
+    timestamp = datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')
+
+    query = f"""
+        INSERT INTO `{PROJECT_ID}.{COURSE_CODE}.ChatHistory` (MessageId, UserId, Timestamp, Role, Content)
+        VALUES (@message_id, @user_id, @timestamp, @role, @content)
+    """
+
+    job_config = bigquery.QueryJobConfig(
+        query_parameters=[
+            bigquery.ScalarQueryParameter("message_id", "STRING", message_id),
+            bigquery.ScalarQueryParameter("user_id", "STRING", user_id),
+            bigquery.ScalarQueryParameter("timestamp", "STRING", timestamp),
+            bigquery.ScalarQueryParameter("role", "STRING", role),
+            bigquery.ScalarQueryParameter("content", "STRING", content),
+        ]
+    )
+
+    query_job = client.query(query, job_config=job_config)
+    query_job.result()
+
+def get_fitness_profile(user_id):
+    """Returns the saved fitness profile for a given user from BigQuery.
+    Returns None if no profile has been saved yet.
+    """
+    client = _get_bigquery_client()
+    if client is None:
+        return None
+
+    query = f"""
+        SELECT
+            FirstName, LastName, Age, Sex, Height, Weight,
+            FitnessLevel, InjuriesLimitations, PrimaryGoal, UpdatedAt
+        FROM `{PROJECT_ID}.{COURSE_CODE}.UserFitnessProfiles`
+        WHERE UserId = @user_id
+        LIMIT 1
+    """
+
+    job_config = bigquery.QueryJobConfig(
+        query_parameters=[
+            bigquery.ScalarQueryParameter("user_id", "STRING", user_id)
+        ]
+    )
+
+    try:
+        query_job = client.query(query, job_config=job_config)
+        results = query_job.result()
+        for row in results:
+            return {
+                "first_name": row.FirstName,
+                "last_name": row.LastName,
+                "age": row.Age,
+                "sex": row.Sex,
+                "height": row.Height,
+                "weight": row.Weight,
+                "fitness_level": row.FitnessLevel,
+                "injuries_limitations": row.InjuriesLimitations,
+                "primary_goal": row.PrimaryGoal,
+                "updated_at": row.UpdatedAt,
+            }
+    except Exception as e:
+        print(f"Error fetching fitness profile: {e}")
+
+    return None
+
+
+def save_fitness_profile(user_id, first_name, last_name, age, sex, height,
+                         weight, fitness_level, injuries_limitations, primary_goal):
+    """Saves (upserts) a user's fitness profile into BigQuery.
+
+    Uses a MERGE statement so repeated saves update the existing row rather
+    than inserting duplicates.
+    """
+    client = _get_bigquery_client()
+    if client is None:
+        return
+    updated_at = datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')
+
+    # BigQuery MERGE (upsert) — insert if not exists, update if exists.
+    query = f"""
+        MERGE `{PROJECT_ID}.{COURSE_CODE}.UserFitnessProfiles` AS target
+        USING (SELECT @user_id AS UserId) AS source
+        ON target.UserId = source.UserId
+        WHEN MATCHED THEN
+            UPDATE SET
+                FirstName = @first_name,
+                LastName = @last_name,
+                Age = @age,
+                Sex = @sex,
+                Height = @height,
+                Weight = @weight,
+                FitnessLevel = @fitness_level,
+                InjuriesLimitations = @injuries_limitations,
+                PrimaryGoal = @primary_goal,
+                UpdatedAt = @updated_at
+        WHEN NOT MATCHED THEN
+            INSERT (UserId, FirstName, LastName, Age, Sex, Height, Weight,
+                    FitnessLevel, InjuriesLimitations, PrimaryGoal, UpdatedAt)
+            VALUES (@user_id, @first_name, @last_name, @age, @sex, @height,
+                    @weight, @fitness_level, @injuries_limitations, @primary_goal, @updated_at)
+    """
+
+    job_config = bigquery.QueryJobConfig(
+        query_parameters=[
+            bigquery.ScalarQueryParameter("user_id", "STRING", user_id),
+            bigquery.ScalarQueryParameter("first_name", "STRING", first_name),
+            bigquery.ScalarQueryParameter("last_name", "STRING", last_name),
+            bigquery.ScalarQueryParameter("age", "INT64", int(age) if age else 0),
+            bigquery.ScalarQueryParameter("sex", "STRING", sex),
+            bigquery.ScalarQueryParameter("height", "STRING", height),
+            bigquery.ScalarQueryParameter("weight", "STRING", weight),
+            bigquery.ScalarQueryParameter("fitness_level", "STRING", fitness_level),
+            bigquery.ScalarQueryParameter("injuries_limitations", "STRING", injuries_limitations),
+            bigquery.ScalarQueryParameter("primary_goal", "STRING", primary_goal),
+            bigquery.ScalarQueryParameter("updated_at", "STRING", updated_at),
+        ]
+    )
+
+    query_job = client.query(query, job_config=job_config)
+    query_job.result()
+
+
+def chat_with_ai(user_id, user_message):
+    """
+    Sends a message to Vertex AI with full conversation context fetched from
+    BigQuery on every call. Uses generate_content() with a reconstructed
+    contents list so no stateful client object is needed between server restarts.
+    """
+    from vertexai.generative_models import Content, Part
+
+    # Store the user's message first so it is included in history
+    insert_chat_message(user_id, 'user', user_message)
+
+    # Rebuild full conversation history from BigQuery on every call
+    history = get_chat_history(user_id)
+
+    # Reconstruct the contents list — Vertex AI only accepts 'user' or 'model'
+    contents = []
+    for msg in history:
+        vertex_role = 'user' if msg['role'] == 'user' else 'model'
+        contents.append(Content(role=vertex_role, parts=[Part.from_text(msg['content'])]))
+
+    # Include fitness profile as context in the system instruction if available.
+    profile = get_fitness_profile(user_id)
+    if profile:
+        profile_context = f"""
+    User's Fitness Profile:
+    - Name: {profile['first_name']} {profile['last_name']}
+    - Age: {profile['age']}
+    - Sex: {profile['sex']}
+    - Height: {profile['height']}
+    - Weight: {profile['weight']}
+    - Fitness Level: {profile['fitness_level']}
+    - Primary Goal: {profile['primary_goal']}
+    - Injuries / Limitations: {profile['injuries_limitations'] or 'None'}
+
+    Always personalise your advice using this profile.
+"""
+    else:
+        profile_context = "\n    No fitness profile saved yet. Encourage the user to complete their profile.\n"
+
+    vertexai.init(project=PROJECT_ID, location="us-central1")
+    model = GenerativeModel("gemini-2.5-flash-lite",
+    system_instruction=f"""You are Arnold, an expert AI personal trainer and fitness coach. You have deep knowledge of strength training, cardio, nutrition, injury prevention, recovery, and workout programming.
+{profile_context}
+    You ONLY answer questions related to:
+    - Exercise and workout programming
+    - Fitness goals (weight loss, muscle building, flexibility, endurance)
+    - Nutrition as it relates to fitness and performance
+    - Recovery, sleep, and injury prevention
+    - The user's personal training context provided above
+
+    If a user asks about ANYTHING outside of fitness and training — coding, math, general knowledge, current events, or anything unrelated — you must politely decline and redirect. For example: "That's outside my expertise! I'm here strictly for your fitness journey. Ask me about your workouts, nutrition, or training plan instead."
+
+    Tone: Direct, motivating, and knowledgeable. Like a real personal trainer who genuinely cares about results. Be concise — 2-4 sentences unless the user explicitly asks for detail or a full plan.
+
+    Never break character. Never answer non-fitness questions even if the user insists."""
+    )
+
+    response = model.generate_content(contents=contents)
+    ai_text = response.text
+
+    # Persist the model's response using the correct role string
+    insert_chat_message(user_id, 'model', ai_text)
+
+    return ai_text

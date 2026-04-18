@@ -1,0 +1,404 @@
+:root {
+  --cc-bg-app: #0e1117;
+  --cc-bg-card: #161b22;
+  --cc-bg-elevated: #1c1f26;
+  --cc-border: #30363d;
+  --cc-text: #e6edf3;
+  --cc-text-muted: #8b949e;
+  --cc-accent: #f97316;
+  --cc-accent-secondary: #b4f000;
+  --cc-accent-soft: rgba(249, 115, 22, 0.2);
+  --cc-success: #3fb950;
+  --cc-stat-blue: #58a6ff;
+  --cc-stat-coral: #ff7b72;
+  --cc-chat-user-bg: #1e1e2e;
+  --cc-font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  margin: 0;
+  font-family: var(--cc-font);
+  background: var(--cc-bg-app);
+  color: var(--cc-text);
+}
+
+.chat-feed {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.turn-divider {
+  height: 1px;
+  background: rgba(255,255,255,0.04);
+  margin: 4px 0;
+}
+
+.chat-msg-user {
+  display: flex;
+  justify-content: flex-end;
+  width: 100%;
+  padding: 6px 0;
+}
+.chat-msg-user .bubble {
+  max-width: 72%;
+  background-color: var(--cc-chat-user-bg);
+  color: #e0e0e0;
+  padding: 10px 14px;
+  border-radius: 18px 18px 4px 18px;
+  font-size: 0.92em;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+.chat-msg-user .bubble .ts {
+  font-size: 0.68em;
+  color: #6b7280;
+  text-align: right;
+  margin-top: 4px;
+}
+
+.chat-msg-ai {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  padding: 10px 0 6px 0;
+}
+.chat-msg-ai .label {
+  font-size: 0.72em;
+  font-weight: 600;
+  color: var(--cc-text-muted);
+  letter-spacing: 0.04em;
+  margin-bottom: 6px;
+  text-transform: uppercase;
+}
+.chat-msg-ai .bubble {
+  color: #d1d5db;
+  font-size: 0.92em;
+  line-height: 1.65;
+  white-space: pre-wrap;
+  word-break: break-word;
+  max-width: 90%;
+}
+.chat-msg-ai .ts {
+  font-size: 0.68em;
+  color: #4b5563;
+  margin-top: 6px;
+}
+
+.post-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 8px 0;
+}
+.post-card {
+  border: 1px solid var(--cc-border);
+  border-radius: 16px;
+  padding: 16px;
+  background: var(--cc-bg-card);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  width: min(100%, 420px);
+}
+.post-user {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-bottom: 12px;
+}
+.post-user img {
+  width: 48px;
+  height: 48px;
+  object-fit: cover;
+  border-radius: 999px;
+  border: 2px solid var(--cc-accent-soft);
+}
+.post-user .name {
+  color: var(--cc-text);
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+.post-body {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+}
+.post-body img.post-img {
+  width: 100%;
+  max-width: 280px;
+  height: auto;
+  max-height: 280px;
+  object-fit: cover;
+  border-radius: 12px;
+  border: 1px solid var(--cc-border);
+}
+.post-body img.post-img[src=""] {
+  display: none;
+}
+.post-body .text {
+  color: var(--cc-text);
+  font-size: 0.92rem;
+  line-height: 1.5;
+}
+.post-card .timestamp {
+  color: var(--cc-text-muted);
+  font-size: 0.78rem;
+  margin-top: 8px;
+}
+
+.wc-root {
+  max-width: 420px;
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--cc-bg-card);
+  border: 1px solid var(--cc-border);
+  box-shadow: none;
+}
+.wc-header {
+  background: var(--cc-bg-elevated);
+  color: var(--cc-text);
+  padding: 18px 20px;
+  border-bottom: 1px solid var(--cc-border);
+}
+.wc-header h2 {
+  margin: 0;
+  font-weight: 600;
+  font-size: 1.1rem;
+}
+.wc-header .subtitle {
+  margin: 6px 0 0 0;
+  font-size: 0.9em;
+  color: var(--cc-text-muted);
+}
+.wc-body {
+  padding: 20px;
+}
+.wc-metrics {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  text-align: center;
+  gap: 10px;
+  margin-bottom: 18px;
+}
+.wc-metric {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+.wc-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--cc-accent);
+  line-height: 0;
+}
+.wc-icon svg {
+  width: 20px;
+  height: 20px;
+}
+.wc-metrics .val {
+  font-size: 1.35em;
+  font-weight: 600;
+  color: var(--cc-accent);
+}
+.wc-metrics .lbl {
+  font-size: 0.75em;
+  color: var(--cc-text-muted);
+}
+.wc-rule {
+  height: 1px;
+  background: var(--cc-border);
+  margin-bottom: 14px;
+}
+.wc-loc {
+  font-size: 0.85em;
+  color: var(--cc-text-muted);
+  line-height: 1.5;
+}
+
+.advice-card {
+  background-color: var(--cc-bg-elevated);
+  padding: 24px;
+  border-radius: 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 24px;
+  border: 1px solid var(--cc-border);
+  max-width: 720px;
+}
+.advice-text {
+  flex: 2;
+  font-size: 1.05rem;
+  color: var(--cc-text);
+}
+.advice-text h3 {
+  color: var(--cc-accent);
+  font-size: 0.95rem;
+  margin-bottom: 10px;
+  font-weight: 600;
+}
+.advice-text p {
+  line-height: 1.55;
+}
+.advice-text .timestamp {
+  font-size: 0.8rem;
+  color: var(--cc-text-muted);
+  margin-top: 16px;
+}
+.advice-image {
+  flex: 1;
+  min-width: 120px;
+}
+.advice-image img {
+  width: 100%;
+  border-radius: 10px;
+  border: 1px solid var(--cc-border);
+}
+
+.hero-root {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 28px 20px 16px;
+  text-align: center;
+  background: transparent;
+}
+.hero-greeting {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #ffffff;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+}
+.hero-greeting .name {
+  color: var(--cc-accent);
+}
+
+.activity-doc body {
+  background: var(--cc-bg-app);
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  min-height: 100vh;
+  padding: 12px 8px;
+}
+.activity-doc .card {
+  width: min(900px, 100%);
+  background: var(--cc-bg-card);
+  border-radius: 8px;
+  padding: 24px;
+  color: var(--cc-text);
+  box-shadow: none;
+  border: 1px solid var(--cc-border);
+}
+.activity-doc .header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.activity-doc .header-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.activity-doc .icon-box {
+  width: 56px;
+  height: 56px;
+  background: var(--cc-bg-elevated);
+  border: 1px solid var(--cc-border);
+  border-radius: 6px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: var(--cc-accent);
+}
+.activity-doc .icon-box svg {
+  flex-shrink: 0;
+}
+.activity-doc .header-text h1 {
+  font-size: 1.25rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+}
+.activity-doc .badge {
+  padding: 8px 16px;
+  border-radius: 6px;
+  border: 1px solid var(--cc-accent);
+  color: var(--cc-accent);
+  font-weight: 600;
+  font-size: 0.75rem;
+}
+.activity-doc .stats {
+  margin-top: 28px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  text-align: center;
+  border-top: 1px solid var(--cc-border);
+  border-bottom: 1px solid var(--cc-border);
+}
+.activity-doc .stat {
+  padding: 28px 8px;
+}
+.activity-doc .stat:not(:last-child) {
+  border-right: 1px solid var(--cc-border);
+}
+.activity-doc .stat h2 {
+  font-size: clamp(1.5rem, 5vw, 2.5rem);
+  margin-bottom: 8px;
+  color: var(--cc-accent);
+}
+.activity-doc .stat p {
+  color: var(--cc-text-muted);
+  letter-spacing: 0.12em;
+  font-size: 0.7rem;
+}
+.activity-doc .goal-section { margin-top: 24px; }
+.activity-doc .goal-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  color: var(--cc-text-muted);
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  font-size: 0.8rem;
+}
+.activity-doc .goal-count {
+  color: var(--cc-accent);
+}
+.activity-doc .progress-bar {
+  height: 10px;
+  background: var(--cc-bg-elevated);
+  border-radius: 4px;
+  overflow: hidden;
+  border: 1px solid var(--cc-border);
+}
+.activity-doc .progress {
+  height: 100%;
+  background: var(--cc-accent);
+  border-radius: 3px;
+  transition: width 0.8s ease;
+}
+.activity-doc .footer {
+  margin-top: 20px;
+  color: var(--cc-text-muted);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.75rem;
+}
+.activity-doc .footer-dot {
+  width: 8px;
+  height: 8px;
+  background: var(--cc-accent);
+  border-radius: 50%;
+}
