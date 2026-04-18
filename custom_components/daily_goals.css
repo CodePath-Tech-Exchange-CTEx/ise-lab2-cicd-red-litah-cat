@@ -43,6 +43,28 @@ h1, h2, h3, p, label, span, div {
     text-align: center !important;
 }
 
+/* centered wrapper for "Add new goal" label + "+" button */
+div.st-key-add_goal_cta div[data-testid="stVerticalBlock"] {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+}
+
+div.st-key-add_goal_cta .add-goal-label {
+    width: 100% !important;
+    text-align: center !important;
+}
+
+/* keep the "+" trigger visually centered under its label */
+div.st-key-open_add_goal_modal div[data-testid="stButton"] {
+    display: flex !important;
+    justify-content: center !important;
+}
+
+div.st-key-open_add_goal_modal div[data-testid="stButton"] > button {
+    margin: 0 auto !important;
+}
+
 .stImage img {
     border-radius: 50% !important;
     object-fit: cover !important;

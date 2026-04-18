@@ -5,12 +5,6 @@ from data_fetcher import get_daily_goals, get_user_profile, update_goal_status, 
 
 user_id = "user1"
 
-
-def initialize_daily_goals_state():
-    if "show_add_goal_modal" not in st.session_state:
-        st.session_state.show_add_goal_modal = False
-
-
 def load_workout_css():
     with open("custom_components/daily_goals.css") as f:
         st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
@@ -58,7 +52,6 @@ def display_add_goal_modal():
 
     with col1:
         if st.button("Cancel", key="cancel_add_goal", use_container_width=True):
-            st.session_state.show_add_goal_modal = False
             st.rerun()
 
     with col2:
@@ -85,12 +78,10 @@ def display_add_goal_modal():
                 return
 
             save_new_goal(user_id, clean_name, duration)
-            st.session_state.show_add_goal_modal = False
             st.rerun()
 
 
 def display_daily_goals_page():
-    initialize_daily_goals_state()
     load_workout_css()
 
     st.markdown('<div class="daily-goals-page">', unsafe_allow_html=True)
@@ -128,16 +119,10 @@ def display_daily_goals_page():
                     update_goal_status(goal["goal_id"], new_status)
                     st.rerun()
 
-    st.markdown('<div class="add-goal-label">Add new goal</div>', unsafe_allow_html=True)
-    left, center, right = st.columns([3.6, 1, 3])
-
-    with center:
-        st.markdown('<div class="add-goal-button-wrap">', unsafe_allow_html=True)
+    add_goal_cta = st.container(key="add_goal_cta")
+    with add_goal_cta:
+        st.markdown('<div class="add-goal-label">Add new goal</div>', unsafe_allow_html=True)
         if st.button("✚", key="open_add_goal_modal"):
-            st.session_state.show_add_goal_modal = True
-        st.markdown('</div>', unsafe_allow_html=True)
+            display_add_goal_modal()
 
     st.markdown('</div>', unsafe_allow_html=True)
-
-    if st.session_state.show_add_goal_modal:
-        display_add_goal_modal()
