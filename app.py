@@ -12,6 +12,7 @@ from activity_page import display_activity_page
 from community_page import display_community_page
 from chat_page import display_chat_page
 from log_workout_page import display_log_workout_page
+from workout_plan_page import display_workout_plan_page
 from internals import inject_streamlit_global_styles
 import datetime
  

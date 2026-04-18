@@ -23,6 +23,35 @@ load_dotenv()
 PROJECT_ID = os.environ.get("PROJECT_ID")
 COURSE_CODE = os.environ.get("COURSE_CODE")
 
+try:
+    from google.auth.exceptions import DefaultCredentialsError
+except ImportError:
+    DefaultCredentialsError = Exception
+
+
+def _get_bigquery_client():
+    """Return a BigQuery client if credentials are available, otherwise None."""
+    if not PROJECT_ID:
+        return None
+    try:
+        return bigquery.Client(project=PROJECT_ID)
+    except Exception as exc:
+        if isinstance(exc, DefaultCredentialsError) or "DefaultCredentialsError" in type(exc).__name__:
+            return None
+        if "Could not automatically determine credentials" in str(exc):
+            return None
+        raise
+
+
+def _safe_vertex_ai_init():
+    if not PROJECT_ID:
+        return False
+    try:
+        vertexai.init(project=PROJECT_ID, location="us-central1")
+        return True
+    except Exception:
+        return False
+
 users = {
     'user1': {
         'full_name': 'Remi',
