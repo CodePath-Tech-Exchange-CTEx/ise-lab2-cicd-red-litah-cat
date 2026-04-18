@@ -332,7 +332,7 @@ button[kind="secondary"] {
   color: var(--st-text-muted) !important;
 }
 
-/*
+
 div[data-testid="stVerticalBlock"]:has(.profile-btn-hook) div[data-testid="stButton"] > button {
   display: flex !important;
   flex-direction: column !important;
@@ -379,4 +379,4 @@ div[data-testid="stVerticalBlock"]:has(.profile-btn-hook) div[data-testid="stBut
     width: 72px !important;
     font-size: 9px !important;
   }
-} */
+}

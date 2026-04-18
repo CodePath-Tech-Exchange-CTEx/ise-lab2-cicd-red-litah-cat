@@ -660,7 +660,7 @@ def chat_with_ai(user_id, user_message):
 
     return ai_text
 
-PROJECT_ID = "toyosi-ajiboye-fisk"
+# PROJECT_ID = "toyosi-ajiboye-fisk"
 
 def get_daily_goals(user_id):
     """Displays daily workout goals."""

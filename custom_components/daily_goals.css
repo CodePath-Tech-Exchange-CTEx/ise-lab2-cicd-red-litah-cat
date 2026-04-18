@@ -4,13 +4,13 @@ html, body, [class*="css"] {
     font-family: 'Outfit', sans-serif !important;
 }
 
-#MainMenu, footer, header {
+/* #MainMenu, footer, header {
     visibility: hidden;
-}
+} */
 
-.stApp {
+/* .stApp {
     background: black !important;
-}
+} */
 
 h1, h2, h3, p, label, span, div {
     font-family: 'Outfit', sans-serif !important;
@@ -72,7 +72,7 @@ div[data-testid="stDialog"] > div {
     background: none !important;
     border: 1px solid #ff8500 !important;
     border-radius: 18px !important;
-    color: black !important;
+    /* color: black !important; */
 }
 
 /* hide built-in dialog header/title area */
@@ -82,7 +82,7 @@ div[data-testid="stDialog"] [data-testid="stDialogHeader"] {
 
 /* custom centered title */
 div[data-testid="stDialog"] .custom-modal-title {
-    color: black !important;
+    /* color: black !important; */
     font-family: 'Outfit', sans-serif !important;
     font-size: 1.5rem !important;
     font-weight: 700 !important;
@@ -94,7 +94,7 @@ div[data-testid="stDialog"] .custom-modal-title {
 
 /* custom labels inside modal */
 div[data-testid="stDialog"] .modal-field-label {
-    color: black !important;
+    /* color: black !important; */
     font-size: 1rem !important;
     font-weight: 700 !important;
     margin-top: 8px !important;
@@ -103,11 +103,11 @@ div[data-testid="stDialog"] .modal-field-label {
 }
 
 /* input wrapper */
-div[data-testid="stDialog"] div[data-baseweb="input"] {
+/* div[data-testid="stDialog"] div[data-baseweb="input"] {
     background: white !important;
     border: 1px solid #cfcfcf !important;
     border-radius: 12px !important;
-}
+} */
 
 /* actual text input */
 div[data-testid="stDialog"] input {
@@ -160,5 +160,3 @@ div[data-testid="stDialog"] div[data-baseweb="notification"] {
     border-radius: 12px !important;
     font-family: 'Outfit', sans-serif !important;
 }
-
-
