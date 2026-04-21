@@ -393,7 +393,7 @@ class TestDisplayRecentWorkouts(unittest.TestCase):
         }
 
         # Validate component metadata and content mapping
-        self.assertEqual(card["component_name"], "workout_card")
+        self.assertEqual(card["component_name"], "workout_summary_card")
         self.assertEqual(card["height"], 270) 
         self.assertEqual(card["width"], 500)
         self.assertEqual(card["data"], expected_data)

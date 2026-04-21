@@ -12,7 +12,7 @@ import json
 import requests
 import vertexai
 from vertexai.generative_models import GenerativeModel, GenerationConfig
-from datetime import datetime, date
+from datetime import datetime, date, timedelta
 from google.cloud import bigquery
 
 
@@ -739,4 +739,103 @@ def update_goal_status(goal_id: str, completed: bool):
             bigquery.ScalarQueryParameter("completed", "BOOL", completed),
         ]
     )
+    client.query(query, job_config=job_config).result()
+
+
+def get_logged_workouts(user_id):
+    """Fetches all manually logged workouts for a user from the Workouts table.
+
+    Manually logged workouts are identified by having a non-null WorkoutType.
+    Returns a list of dicts ordered by date descending.
+    """
+    client = bigquery.Client(project=PROJECT_ID)
+
+    query = f"""
+        SELECT
+            WorkoutId       AS workout_id,
+            UserId          AS user_id,
+            WorkoutType     AS workout_type,
+            DurationMinutes AS duration,
+            Intensity       AS intensity,
+            CaloriesBurned  AS calories_burned,
+            DATE(StartTimestamp) AS workout_date,
+            Notes           AS notes
+        FROM `{PROJECT_ID}.{COURSE_CODE}.Workouts`
+        WHERE UserId = @user_id
+          AND WorkoutType IS NOT NULL
+        ORDER BY StartTimestamp DESC
+    """
+
+    job_config = bigquery.QueryJobConfig(
+        query_parameters=[
+            bigquery.ScalarQueryParameter("user_id", "STRING", user_id)
+        ]
+    )
+
+    query_job = client.query(query, job_config=job_config)
+    results = query_job.result()
+
+    logged_workouts = []
+    for row in results:
+        logged_workouts.append({
+            "workout_id": row.workout_id,
+            "user_id": row.user_id,
+            "workout_type": row.workout_type,
+            "duration": row.duration,
+            "intensity": row.intensity,
+            "calories_burned": row.calories_burned,
+            "workout_date": row.workout_date,
+            "notes": row.notes,
+        })
+
+    return logged_workouts
+
+
+def save_logged_workout(user_id, workout_type, duration, intensity,
+                        calories_burned, workout_date, notes):
+    """Inserts a manually logged workout into the Workouts table.
+
+    GPS, distance, and step columns are left NULL for manually logged entries.
+    StartTimestamp and EndTimestamp are derived from workout_date and duration
+    so the activity summary can still calculate totals correctly.
+
+    Args:
+        user_id (str): The ID of the user logging the workout.
+        workout_type (str): Type of workout (e.g. 'Running').
+        duration (int): Duration in minutes.
+        intensity (str): Intensity level (e.g. 'Moderate').
+        calories_burned (int): Estimated calories burned (0 if not provided).
+        workout_date (date): The date the workout took place.
+        notes (str): Optional free-text notes.
+    """
+    client = bigquery.Client(project=PROJECT_ID)
+
+    start_dt = datetime.combine(workout_date, datetime.min.time())
+    end_dt = start_dt + timedelta(minutes=duration)
+    start_ts = start_dt.strftime('%Y-%m-%d %H:%M:%S')
+    end_ts = end_dt.strftime('%Y-%m-%d %H:%M:%S')
+
+    query = f"""
+        INSERT INTO `{PROJECT_ID}.{COURSE_CODE}.Workouts`
+            (WorkoutId, UserId, StartTimestamp, EndTimestamp,
+             WorkoutType, DurationMinutes, Intensity, CaloriesBurned, Notes)
+        VALUES
+            (@workout_id, @user_id, @start_ts, @end_ts,
+             @workout_type, @duration, @intensity, @calories_burned, @notes)
+    """
+
+    job_config = bigquery.QueryJobConfig(
+        query_parameters=[
+            bigquery.ScalarQueryParameter("workout_id", "STRING", str(uuid.uuid4())),
+            bigquery.ScalarQueryParameter("user_id", "STRING", user_id),
+            bigquery.ScalarQueryParameter("start_ts", "DATETIME", start_ts),
+            bigquery.ScalarQueryParameter("end_ts", "DATETIME", end_ts),
+            bigquery.ScalarQueryParameter("workout_type", "STRING", workout_type),
+            bigquery.ScalarQueryParameter("duration", "INT64", duration),
+            bigquery.ScalarQueryParameter("intensity", "STRING", intensity),
+            bigquery.ScalarQueryParameter("calories_burned", "INT64", int(calories_burned)),
+            bigquery.ScalarQueryParameter("notes", "STRING", notes or ""),
+        ]
+    )
+
     client.query(query, job_config=job_config).result()

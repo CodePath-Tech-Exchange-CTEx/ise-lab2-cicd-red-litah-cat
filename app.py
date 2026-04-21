@@ -12,7 +12,7 @@ from activity_page import display_activity_page
 from community_page import display_community_page
 from daily_goals_page import display_daily_goals_page
 from chat_page import display_chat_page
-from log_workout_page import display_log_workout_page
+from workout_plan_page import display_workout_plan_page
 import datetime
  
 userId = 'user1'
@@ -64,8 +64,8 @@ if __name__ == '__main__':
     with open('custom_components/streamlit_global.css') as f:
         st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
 
-    home_tab, activity_tab, log_workout_tab, daily_goals_tab, ai_trainer_tab, community_tab = st.tabs(
-        ["Home", "Activity", "Workout", "Daily Goals", "AI Trainer", "Community"]
+    home_tab, activity_tab, workout_plan_tab, daily_goals_tab, ai_trainer_tab, community_tab = st.tabs(
+        ["Home", "Activity", "Workout Plan", "Daily Goals", "AI Trainer", "Community"]
     )
 
     with home_tab:
@@ -74,8 +74,8 @@ if __name__ == '__main__':
     with activity_tab:
         display_activity_page()
 
-    with log_workout_tab:
-        display_log_workout_page()
+    with workout_plan_tab:
+        display_workout_plan_page()
 
     with daily_goals_tab:
         display_daily_goals_page()

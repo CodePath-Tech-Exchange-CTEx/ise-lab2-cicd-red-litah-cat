@@ -118,9 +118,7 @@ def display_recent_workouts(workouts_list):
             'END_COORDS': f"{workout['end_lat_lng'][0]}, {workout['end_lat_lng'][1]}"
         }
         
-        # This renders 'custom_components/workout_card.html'.
-        html_file_name = "workout_card"
-        create_component(data, "workout_card", 270, 500)
+        create_component(data, "workout_summary_card", 270, 500)
 
 def display_genai_advice(timestamp, content, image):
     """Write a good docstring here.
@@ -193,7 +191,7 @@ def display_chat_history(messages):
     wrapper = load_html_file('custom_components/chat_feed_wrapper.html')
     wrapper = wrapper.replace('{{INNER_HTML}}', assembled_html)
 
-    height = max(400, min(len(messages) * 150, 650))
+    height = max(300, min(len(messages) * 110, 500))
     components.html(wrapper, height=height, scrolling=True)
 
 def display_goals(goal_name, duration, status):
@@ -207,3 +205,21 @@ def display_goals(goal_name, duration, status):
     }
 
     create_component(data, "daily_goals", height=120, scrolling=False)
+
+
+def display_workout_plan_card(workout_type, duration, intensity, workout_date):
+    """Displays a single logged workout as a white rounded card.
+
+    Args:
+        workout_type (str): The type of workout (e.g. 'Running').
+        duration (int): Duration of the workout in minutes.
+        intensity (str): Intensity level (e.g. 'Moderate').
+        workout_date: The date the workout was performed.
+    """
+    data = {
+        "WORKOUT_TYPE": workout_type,
+        "DURATION": str(duration),
+        "INTENSITY": intensity,
+        "WORKOUT_DATE": str(workout_date),
+    }
+    create_component(data, "workout_plan_card", height=120, scrolling=False)
