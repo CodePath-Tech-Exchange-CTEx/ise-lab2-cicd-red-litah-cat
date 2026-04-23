@@ -10,6 +10,7 @@ import re
 import json
 from unittest.mock import MagicMock, patch, Mock
 from data_fetcher import get_user_workouts, insert_post, get_user_sensor_data, get_user_profile, get_user_posts, get_user_friends, get_genai_advice, get_image_url_genai_advice, get_logged_workouts, save_logged_workout
+from data_fetcher import create_new_user, verify_login, get_last_x_posts
 from datetime import datetime
 
 class TestDataFetcher(unittest.TestCase):
@@ -64,7 +65,7 @@ class TestDataFetcher(unittest.TestCase):
         expected_keys = {
             "workout_id", "start_timestamp", "end_timestamp",
             "start_lat_lng", "end_lat_lng",
-            "distance", "steps", "calories_burned"
+            "distance", "steps", "calories_burned", "duration_minutes"
         }
         self.assertEqual(set(full.keys()), expected_keys)
 
@@ -378,8 +379,8 @@ class TestGenAIAdvice(unittest.TestCase):
 
         # Verify the fallback response
         self.assertIsNone(result["advice_id"])
-        self.assertIsNone(result["image"])
-        self.assertEqual(result["content"], "No workouts found yet. Let's get moving!")
+        self.assertEqual(result["image"],'https://images.unsplash.com/photo-1461896836934-ffe607ba8211?q=80&w=1470&auto=format&fit=crop')
+        self.assertEqual(result["content"], "No workouts found yet. Time to get moving!")
         self.assertIn("timestamp", result)
 
     @patch('data_fetcher.get_image_url_genai_advice')
@@ -824,6 +825,212 @@ class TestSaveLoggedWorkout(unittest.TestCase):
         tables_called = [call.args[0] for call in mock_client.insert_rows_json.call_args_list]
         self.assertIn('ISE.Workouts', tables_called)
         self.assertNotIn('ISE.WorkoutExercises', tables_called)
+
+class TestCreateNewUser(unittest.TestCase):
+
+    @patch('data_fetcher.bigquery.Client')
+    @patch('data_fetcher.bcrypt')
+    def test_create_new_user_success(self, mock_bcrypt, mock_client_class):
+        """Tests successful user creation with password hashing and DB insertion."""
+        # 1. Setup DB Mocks
+        mock_client = MagicMock()
+        mock_client_class.return_value = mock_client
+        
+        # Mock the username check to return empty (meaning username is available)
+        mock_query_job = MagicMock()
+        mock_query_job.result.return_value = []
+        mock_client.query.return_value = mock_query_job
+        
+        # Mock the insert to return an empty list (meaning no insertion errors)
+        mock_client.insert_rows_json.return_value = []
+
+        # 2. Setup Bcrypt Mocks (to avoid slow test execution and deal with bytes easily)
+        mock_bcrypt.gensalt.return_value = b'fake_salt'
+        mock_bcrypt.hashpw.return_value = b'fake_hashed_password'
+
+        # Execute
+        result = create_new_user("Jane", "Doe", "janedoe", "secure_password")
+
+        # Assertions
+        self.assertIsNotNone(result) # Should return a UUID string
+        
+        # Verify bcrypt was called correctly with utf-8 encoded bytes
+        mock_bcrypt.hashpw.assert_called_once_with(b'secure_password', b'fake_salt')
+        
+        # Verify the exact data sent to BigQuery
+        mock_client.insert_rows_json.assert_called_once()
+        inserted_payload = mock_client.insert_rows_json.call_args[0][1][0]
+        
+        self.assertEqual(inserted_payload['Name'], "Jane Doe")
+        self.assertEqual(inserted_payload['Username'], "janedoe")
+        self.assertEqual(inserted_payload['PasswordHash'], "fake_hashed_password") # Decoded to string
+
+    @patch('data_fetcher.bigquery.Client')
+    def test_create_new_user_username_taken(self, mock_client_class):
+        """Tests that user creation stops and returns None if the username exists."""
+        mock_client = MagicMock()
+        mock_client_class.return_value = mock_client
+        
+        # Mock the username check to return a result (meaning username is taken)
+        mock_query_job = MagicMock()
+        mock_query_job.result.return_value = [{'Username': 'taken_user'}]
+        mock_client.query.return_value = mock_query_job
+
+        result = create_new_user("John", "Smith", "taken_user", "password123")
+
+        # Should return None and NEVER call insert_rows_json
+        self.assertIsNone(result)
+        mock_client.insert_rows_json.assert_not_called()
+
+    @patch('data_fetcher.bigquery.Client')
+    @patch('data_fetcher.bcrypt')
+    def test_create_new_user_insert_fails(self, mock_bcrypt, mock_client_class):
+        """Tests that None is returned if BigQuery rejects the insert."""
+        mock_client = MagicMock()
+        mock_client_class.return_value = mock_client
+        
+        # Username available
+        mock_query_job = MagicMock()
+        mock_query_job.result.return_value = []
+        mock_client.query.return_value = mock_query_job
+        
+        # Mock BigQuery returning an error during insertion
+        mock_client.insert_rows_json.return_value = [{'errors': ['Schema mismatch']}]
+        
+        mock_bcrypt.gensalt.return_value = b'salt'
+        mock_bcrypt.hashpw.return_value = b'hash'
+
+        result = create_new_user("Bad", "Insert", "bad_insert", "pass")
+
+        # Should return None because the database rejected the row
+        self.assertIsNone(result)
+
+
+class TestVerifyLogin(unittest.TestCase):
+
+    @patch('data_fetcher.bigquery.Client')
+    @patch('data_fetcher.bcrypt')
+    def test_verify_login_success(self, mock_bcrypt, mock_client_class):
+        """Tests that providing a correct password returns the UserId."""
+        mock_client = MagicMock()
+        mock_client_class.return_value = mock_client
+        
+        # Mock BigQuery finding the user
+        mock_query_job = MagicMock()
+        mock_row = MagicMock(UserId="user-uuid-123", PasswordHash="stored_fake_hash")
+        mock_query_job.result.return_value = [mock_row]
+        mock_client.query.return_value = mock_query_job
+
+        # Mock bcrypt confirming the password matches the hash
+        mock_bcrypt.checkpw.return_value = True
+
+        result = verify_login("valid_user", "correct_password")
+
+        self.assertEqual(result, "user-uuid-123")
+        
+        # Verify the bytes translation happened correctly
+        mock_bcrypt.checkpw.assert_called_once_with(
+            b'correct_password', 
+            b'stored_fake_hash'
+        )
+
+    @patch('data_fetcher.bigquery.Client')
+    def test_verify_login_user_not_found(self, mock_client_class):
+        """Tests that a non-existent username returns None gracefully."""
+        mock_client = MagicMock()
+        mock_client_class.return_value = mock_client
+        
+        # Mock BigQuery returning zero rows
+        mock_query_job = MagicMock()
+        mock_query_job.result.return_value = []
+        mock_client.query.return_value = mock_query_job
+
+        result = verify_login("ghost_user", "password123")
+
+        self.assertIsNone(result)
+
+    @patch('data_fetcher.bigquery.Client')
+    @patch('data_fetcher.bcrypt')
+    def test_verify_login_incorrect_password(self, mock_bcrypt, mock_client_class):
+        """Tests that an incorrect password returns None."""
+        mock_client = MagicMock()
+        mock_client_class.return_value = mock_client
+        
+        mock_query_job = MagicMock()
+        mock_row = MagicMock(UserId="user-uuid-123", PasswordHash="stored_fake_hash")
+        mock_query_job.result.return_value = [mock_row]
+        mock_client.query.return_value = mock_query_job
+
+        # Mock bcrypt rejecting the password match
+        mock_bcrypt.checkpw.return_value = False
+
+        result = verify_login("valid_user", "wrong_password")
+
+        self.assertIsNone(result)
+
+
+class TestGetLastXPosts(unittest.TestCase):
+
+    @patch('data_fetcher.bigquery.Client')
+    def test_get_last_x_posts_success(self, mock_client_class):
+        """Tests that post data from the JOIN query is mapped correctly to dictionaries."""
+        mock_client = MagicMock()
+        mock_client_class.return_value = mock_client
+        
+        mock_query_job = MagicMock()
+        
+        # Simulate two rows returned from the JOIN query
+        mock_row_1 = MagicMock(
+            Username="gym_bro",
+            AuthorId="user1",
+            PostId="post1",
+            Timestamp="2026-04-23 10:00:00",
+            Content="Hit a new PR today!",
+            ImageUrl="post_image.jpg"
+        )
+        mock_row_2 = MagicMock(
+            Username="cardio_queen",
+            AuthorId="user2",
+            PostId="post2",
+            Timestamp="2026-04-23 09:00:00",
+            Content="Morning run complete.",
+            ImageUrl=None
+        )
+        
+        mock_query_job.result.return_value = [mock_row_1, mock_row_2]
+        mock_client.query.return_value = mock_query_job
+
+        # Execute
+        results = get_last_x_posts(5)
+
+        # Assertions
+        self.assertEqual(len(results), 2)
+        
+        # Check mapping of the first post
+        post1 = results[0]
+        self.assertEqual(post1["username"], "gym_bro")
+        self.assertEqual(post1["user_id"], "user1")
+        self.assertEqual(post1["post_id"], "post1")
+        self.assertEqual(post1["content"], "Hit a new PR today!")
+        self.assertEqual(post1["image"], "post_image.jpg")
+
+        # Verify the LIMIT parameter was injected into the query
+        query_sent = mock_client.query.call_args[0][0]
+        self.assertIn("LIMIT 5", query_sent)
+
+    @patch('data_fetcher.bigquery.Client')
+    def test_get_last_x_posts_empty(self, mock_client_class):
+        """Tests that it returns an empty list if there are no posts in the database."""
+        mock_client = MagicMock()
+        mock_client_class.return_value = mock_client
+        
+        mock_query_job = MagicMock()
+        mock_query_job.result.return_value = []
+        mock_client.query.return_value = mock_query_job
+
+        results = get_last_x_posts(10)
+
+        self.assertEqual(results, [])
 
 
 if __name__ == "__main__":

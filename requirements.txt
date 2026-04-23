@@ -3,3 +3,4 @@ google-cloud-bigquery
 python-dotenv
 google-cloud-aiplatform
 requests
+bcrypt

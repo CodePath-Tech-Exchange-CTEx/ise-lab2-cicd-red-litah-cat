@@ -86,9 +86,11 @@ class TestWorkoutPlanPage(unittest.TestCase):
             "workout_date": date(2026, 4, 25)
         }]
 
-        workout_plan_page.display_workout_plan_page()
+        # Pass the dummy user_id
+        workout_plan_page.display_workout_plan_page("test_user_123")
 
-        mock_get_workouts.assert_called_once_with("user1")
+        # Verify it used the parameter to fetch workouts
+        mock_get_workouts.assert_called_once_with("test_user_123")
         mock_display_card.assert_called_once_with(
             "Back Day", 45, "High", date(2026, 4, 25)
         )
@@ -98,7 +100,8 @@ class TestWorkoutPlanPage(unittest.TestCase):
         """Tests the empty state when a user has no logged workouts."""
         mock_get_workouts.return_value = []
 
-        workout_plan_page.display_workout_plan_page()
+        # Pass the dummy user_id
+        workout_plan_page.display_workout_plan_page("test_user_123")
 
         mock_st.write.assert_called_with("No workout plans added yet.")
 
@@ -142,7 +145,8 @@ class TestWorkoutPlanPage(unittest.TestCase):
 
     def test_add_workout_modal_initializes_session_state(self):
         """Tests that opening the modal initializes the default exercise row."""
-        workout_plan_page.display_add_workout_plan_modal()
+        # Pass the dummy user_id
+        workout_plan_page.display_add_workout_plan_modal("test_user_123")
 
         self.assertIn("exercise_rows", mock_st.session_state)
         self.assertEqual(len(mock_st.session_state.exercise_rows), 1)
@@ -157,13 +161,13 @@ class TestWorkoutPlanPage(unittest.TestCase):
         mock_st.number_input.return_value = 45
         mock_st.date_input.return_value = date(2026, 4, 22)
         
-        # --- THE FIX ---
         # Only simulate clicking the "Save Workout" button
         def mock_button(label, *args, **kwargs):
             return label == "Save Workout"
         mock_st.button.side_effect = mock_button
 
-        workout_plan_page.display_add_workout_plan_modal()
+        # Pass the dummy user_id
+        workout_plan_page.display_add_workout_plan_modal("test_user_123")
 
         mock_st.error.assert_called_with("Please enter a Workout Name.")
         mock_save.assert_not_called()
@@ -179,19 +183,23 @@ class TestWorkoutPlanPage(unittest.TestCase):
         mock_st.select_slider.return_value = "Moderate"
         mock_st.text_area.return_value = "Good workout"
         
-        # --- THE FIX ---
         # Only simulate clicking the "Save Workout" button
         def mock_button(label, *args, **kwargs):
             return label == "Save Workout"
         mock_st.button.side_effect = mock_button
 
-        workout_plan_page.display_add_workout_plan_modal()
+        # Pass the dummy user_id
+        workout_plan_page.display_add_workout_plan_modal("test_user_123")
 
         mock_st.error.assert_not_called()
         mock_st.success.assert_called_with("Workout Saved Successfully!")
         mock_save.assert_called_once()
         
+        # Verify the user_id was passed to the save function correctly
+        saved_user_id = mock_save.call_args[0][0]
         saved_data = mock_save.call_args[0][1]
+        
+        self.assertEqual(saved_user_id, "test_user_123")
         self.assertEqual(saved_data["name"], "Valid Name")
         self.assertEqual(saved_data["type"], "Strength")
 
