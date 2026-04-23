@@ -3,15 +3,14 @@ from datetime import datetime
 from modules import display_goals
 from data_fetcher import get_daily_goals, get_user_profile, update_goal_status, save_new_goal
 
-user_id = "user1"
 
 def load_workout_css():
     with open("custom_components/daily_goals.css") as f:
         st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
 
 
-def display_workout_header():
-    user_profile = get_user_profile(user_id)
+def display_workout_header(userId):
+    user_profile = get_user_profile(userId)
     profile_image = user_profile["profile_image"]
 
     left, middle, right = st.columns([1, 5, 1])
@@ -23,13 +22,18 @@ def display_workout_header():
         )
 
     with right:
-        st.image(profile_image, width=60)
+        if profile_image:
+            st.image(profile_image, width=60)
+        else:
+            # Use a default generic avatar silhouette if they don't have one
+            DEFAULT_AVATAR = "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png"
+            st.image(DEFAULT_AVATAR, width=60)
 
     st.divider()
 
 
 @st.dialog(" ")
-def display_add_goal_modal():
+def display_add_goal_modal(userId):
     st.markdown('<div class="custom-modal-title">Add New Goal</div>', unsafe_allow_html=True)
 
     st.markdown('<div class="modal-field-label">Goal Name</div>', unsafe_allow_html=True)
@@ -77,23 +81,23 @@ def display_add_goal_modal():
                 st.warning("Duration must be greater than 0.")
                 return
 
-            save_new_goal(user_id, clean_name, duration)
+            save_new_goal(userId, clean_name, duration)
             st.rerun()
 
 
-def display_daily_goals_page():
+def display_daily_goals_page(userId):
     load_workout_css()
 
     st.markdown('<div class="daily-goals-page">', unsafe_allow_html=True)
 
-    display_workout_header()
+    display_workout_header(userId)
 
     st.markdown(
         '<div class="section-label">View your daily goals:</div>',
         unsafe_allow_html=True
     )
 
-    goals = get_daily_goals(user_id)
+    goals = get_daily_goals(userId)
 
     if not goals:
         st.write("No goals for today yet.")
@@ -123,6 +127,6 @@ def display_daily_goals_page():
     with add_goal_cta:
         st.markdown('<div class="add-goal-label">Add new goal</div>', unsafe_allow_html=True)
         if st.button("✚", key="open_add_goal_modal"):
-            display_add_goal_modal()
+            display_add_goal_modal(userId)
 
     st.markdown('</div>', unsafe_allow_html=True)
