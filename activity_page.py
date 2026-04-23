@@ -9,9 +9,8 @@ import streamlit as st
 from modules import display_recent_workouts, display_activity_summary
 from data_fetcher import get_user_workouts, insert_post
 
-userId = 'user1'
 
-def display_activity_page():
+def display_activity_page(userId):
     """Displays the activity page, including recent workouts, an activity
     summary, and a button to share a workout stat with the community."""
 
@@ -34,9 +33,15 @@ def display_activity_page():
     if submitted:
         if recent_workouts:
             latest = recent_workouts[0]
-            steps = latest.get('steps')
-            insert_post(userId, f"I walked {steps} steps today!")
-            st.success(f"Shared: I walked {steps} steps today!")
+            workout_duration = latest.get('duration_minutes')
+            calories_burned = latest.get('calories_burned')
+            
+            if calories_burned:
+                insert_post(userId, f"I worked out for {workout_duration} minutes and burned {calories_burned} calories today!")
+                st.success(f"Shared: I worked out for {workout_duration} minutes and burned {calories_burned} calories today!")
+            else:
+                insert_post(userId, f"I worked out for {workout_duration} minutes and burned a lot of calories today!")
+                st.success(f"Shared: I worked out for {workout_duration} minutes and burned a lot of calories today!")
         else:
             st.warning("No workouts to share yet.")
 
