@@ -14,6 +14,7 @@ import vertexai
 from vertexai.generative_models import GenerativeModel, GenerationConfig
 from datetime import datetime, date, timedelta
 from google.cloud import bigquery
+import bcrypt
 
 
 # TODO: Rename ".env.template" to ".env" and add your project ID to it.
@@ -166,7 +167,8 @@ def get_user_workouts(user_id):
             EndLocationLong, 
             TotalDistance, 
             TotalSteps, 
-            CaloriesBurned
+            CaloriesBurned,
+            DurationMinutes
         FROM `{PROJECT_ID}.{COURSE_CODE}.Workouts`
         WHERE UserId = @user_id
         ORDER BY StartTimestamp DESC
@@ -193,60 +195,12 @@ def get_user_workouts(user_id):
             "end_lat_lng": (row.EndLocationLat, row.EndLocationLong),
             "distance": row.TotalDistance,
             "steps": row.TotalSteps,
-            "calories_burned": row.CaloriesBurned
+            "calories_burned": row.CaloriesBurned,
+            "duration_minutes": row.DurationMinutes
         }
         workouts.append(workout_dict)
 
     return workouts
-
-
-def get_user_workout_plans(user_id):
-    """Returns the user's saved structured workout plans."""
-    # This is a sample implementation for saved workout plans.
-    # In a full app, plans would come from a data store.
-    return [
-        {
-            "plan_id": "plan_1",
-            "name": "Full Body Strength",
-            "duration": 35,
-            "goal": "Build strength",
-            "workout_count": 5,
-            "exercises": [
-                {"name": "Warm-up jog", "duration": "5 min"},
-                {"name": "Squats", "sets_reps": "3x12", "rest": "60 sec"},
-                {"name": "Push-ups", "sets_reps": "3x10", "rest": "45 sec"},
-                {"name": "Dumbbell rows", "sets_reps": "3x12", "rest": "60 sec"},
-                {"name": "Plank", "duration": "2 min", "notes": "Hold with core engaged."},
-            ],
-        },
-        {
-            "plan_id": "plan_2",
-            "name": "Cardio & Core",
-            "duration": 25,
-            "goal": "Increase endurance",
-            "workout_count": 4,
-            "exercises": [
-                {"name": "Jump rope", "duration": "5 min"},
-                {"name": "High knees", "sets_reps": "3x45 sec", "rest": "30 sec"},
-                {"name": "Mountain climbers", "sets_reps": "3x40 sec", "rest": "30 sec"},
-                {"name": "Bicycle crunches", "sets_reps": "3x20", "rest": "30 sec"},
-            ],
-        },
-        {
-            "plan_id": "plan_3",
-            "name": "Push Day Focus",
-            "duration": 40,
-            "goal": "Upper body strength",
-            "workout_count": 5,
-            "exercises": [
-                {"name": "Dynamic warm-up", "duration": "5 min"},
-                {"name": "Bench press", "sets_reps": "4x8", "rest": "90 sec"},
-                {"name": "Overhead press", "sets_reps": "3x10", "rest": "75 sec"},
-                {"name": "Tricep dips", "sets_reps": "3x12", "rest": "60 sec"},
-                {"name": "Core stretch", "duration": "5 min"},
-            ],
-        },
-    ]
 
 
 def get_user_profile(user_id):
@@ -417,8 +371,8 @@ def get_genai_advice(user_id):
         return {
             "advice_id": None,
             "timestamp": datetime.now().isoformat(),
-            "content": "No workouts found yet. Let's get moving!",
-            "image": None
+            "content": "No workouts found yet. Time to get moving!",
+            "image": "https://images.unsplash.com/photo-1461896836934-ffe607ba8211?q=80&w=1470&auto=format&fit=crop"
         }
 
     latest_workout = workouts[0]
@@ -430,7 +384,7 @@ def get_genai_advice(user_id):
             "advice_id": "ADV-LOCAL",
             "timestamp": datetime.now(),
             "content": "Nice work! Keep up the momentum and hydrate after your workout.",
-            "image": None,
+            "image": "https://images.unsplash.com/photo-1461896836934-ffe607ba8211?q=80&w=1470&auto=format&fit=crop",
         }
     
     model = GenerativeModel(
@@ -1054,3 +1008,130 @@ def save_logged_workout(user_id, workout_data):
             print(f"Error inserting muscle groups: {mg_errors}")
     else:
         print('ERROR: Rows not added because List was empty.')
+
+
+def create_new_user(first_name, last_name, username, password):
+    """
+    Checks if a username exists, hashes the password, and creates a new user.
+    Returns the new UserId if successful, or None if the username is taken.
+    """
+    client = bigquery.Client(project=PROJECT_ID)
+
+    # 1. Check if the username is already taken
+    check_query = f"""
+        SELECT Username 
+        FROM `{PROJECT_ID}.{COURSE_CODE}.Users` 
+        WHERE Username = @username
+    """
+    check_config = bigquery.QueryJobConfig(
+        query_parameters=[bigquery.ScalarQueryParameter("username", "STRING", username)]
+    )
+    check_results = list(client.query(check_query, job_config=check_config).result())
+    
+    if len(check_results) > 0:
+        print("Username already exists.")
+        return None  # Username taken
+
+    # 2. Hash the password
+    # bcrypt requires passwords to be encoded to bytes before hashing
+    salt = bcrypt.gensalt()
+    hashed_password = bcrypt.hashpw(password.encode('utf-8'), salt)
+
+    # 3. Prepare the new user data
+    new_user_id = str(uuid.uuid4())
+    full_name = f"{first_name} {last_name}".strip()
+
+    user_rows = [{
+        'UserId': new_user_id,
+        'Name': full_name,
+        'Username': username,
+        'PasswordHash': hashed_password.decode('utf-8'), # Decode back to string for BigQuery
+        'ImageUrl': None,
+        'DateOfBirth': None
+    }]
+
+    # 4. Insert into BigQuery
+    errors = client.insert_rows_json(f'{PROJECT_ID}.{COURSE_CODE}.Users', user_rows)
+    
+    if errors:
+        print(f"Error inserting new user: {errors}")
+        return None
+        
+    print(f"Successfully created user: {username}")
+    return new_user_id
+
+
+def verify_login(username, password):
+    """
+    Fetches the user by username and verifies the password against the stored hash.
+    Returns the UserId if login is successful, or None if it fails.
+    """
+    client = bigquery.Client(project=PROJECT_ID)
+
+    # 1. Fetch the user's stored hash and ID
+    query = f"""
+        SELECT UserId, PasswordHash 
+        FROM `{PROJECT_ID}.{COURSE_CODE}.Users` 
+        WHERE Username = @username
+    """
+    job_config = bigquery.QueryJobConfig(
+        query_parameters=[bigquery.ScalarQueryParameter("username", "STRING", username)]
+    )
+    
+    results = list(client.query(query, job_config=job_config).result())
+
+    # 2. Check if the user actually exists
+    if len(results) == 0:
+        print("Login failed: User not found.")
+        return None
+        
+    user_record = results[0]
+    stored_hash = user_record.PasswordHash
+
+    # 3. Verify the password
+    # We must ensure both the input password and stored hash are encoded to bytes for bcrypt
+    if stored_hash:
+        is_valid = bcrypt.checkpw(
+            password.encode('utf-8'), 
+            stored_hash.encode('utf-8')
+        )
+        
+        if is_valid:
+            print(f"Login successful for: {username}")
+            return user_record.UserId
+            
+    print("Login failed: Incorrect password.")
+    return None
+
+def get_last_x_posts(x):
+    "Gets the last x posts from database"
+
+    client = bigquery.Client(project=PROJECT_ID)
+
+    query = f"""
+    SELECT 
+        p.*, 
+        u.Username,
+        u.ImageUrl AS UserImageUrl
+    FROM `{PROJECT_ID}.{COURSE_CODE}.Posts` p
+    JOIN `{PROJECT_ID}.{COURSE_CODE}.Users` u
+      ON p.AuthorId = u.UserId
+    ORDER BY p.Timestamp DESC
+    LIMIT {x}
+    """
+
+    query_job = client.query(query)
+    results = query_job.result()
+
+    posts = []
+    for result in results:
+        posts.append({
+            "username": result.Username,
+            "user_id": result.AuthorId,
+            "post_id": result.PostId,
+            "timestamp": result.Timestamp,
+            "content": result.Content,
+            "image": result.ImageUrl
+        })
+
+    return posts
