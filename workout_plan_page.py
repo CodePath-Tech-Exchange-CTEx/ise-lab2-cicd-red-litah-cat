@@ -283,8 +283,12 @@ def display_workout_plan_page(userId):
     workout_plan_cta = st.container(key="workout_plan_cta")
     with workout_plan_cta:
         st.markdown('<div class="add-goal-label">Add new workout plan</div>', unsafe_allow_html=True)
-        if st.button("✚", key="open_workout_plan_modal"):
-            display_add_workout_plan_modal(userId)
+
+        spacer_left, center_col, spacer_right = st.columns([4, 1, 4])
+
+        with center_col:
+            if st.button("✚", key="open_workout_plan_modal"):
+                display_add_workout_plan_modal(userId)
 
     st.markdown('</div>', unsafe_allow_html=True)
 
