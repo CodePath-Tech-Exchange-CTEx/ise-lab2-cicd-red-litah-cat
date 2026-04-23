@@ -138,7 +138,7 @@ def display_genai_advice(timestamp, content, image):
             'IMAGE': image}
 
     html_file_name = 'display_genai_advice_component'
-    create_component(data, html_file_name, height=300, scrolling=True)
+    create_component(data, html_file_name, height=500, scrolling=True)
 
 
 def display_ai_trainer_hero(user_name):
@@ -207,17 +207,17 @@ def display_goals(goal_name, duration, status):
     create_component(data, "daily_goals", height=120, scrolling=False)
 
 
-def display_workout_plan_card(workout_type, duration, intensity, workout_date):
+def display_workout_plan_card(workout_name, duration, intensity, workout_date):
     """Displays a single logged workout as a white rounded card.
 
     Args:
-        workout_type (str): The type of workout (e.g. 'Running').
+        workout_name (str): The name of the workout (e.g. 'Running').
         duration (int): Duration of the workout in minutes.
         intensity (str): Intensity level (e.g. 'Moderate').
         workout_date: The date the workout was performed.
     """
     data = {
-        "WORKOUT_TYPE": workout_type,
+        "WORKOUT_NAME": workout_name,
         "DURATION": str(duration),
         "INTENSITY": intensity,
         "WORKOUT_DATE": str(workout_date),
