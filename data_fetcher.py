@@ -324,7 +324,11 @@ def get_genai_advice(user_id):
     
             Provide one to two sentence of expert, encouraging fitness advice based on these specific numbers.
             Also, provide 3 keywords for a matching stock photo (e.g., 'running shoes asphalt').
-    """
+
+            IMPORTANT: Respond in plain text only. Do not use markdown formatting of any kind — 
+            no asterisks, no bold, no italics, no bullet point dashes, no headers, no backticks, 
+            and no escape characters such as \\' or \\\".    
+            """
     
     # Line Written By Gemini
     response = model.generate_content(
@@ -750,20 +754,41 @@ def get_logged_workouts(user_id):
     """
     client = bigquery.Client(project=PROJECT_ID)
 
+    # We use subqueries with ARRAY_AGG to bundle the child rows into lists
     query = f"""
         SELECT
-            WorkoutId       AS workout_id,
-            UserId          AS user_id,
-            WorkoutType     AS workout_type,
-            DurationMinutes AS duration,
-            Intensity       AS intensity,
-            CaloriesBurned  AS calories_burned,
-            DATE(StartTimestamp) AS workout_date,
-            Notes           AS notes
-        FROM `{PROJECT_ID}.{COURSE_CODE}.Workouts`
-        WHERE UserId = @user_id
-          AND WorkoutType IS NOT NULL
-        ORDER BY StartTimestamp DESC
+            w.WorkoutName   AS workout_name,
+            w.WorkoutId      AS workout_id,
+            w.UserId         AS user_id,
+            w.WorkoutType    AS workout_type,
+            w.DurationMinutes AS duration,
+            w.Intensity      AS intensity,
+            w.CaloriesBurned AS calories_burned,
+            DATE(w.StartTimestamp) AS workout_date,
+            w.Notes          AS notes,
+            
+            -- Pack the muscle groups into a simple list of strings
+            (SELECT ARRAY_AGG(m.MuscleGroup) 
+             FROM `{PROJECT_ID}.{COURSE_CODE}.WorkoutMuscleGroups` m 
+             WHERE m.WorkoutID = w.WorkoutId) AS muscle_groups,
+             
+            -- Pack the exercises into a list of dictionaries (STRUCTs)
+            (SELECT ARRAY_AGG(
+                STRUCT(
+                    e.ExerciseName AS name, 
+                    e.ExerciseSets AS sets, 
+                    e.ExerciseReps AS reps, 
+                    e.ExerciseWeight AS weight, 
+                    e.ExerciseTimeOrDistance AS cardio_metric
+                )
+             ) 
+             FROM `{PROJECT_ID}.{COURSE_CODE}.WorkoutExercises` e 
+             WHERE e.WorkoutID = w.WorkoutId) AS exercises
+
+        FROM `{PROJECT_ID}.{COURSE_CODE}.Workouts` w
+        WHERE w.UserId = @user_id
+          AND w.WorkoutType IS NOT NULL
+        ORDER BY w.StartTimestamp DESC
     """
 
     job_config = bigquery.QueryJobConfig(
@@ -777,7 +802,15 @@ def get_logged_workouts(user_id):
 
     logged_workouts = []
     for row in results:
+        # BigQuery will return None for the arrays if no child rows exist, 
+        # so we use `or []` to ensure Python always gets a list.
+        
+        # Unpack the BigQuery Structs into standard Python dictionaries
+        raw_exercises = row.exercises or []
+        parsed_exercises = [dict(ex) for ex in raw_exercises]
+        
         logged_workouts.append({
+            "workout_name": row.workout_name,
             "workout_id": row.workout_id,
             "user_id": row.user_id,
             "workout_type": row.workout_type,
@@ -786,13 +819,13 @@ def get_logged_workouts(user_id):
             "calories_burned": row.calories_burned,
             "workout_date": row.workout_date,
             "notes": row.notes,
+            "muscle_groups": row.muscle_groups or [], # List of strings
+            "exercises": parsed_exercises             # List of dictionaries
         })
 
     return logged_workouts
 
-
-def save_logged_workout(user_id, workout_type, duration, intensity,
-                        calories_burned, workout_date, notes):
+def save_logged_workout(user_id, workout_data):
     """Inserts a manually logged workout into the Workouts table.
 
     GPS, distance, and step columns are left NULL for manually logged entries.
@@ -801,41 +834,85 @@ def save_logged_workout(user_id, workout_type, duration, intensity,
 
     Args:
         user_id (str): The ID of the user logging the workout.
-        workout_type (str): Type of workout (e.g. 'Running').
-        duration (int): Duration in minutes.
-        intensity (str): Intensity level (e.g. 'Moderate').
-        calories_burned (int): Estimated calories burned (0 if not provided).
-        workout_date (date): The date the workout took place.
-        notes (str): Optional free-text notes.
+        workout_data (dict): A dictionary containing the workout details.
+            workout_type (str): Type of workout (e.g. 'Running').
+            duration (int): Duration in minutes.
+            intensity (str): Intensity level (e.g. 'Moderate').
+            calories_burned (int): Estimated calories burned (0 if not provided).
+            workout_date (date): The date the workout took place.
+            notes (str): Optional free-text notes.
+            muscle_groups (List[str]): The muscle group the workout plan targets
+            exercises (List[dict{}]): the exercises that make up the workout plan
     """
     client = bigquery.Client(project=PROJECT_ID)
 
-    start_dt = datetime.combine(workout_date, datetime.min.time())
-    end_dt = start_dt + timedelta(minutes=duration)
+    start_dt = datetime.combine(workout_data['date'], datetime.min.time())
+    end_dt = start_dt + timedelta(minutes=workout_data['duration'])
     start_ts = start_dt.strftime('%Y-%m-%d %H:%M:%S')
     end_ts = end_dt.strftime('%Y-%m-%d %H:%M:%S')
 
-    query = f"""
-        INSERT INTO `{PROJECT_ID}.{COURSE_CODE}.Workouts`
-            (WorkoutId, UserId, StartTimestamp, EndTimestamp,
-             WorkoutType, DurationMinutes, Intensity, CaloriesBurned, Notes)
-        VALUES
-            (@workout_id, @user_id, @start_ts, @end_ts,
-             @workout_type, @duration, @intensity, @calories_burned, @notes)
-    """
+    workout_id = str(uuid.uuid4())
 
-    job_config = bigquery.QueryJobConfig(
-        query_parameters=[
-            bigquery.ScalarQueryParameter("workout_id", "STRING", str(uuid.uuid4())),
-            bigquery.ScalarQueryParameter("user_id", "STRING", user_id),
-            bigquery.ScalarQueryParameter("start_ts", "DATETIME", start_ts),
-            bigquery.ScalarQueryParameter("end_ts", "DATETIME", end_ts),
-            bigquery.ScalarQueryParameter("workout_type", "STRING", workout_type),
-            bigquery.ScalarQueryParameter("duration", "INT64", duration),
-            bigquery.ScalarQueryParameter("intensity", "STRING", intensity),
-            bigquery.ScalarQueryParameter("calories_burned", "INT64", int(calories_burned)),
-            bigquery.ScalarQueryParameter("notes", "STRING", notes or ""),
-        ]
-    )
+    # Standard Workout Info
+    wr_errors = []
+    workout_rows = [{'WorkoutId':workout_id, 'UserId':user_id, 
+                    'StartTimestamp':start_ts, 'EndTimestamp':end_ts, 
+                    'WorkoutType':workout_data['type'], 'DurationMinutes':workout_data['duration'], 
+                    'Intensity':workout_data['intensity'], 'CaloriesBurned':workout_data['calories'],
+                    'Notes':workout_data['notes'], 'WorkoutName':workout_data['name']}]
 
-    client.query(query, job_config=job_config).result()
+    if workout_rows:
+        # Insert workout rows into db
+        wr_errors = client.insert_rows_json('ISE.Workouts', workout_rows)
+    else:
+        wr_errors.append("ERROR: Rows not added because List was empty.")
+        print('ERROR: Rows not added because List was empty.')
+
+    if wr_errors:
+        print(f'Encountered Error Inserting Workout Rows: {wr_errors}')
+    
+
+    # Exercises
+    exercises = workout_data['exercises']
+    er_errors = []
+    exercise_rows = []
+
+    for exercise in exercises:
+        if exercise['name'].strip() != '':
+            exercise_rows.append({
+                'WorkoutId':workout_id, 'ExerciseId': str(uuid.uuid4()), 
+                'ExerciseName': exercise['name'], 'ExerciseSets': exercise['sets'],
+                'ExerciseReps': exercise['reps'], 'ExerciseWeight': exercise['weight'],
+                'ExerciseTimeOrDistance': exercise['cardio_metric']
+            })
+    
+    if not wr_errors:
+        if exercise_rows:
+            # Insert exercise rows into db
+            er_errors = client.insert_rows_json('ISE.WorkoutExercises', exercise_rows)
+        else:
+            er_errors = []
+            print('ERROR: Rows not added because List was empty.')
+
+    if er_errors:
+        print(f'Encountered Error Inserting Exercise Rows: {er_errors}')
+
+
+    # Muscle Groups
+    muscle_groups = workout_data['muscle_groups']
+    mg_errors = []
+    muscle_group_rows = []
+
+    for group in muscle_groups: 
+        muscle_group_rows.append({
+            'WorkoutId': workout_id,
+            'MuscleGroup': group
+        })
+
+    if muscle_group_rows:
+        # Insert muscle group rows into db
+        mg_errors = client.insert_rows_json('ISE.WorkoutMuscleGroups', muscle_group_rows)
+        if mg_errors:
+            print(f"Error inserting muscle groups: {mg_errors}")
+    else:
+        print('ERROR: Rows not added because List was empty.')
