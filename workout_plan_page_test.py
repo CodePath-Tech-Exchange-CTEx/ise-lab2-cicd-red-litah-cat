@@ -12,15 +12,15 @@ import sys
 import streamlit as st
 
 # =====================================================================
-# STREAMLIT MOCK SETUP
-# Must be configured completely BEFORE importing workout_plan_page
+# STREAMLIT MOCK SETUP (ISOLATED)
 # =====================================================================
-mock_st = MagicMock()
 
-# 1. Bypass the @st.dialog decorator so the functions actually run in testing
+# 1. Save the real Streamlit if the CI/CD pipeline already loaded it
+original_streamlit = sys.modules.get('streamlit')
+
+mock_st = MagicMock()
 mock_st.dialog.return_value = lambda f: f
 
-# 2. Build a Session State object that handles both dict and attribute access
 class MockSessionState(dict):
     def __getattr__(self, key):
         if key in self:
@@ -32,17 +32,19 @@ class MockSessionState(dict):
         if key in self:
             del self[key]
 
-# Attach the custom session state
 mock_st.session_state = MockSessionState()
 
-# Inject the mock into the system modules
+# 2. Inject the mock into the system modules
 sys.modules['streamlit'] = mock_st
 
-# =====================================================================
-# NOW IMPORT THE PAGE
-# =====================================================================
+# 3. Import the page. It will grab our mock and hold onto it as `st`
 import workout_plan_page
 
+# 4. Restore the global environment so other tests don't crash!
+if original_streamlit is not None:
+    sys.modules['streamlit'] = original_streamlit
+else:
+    del sys.modules['streamlit']
 
 class TestWorkoutPlanPage(unittest.TestCase):
 
