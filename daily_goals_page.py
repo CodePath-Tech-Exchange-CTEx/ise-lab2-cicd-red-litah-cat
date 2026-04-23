@@ -126,7 +126,11 @@ def display_daily_goals_page(userId):
     add_goal_cta = st.container(key="add_goal_cta")
     with add_goal_cta:
         st.markdown('<div class="add-goal-label">Add new goal</div>', unsafe_allow_html=True)
-        if st.button("✚", key="open_add_goal_modal"):
-            display_add_goal_modal(userId)
+
+        spacer_left, center_col, spacer_right = st.columns([4, 1, 4])
+
+        with center_col:
+            if st.button("✚", key="open_add_goal_modal"):
+                display_add_goal_modal(userId)
 
     st.markdown('</div>', unsafe_allow_html=True)
