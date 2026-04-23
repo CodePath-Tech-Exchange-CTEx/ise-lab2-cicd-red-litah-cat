@@ -1,19 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Post</title>
+<style>
+:root {
+  --cc-bg-app: #0e1117;
+  --cc-bg-card: #161b22;
+  --cc-border: #30363d;
+  --cc-text: #e6edf3;
+  --cc-text-muted: #8b949e;
+  --cc-accent: #f97316;
+  --cc-accent-soft: rgba(249, 115, 22, 0.2);
+  --cc-font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  margin: 0;
+  font-family: var(--cc-font);
+  background: var(--cc-bg-app);
+  color: var(--cc-text);
+}
+
+.post-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 8px 0;
+}
+
+.post-card {
+  border: 1px solid var(--cc-border);
+  border-radius: 16px;
+  padding: 16px;
+  background: var(--cc-bg-card);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  width: min(100%, 420px);
+}
+
+.post-user {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-bottom: 12px;
+}
+
+.post-user img {
+  width: 48px;
+  height: 48px;
+  object-fit: cover;
+  border-radius: 999px;
+  border: 2px solid var(--cc-accent-soft);
+}
+
+.post-user .name {
+  color: var(--cc-text);
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.post-body {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+}
+
+.post-body img.post-img {
+  width: 100%;
+  max-width: 280px;
+  height: auto;
+  max-height: 280px;
+  object-fit: cover;
+  border-radius: 12px;
+  border: 1px solid var(--cc-border);
+}
+
+.post-body img.post-img[src=""] {
+  display: none;
+}
+
+.post-body .text {
+  color: var(--cc-text);
+  font-size: 0.92rem;
+  line-height: 1.5;
+}
+
+.post-card .timestamp {
+  color: var(--cc-text-muted);
+  font-size: 0.78rem;
+  margin-top: 8px;
+}
+</style>
+</head>
+<body>
 <section class="post-section">
-    <div class="post-card">
-        <div class="post-user">
-            <img class="profile-image"
-                src="{{USER_IMAGE}}"
-                alt=""
-                onerror="this.src='https://cdn-icons-png.flaticon.com/512/149/149071.png';">
-            <span class="name">{{USERNAME}}</span>
-        </div>
-        <div class="post-body">
-            <img class="post-img"
-                src="{{POST_IMAGE}}"
-                alt=""
-                onerror="this.style.display='none'">
-            <p class="text">{{CONTENT}}</p>
-        </div>
-        <p class="timestamp">{{TIMESTAMP}}</p>
+  <div class="post-card">
+    <div class="post-user">
+      <img class="profile-image"
+        src="{{USER_IMAGE}}"
+        alt=""
+        onerror="this.src='https://cdn-icons-png.flaticon.com/512/149/149071.png';">
+      <span class="name">{{USERNAME}}</span>
     </div>
+    <div class="post-body">
+      <img class="post-img"
+        src="{{POST_IMAGE}}"
+        alt=""
+        onerror="this.style.display='none'">
+      <p class="text">{{CONTENT}}</p>
+    </div>
+    <p class="timestamp">{{TIMESTAMP}}</p>
+  </div>
 </section>
+</body>
+</html>

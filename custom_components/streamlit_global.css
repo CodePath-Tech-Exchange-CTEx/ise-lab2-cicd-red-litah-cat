@@ -8,6 +8,7 @@
 }
 
 /* ===== CUSTOM NAVIGATION BAR ===== */
+
 [data-baseweb="tab-list"] {
   background: transparent !important;
   border-bottom: none !important;
@@ -102,14 +103,21 @@
 }
 
 [data-baseweb="tab"]:nth-child(4)::before {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23f97316' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 8V4H8'/%3E%3Crect width='16' height='12' x='4' y='8' rx='2'/%3E%3Cpath d='M2 14h2'/%3E%3Cpath d='M20 14h2'/%3E%3Cpath d='M15 13v2'/%3E%3Cpath d='M9 13v2'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23f97316' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M9 6h11'/%3E%3Cpath d='M9 12h11'/%3E%3Cpath d='M9 18h11'/%3E%3Cpath d='m3 6 1.5 1.5L7 5'/%3E%3Cpath d='m3 12 1.5 1.5L7 11'/%3E%3Cpath d='m3 18 1.5 1.5L7 17'/%3E%3C/svg%3E");
 }
 
 [data-baseweb="tab"]:nth-child(5)::before {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23f97316' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 8V4H8'/%3E%3Crect width='16' height='12' x='4' y='8' rx='2'/%3E%3Cpath d='M2 14h2'/%3E%3Cpath d='M20 14h2'/%3E%3Cpath d='M15 13v2'/%3E%3Cpath d='M9 13v2'/%3E%3C/svg%3E");
+}
+
+[data-baseweb="tab"]:nth-child(6)::before {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23f97316' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2'/%3E%3Ccircle cx='9' cy='7' r='4'/%3E%3Cpath d='M23 21v-2a4 4 0 0 0-3-3.87'/%3E%3Cpath d='M16 3.13a4 4 0 0 1 0 7.75'/%3E%3C/svg%3E");
 }
 
+
+
 /* PROFILE PAGE */
+
 .pf-label {
   color: var(--st-text);
   font-size: 13px;
@@ -168,12 +176,14 @@
   fill: #888 !important;
 }
 
-[data-testid="stTextInput"]  > label,
+/* Commented Out because it hides text labels */
+
+/* [data-testid="stTextInput"]  > label,
 [data-testid="stNumberInput"] > label,
 [data-testid="stTextArea"]   > label,
 [data-testid="stSelectbox"]  > label {
   display: none !important;
-}
+} */
 
 [data-testid="stForm"] {
   border: none !important;
@@ -193,7 +203,6 @@
   margin-bottom: 16px;
 }
 
-/* Goal cards: only style labels inside the radiogroup, not the collapsed field label (global label rules used to force display:flex and drew an empty box). */
 [data-testid="stRadio"] [role="radiogroup"] {
   display: flex !important;
   flex-direction: row !important;
@@ -227,7 +236,6 @@
   background: #232323 !important;
 }
 
-/* Hide Base Web radio circle / dot; selection is shown only by the label border */
 [data-testid="stRadio"] [role="radiogroup"] label > div:first-child {
   display: none !important;
 }
@@ -294,38 +302,10 @@
   background-color: var(--st-bg-elevated) !important;
 }
 
-/* AI TRAINER / CHAT — bottom bar: nudge inset from the left */
-div[data-testid="stButton"] > button[kind="secondary"] {
-  background: transparent !important;
-  border: none !important;
-  box-shadow: none !important;
-  color: #ffffff !important;
-  padding: 0 !important;
-  min-height: auto !important;
-  font-size: 0.72rem !important;
-  font-weight: 600 !important;
-  letter-spacing: 0.08em !important;
-  text-transform: uppercase !important;
-  transition: color 0.2s ease !important;
-}
+/* AI TRAINER / CHAT — profile button only */
 
-div[data-testid="stButton"] > button[kind="secondary"]:hover {
-  background: transparent !important;
-  border: none !important;
-  color: var(--st-accent) !important;
-}
-
-div[data-testid="stButton"] > button[kind="secondary"]:focus,
-div[data-testid="stButton"] > button[kind="secondary"]:focus-visible {
-  outline: none !important;
-  box-shadow: none !important;
-}
-
-button[kind="secondary"] {
-  color: var(--st-text-muted) !important;
-}
-
-div[data-testid="stVerticalBlock"]:has(.profile-btn-hook) div[data-testid="stButton"] > button {
+div.st-key-profile_btn div[data-testid="stButton"] > button,
+div[data-testid="element-container"]:has(.profile-btn-hook) + div[data-testid="element-container"] div[data-testid="stButton"] > button {
   display: flex !important;
   flex-direction: column !important;
   align-items: center !important;
@@ -338,15 +318,22 @@ div[data-testid="stVerticalBlock"]:has(.profile-btn-hook) div[data-testid="stBut
   border: none !important;
   box-shadow: none !important;
   color: #ffffff !important;
-  font-size: 10px !important;
+  font-size: 9px !important;
   font-weight: 600 !important;
-  letter-spacing: 0.5px !important;
+  letter-spacing: 0.25px !important;
   text-transform: uppercase !important;
   transition: color 0.2s ease !important;
   cursor: pointer !important;
 }
 
-div[data-testid="stVerticalBlock"]:has(.profile-btn-hook) div[data-testid="stButton"] > button::before {
+div.st-key-profile_btn div[data-testid="stButton"] > button p,
+div[data-testid="element-container"]:has(.profile-btn-hook) + div[data-testid="element-container"] div[data-testid="stButton"] > button p {
+  margin: 0 !important;
+  white-space: nowrap !important;
+}
+
+div.st-key-profile_btn div[data-testid="stButton"] > button::before,
+div[data-testid="element-container"]:has(.profile-btn-hook) + div[data-testid="element-container"] div[data-testid="stButton"] > button::before {
   content: '';
   display: block;
   width: 22px;
@@ -358,17 +345,19 @@ div[data-testid="stVerticalBlock"]:has(.profile-btn-hook) div[data-testid="stBut
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23f97316' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2'/%3E%3Ccircle cx='12' cy='7' r='4'/%3E%3C/svg%3E");
 }
 
-div[data-testid="stVerticalBlock"]:has(.profile-btn-hook) div[data-testid="stButton"] > button:hover {
+div.st-key-profile_btn div[data-testid="stButton"] > button:hover,
+div[data-testid="element-container"]:has(.profile-btn-hook) + div[data-testid="element-container"] div[data-testid="stButton"] > button:hover {
   color: var(--st-accent) !important;
   background: transparent !important;
 }
 
-div[data-testid="stVerticalBlock"]:has(.profile-btn-hook) div[data-testid="stButton"] > button:hover::before {
+div.st-key-profile_btn div[data-testid="stButton"] > button:hover::before,
+div[data-testid="element-container"]:has(.profile-btn-hook) + div[data-testid="element-container"] div[data-testid="stButton"] > button:hover::before {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23f97316' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2'/%3E%3Ccircle cx='12' cy='7' r='4'/%3E%3C/svg%3E");
-}
-
+} 
 @media (max-width: 768px) {
-  div[data-testid="stVerticalBlock"]:has(.profile-btn-hook) div[data-testid="stButton"] > button {
+  div.st-key-profile_btn div[data-testid="stButton"] > button,
+  div[data-testid="element-container"]:has(.profile-btn-hook) + div[data-testid="element-container"] div[data-testid="stButton"] > button {
     width: 72px !important;
     font-size: 9px !important;
   }

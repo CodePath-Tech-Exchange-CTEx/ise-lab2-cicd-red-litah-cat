@@ -9,7 +9,7 @@ import unittest
 import re
 import json
 from unittest.mock import MagicMock, patch, Mock
-from data_fetcher import get_user_workouts, insert_post, get_user_sensor_data, get_user_profile, get_user_posts, get_user_friends, get_genai_advice, get_image_url_genai_advice
+from data_fetcher import get_user_workouts, insert_post, get_user_sensor_data, get_user_profile, get_user_posts, get_user_friends, get_genai_advice, get_image_url_genai_advice, get_logged_workouts, save_logged_workout
 from datetime import datetime
 
 class TestDataFetcher(unittest.TestCase):
@@ -654,5 +654,177 @@ class TestGetUserProfile(unittest.TestCase):
         self.assertEqual(param.name, 'target_id')
         self.assertEqual(param.value, 'secure_user_123')
     
+from datetime import date
+
+class TestGetLoggedWorkouts(unittest.TestCase):
+
+    @patch('data_fetcher.bigquery.Client')
+    def test_get_logged_workouts_comprehensive(self, mock_client_class):
+        """Tests that a fully populated workout with exercises and muscle groups maps correctly."""
+        mock_client = MagicMock()
+        mock_client_class.return_value = mock_client
+        mock_query_job = MagicMock()
+        mock_client.query.return_value = mock_query_job
+
+        # Simulate BigQuery row returned with ARRAY_AGG and STRUCT data
+        mock_row = MagicMock(
+            workout_name="Push Day",
+            workout_id="uuid-123",
+            user_id="user1",
+            workout_type="Strength",
+            duration=60,
+            intensity="High",
+            calories_burned=300,
+            workout_date=date(2026, 4, 22),
+            notes="Felt strong today",
+            muscle_groups=["Chest", "Shoulders", "Triceps"],
+            exercises=[
+                {"name": "Bench Press", "sets": 3, "reps": 10, "weight": "225", "cardio_metric": ""}
+            ]
+        )
+        
+        mock_query_job.result.return_value = [mock_row]
+
+        result = get_logged_workouts("user1")
+
+        # Assertions
+        self.assertEqual(len(result), 1)
+        workout = result[0]
+        
+        self.assertEqual(workout["workout_name"], "Push Day")
+        self.assertEqual(workout["duration"], 60)
+        self.assertEqual(workout["muscle_groups"], ["Chest", "Shoulders", "Triceps"])
+        self.assertEqual(len(workout["exercises"]), 1)
+        self.assertEqual(workout["exercises"][0]["name"], "Bench Press")
+
+    @patch('data_fetcher.bigquery.Client')
+    def test_get_logged_workouts_null_arrays(self, mock_client_class):
+        """Tests that BigQuery returning None for arrays is safely converted to empty lists."""
+        mock_client = MagicMock()
+        mock_client_class.return_value = mock_client
+        mock_query_job = MagicMock()
+        mock_client.query.return_value = mock_query_job
+
+        # Simulate a basic cardio workout with NO exercises or muscle groups logged
+        mock_row = MagicMock(
+            workout_name="Quick Run",
+            workout_id="uuid-456",
+            user_id="user1",
+            workout_type="Cardio",
+            duration=30,
+            intensity="Moderate",
+            calories_burned=250,
+            workout_date=date(2026, 4, 23),
+            notes="",
+            muscle_groups=None,  # BigQuery returns None for empty ARRAY_AGG
+            exercises=None       # BigQuery returns None for empty ARRAY_AGG
+        )
+        
+        mock_query_job.result.return_value = [mock_row]
+
+        result = get_logged_workouts("user1")
+
+        self.assertEqual(len(result), 1)
+        workout = result[0]
+        
+        # Verify the 'or []' fallback logic works
+        self.assertEqual(workout["muscle_groups"], [])
+        self.assertEqual(workout["exercises"], [])
+
+    @patch('data_fetcher.bigquery.Client')
+    def test_get_logged_workouts_empty(self, mock_client_class):
+        """Tests that a user with no workouts returns an empty list."""
+        mock_client = MagicMock()
+        mock_client_class.return_value = mock_client
+        mock_query_job = MagicMock()
+        mock_client.query.return_value = mock_query_job
+        mock_query_job.result.return_value = []
+
+        result = get_logged_workouts("newUser")
+        self.assertEqual(result, [])
+
+
+class TestSaveLoggedWorkout(unittest.TestCase):
+
+    def setUp(self):
+        """Creates standard mock data used across multiple save tests."""
+        self.valid_workout_data = {
+            "name": "Leg Day",
+            "type": "Strength",
+            "duration": 45,
+            "intensity": "Max",
+            "calories": 400,
+            "date": date(2026, 4, 24),
+            "notes": "Tough session",
+            "muscle_groups": ["Legs", "Glutes"],
+            "exercises": [
+                {"name": "Squat", "sets": 3, "reps": 8, "weight": "315", "cardio_metric": ""}
+            ]
+        }
+
+    @patch('data_fetcher.bigquery.Client')
+    def test_save_logged_workout_success(self, mock_client_class):
+        """Tests the happy path where all three tables receive bulk inserts."""
+        mock_client = MagicMock()
+        mock_client_class.return_value = mock_client
+        
+        # Simulate successful insertion (returns empty list of errors)
+        mock_client.insert_rows_json.return_value = []
+
+        save_logged_workout("user1", self.valid_workout_data)
+
+        # Verify insert_rows_json was called exactly 3 times
+        self.assertEqual(mock_client.insert_rows_json.call_count, 3)
+        
+        # Verify it targeted the correct tables in order
+        calls = mock_client.insert_rows_json.call_args_list
+        self.assertEqual(calls[0].args[0], 'ISE.Workouts')
+        self.assertEqual(calls[1].args[0], 'ISE.WorkoutExercises')
+        self.assertEqual(calls[2].args[0], 'ISE.WorkoutMuscleGroups')
+
+    @patch('data_fetcher.bigquery.Client')
+    def test_save_logged_workout_filters_empty_exercises(self, mock_client_class):
+        """Tests that exercises with blank names are filtered out before insertion."""
+        mock_client = MagicMock()
+        mock_client_class.return_value = mock_client
+        mock_client.insert_rows_json.return_value = []
+
+        # Add a blank exercise to the mock data
+        self.valid_workout_data["exercises"].append(
+            {"name": "   ", "sets": 0, "reps": 0, "weight": "", "cardio_metric": ""}
+        )
+
+        save_logged_workout("user1", self.valid_workout_data)
+
+        # Extract the payload sent to the WorkoutExercises table
+        exercise_call_args = mock_client.insert_rows_json.call_args_list[1]
+        inserted_exercises = exercise_call_args.args[1]
+
+        # Verify only the valid "Squat" exercise made it through, skipping the blank one
+        self.assertEqual(len(inserted_exercises), 1)
+        self.assertEqual(inserted_exercises[0]["ExerciseName"], "Squat")
+
+    @patch('data_fetcher.bigquery.Client')
+    def test_save_logged_workout_parent_failure(self, mock_client_class):
+        """Tests that exercise child rows are not inserted if the parent workout insert fails."""
+        mock_client = MagicMock()
+        mock_client_class.return_value = mock_client
+        
+        # Simulate BigQuery rejecting the first insert (Parent Workout)
+        def mock_insert_behavior(table_id, rows):
+            if table_id == 'ISE.Workouts':
+                return [{'index': 0, 'errors': [{'reason': 'invalid', 'message': 'Schema mismatch'}]}]
+            return []
+            
+        mock_client.insert_rows_json.side_effect = mock_insert_behavior
+
+        save_logged_workout("user1", self.valid_workout_data)
+
+        # Verify that the Exercise table was skipped due to the `if not wr_errors:` check
+        tables_called = [call.args[0] for call in mock_client.insert_rows_json.call_args_list]
+        self.assertIn('ISE.Workouts', tables_called)
+        self.assertNotIn('ISE.WorkoutExercises', tables_called)
+
+
 if __name__ == "__main__":
     unittest.main()

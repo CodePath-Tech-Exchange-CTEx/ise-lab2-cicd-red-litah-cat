@@ -10,10 +10,9 @@ from modules import display_my_custom_component, display_post, display_genai_adv
 from data_fetcher import get_user_posts, get_genai_advice, get_user_profile, get_user_sensor_data, get_user_workouts
 from activity_page import display_activity_page
 from community_page import display_community_page
+from daily_goals_page import display_daily_goals_page
 from chat_page import display_chat_page
-from log_workout_page import display_log_workout_page
 from workout_plan_page import display_workout_plan_page
-from internals import inject_streamlit_global_styles
 import datetime
  
 userId = 'user1'
@@ -36,20 +35,20 @@ def display_app_page():
     display_post(username, user_image, timestamp, content, post_image)
  
     # --- Activity Summary Logic ---
-    st.divider()
+    # st.divider()
     st.header("Activity Summary")
  
     user_workouts = get_user_workouts(userId)
     display_activity_summary(user_workouts)
  
     # --- Recent Workouts Logic ---
-    st.divider()
+    # st.divider()
     st.header("Recent Activity")
     
     display_recent_workouts(user_workouts)
  
     # --- GenAI Logic ---
-    st.divider()
+    # st.divider()
     st.markdown("## 🤖 AI Advice")
     
     gen_ai_advice = get_genai_advice(userId)
@@ -58,14 +57,15 @@ def display_app_page():
     image = gen_ai_advice['image']
  
     display_genai_advice(timestamp, content, image)
- 
 
+ 
 # This is the starting point for your app. You do not need to change these lines
 if __name__ == '__main__':
-    inject_streamlit_global_styles()
+    with open('custom_components/streamlit_global.css') as f:
+        st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
 
-    home_tab, activity_tab, workout_plans_tab, log_workout_tab, ai_trainer_tab, community_tab = st.tabs(
-        ["Home", "Activity", "Workout Plans", "Log Workout", "AI Trainer", "Community"]
+    home_tab, activity_tab, workout_plan_tab, daily_goals_tab, ai_trainer_tab, community_tab = st.tabs(
+        ["Home", "Activity", "Workout Plan", "Daily Goals", "AI Trainer", "Community"]
     )
 
     with home_tab:
@@ -74,12 +74,12 @@ if __name__ == '__main__':
     with activity_tab:
         display_activity_page()
 
-    with workout_plans_tab:
+    with workout_plan_tab:
         display_workout_plan_page()
 
-    with log_workout_tab:
-        display_log_workout_page()
-
+    with daily_goals_tab:
+        display_daily_goals_page()
+        
     with ai_trainer_tab:
         display_chat_page(userId)
 

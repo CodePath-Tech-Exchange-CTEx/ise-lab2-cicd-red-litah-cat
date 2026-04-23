@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Workout Summary Card</title>
+<style>
+:root {
+  --cc-bg-app: #0e1117;
+  --cc-bg-card: #161b22;
+  --cc-bg-elevated: #1c1f26;
+  --cc-border: #30363d;
+  --cc-text: #e6edf3;
+  --cc-text-muted: #8b949e;
+  --cc-accent: #f97316;
+  --cc-font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  margin: 0;
+  font-family: var(--cc-font);
+  background: var(--cc-bg-app);
+  color: var(--cc-text);
+}
+
+.wc-root {
+  max-width: 420px;
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--cc-bg-card);
+  border: 1px solid var(--cc-border);
+}
+
+.wc-header {
+  background: var(--cc-bg-elevated);
+  color: var(--cc-text);
+  padding: 18px 20px;
+  border-bottom: 1px solid var(--cc-border);
+}
+
+.wc-header h2 {
+  margin: 0;
+  font-weight: 600;
+  font-size: 1.1rem;
+}
+
+.wc-header .subtitle {
+  margin: 6px 0 0 0;
+  font-size: 0.9em;
+  color: var(--cc-text-muted);
+}
+
+.wc-body {
+  padding: 20px;
+}
+
+.wc-metrics {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  text-align: center;
+  gap: 10px;
+  margin-bottom: 18px;
+}
+
+.wc-metrics .val {
+  font-size: 1.35em;
+  font-weight: 600;
+  color: var(--cc-accent);
+}
+
+.wc-metrics .lbl {
+  font-size: 0.75em;
+  color: var(--cc-text-muted);
+}
+
+.wc-rule {
+  height: 1px;
+  background: var(--cc-border);
+  margin-bottom: 14px;
+}
+
+.wc-loc {
+  font-size: 0.85em;
+  color: var(--cc-text-muted);
+  line-height: 1.5;
+}
+</style>
+</head>
+<body>
+<div class="wc-root">
+  <div class="wc-header">
+    <h2>Workout Summary</h2>
+    <p class="subtitle">{{START_TIME}} &ndash; {{END_TIME}}</p>
+  </div>
+  <div class="wc-body">
+    <div class="wc-metrics">
+      <div>
+        <div class="val">{{DISTANCE}}</div>
+        <div class="lbl">Distance</div>
+      </div>
+      <div>
+        <div class="val">{{STEPS}}</div>
+        <div class="lbl">Steps</div>
+      </div>
+      <div>
+        <div class="val">{{CALORIES}}</div>
+        <div class="lbl">Calories</div>
+      </div>
+    </div>
+    <div class="wc-rule"></div>
+    <div class="wc-loc">
+      <strong>Start:</strong> {{START_COORDS}}<br>
+      <strong>End:</strong> {{END_COORDS}}
+    </div>
+  </div>
+</div>
+</body>
+</html>

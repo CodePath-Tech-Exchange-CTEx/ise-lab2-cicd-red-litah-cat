@@ -1,0 +1,184 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap');
+
+html, body, [class*="css"] {
+    font-family: 'Outfit', sans-serif !important;
+}
+
+/* #MainMenu, footer, header {
+    visibility: hidden;
+} */
+
+/* .stApp {
+    background: black !important;
+} */
+
+h1, h2, h3, p, label, span, div {
+    font-family: 'Outfit', sans-serif !important;
+}
+
+.workout-title {
+    color: white !important;
+    font-size: 2rem !important;
+    font-weight: 600 !important;
+    text-align: center !important;
+    margin: 0 !important;
+    padding-top: 8px !important;
+}
+
+.section-label {
+    color: #ff8500 !important;
+    font-size: 1.5rem !important;
+    font-weight: 700 !important;
+    margin-top: 18px !important;
+    margin-bottom: 20px !important;
+    padding-bottom: 35px !important;
+}
+
+.add-goal-label {
+    color: #ff8500 !important;
+    font-size: 22px !important;
+    font-weight: 700 !important;
+    margin-top: 18px !important;
+    margin-bottom: 10px !important;
+    text-align: center !important;
+}
+
+/* centered wrapper for "Add new goal" label + "+" button */
+div.st-key-add_goal_cta div[data-testid="stVerticalBlock"] {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+}
+
+div.st-key-add_goal_cta .add-goal-label {
+    width: 100% !important;
+    text-align: center !important;
+}
+
+/* keep the "+" trigger visually centered under its label */
+div.st-key-open_add_goal_modal div[data-testid="stButton"] {
+    display: flex !important;
+    justify-content: center !important;
+}
+
+div.st-key-open_add_goal_modal div[data-testid="stButton"] > button {
+    margin: 0 auto !important;
+}
+
+.stImage img {
+    border-radius: 50% !important;
+    object-fit: cover !important;
+}
+
+.stCheckbox {
+    margin-top: 24px !important;
+}
+
+.stCheckbox label,
+.stCheckbox p,
+.stCheckbox span {
+    color: #ff8500 !important;
+    font-size: 1.05rem !important;
+    font-weight: 700 !important;
+}
+
+/* all workout page buttons reset */
+div[data-testid="stButton"] > button {
+    border: none !important;
+    box-shadow: none !important;
+    font-family: 'Outfit', sans-serif !important;
+}
+
+/* dialog box */
+div[data-testid="stDialog"] > div {
+    background: none !important;
+    border: 1px solid #ff8500 !important;
+    border-radius: 18px !important;
+    /* color: black !important; */
+}
+
+/* hide built-in dialog header/title area */
+div[data-testid="stDialog"] [data-testid="stDialogHeader"] {
+    display: none !important;
+}
+
+/* custom centered title */
+div[data-testid="stDialog"] .custom-modal-title {
+    /* color: black !important; */
+    font-family: 'Outfit', sans-serif !important;
+    font-size: 1.5rem !important;
+    font-weight: 700 !important;
+    text-align: center !important;
+    margin-top: 4px !important;
+    margin-bottom: 18px !important;
+    width: 100% !important;
+}
+
+/* custom labels inside modal */
+div[data-testid="stDialog"] .modal-field-label {
+    /* color: black !important; */
+    font-size: 1rem !important;
+    font-weight: 700 !important;
+    margin-top: 8px !important;
+    margin-bottom: 6px !important;
+    font-family: 'Outfit', sans-serif !important;
+}
+
+/* input wrapper */
+/* div[data-testid="stDialog"] div[data-baseweb="input"] {
+    background: white !important;
+    border: 1px solid #cfcfcf !important;
+    border-radius: 12px !important;
+} */
+
+/* actual text input */
+div[data-testid="stDialog"] input {
+    background-color: white !important;
+    color: black !important;
+    font-family: 'Outfit', sans-serif !important;
+}
+
+/* placeholder */
+div[data-testid="stDialog"] input::placeholder {
+    color: #828282 !important;
+    opacity: 1 !important;
+}
+
+/* all modal buttons */
+div[data-testid="stDialog"] div[data-testid="stButton"] > button {
+    border-radius: 12px !important;
+    font-family: 'Outfit', sans-serif !important;
+    font-weight: 700 !important;
+    min-height: 44px !important;
+    border: none !important;
+}
+
+/* cancel button */
+div[data-testid="stDialog"] div[data-testid="stButton"] > button:not([kind="primary"]) {
+    background: #d9d9d9 !important;
+    color: black !important;
+    border: none !important;
+}
+
+/* cancel button text */
+div[data-testid="stDialog"] div[data-testid="stButton"] > button:not([kind="primary"]) p {
+    color: black !important;
+}
+
+/* save button */
+div[data-testid="stDialog"] button[kind="primary"] {
+    background: #ff8500 !important;
+    color: white !important;
+    border: none !important;
+}
+
+/* save button text */
+div[data-testid="stDialog"] button[kind="primary"] p {
+    color: white !important;
+}
+
+/* warnings */
+div[data-testid="stDialog"] div[data-baseweb="notification"] {
+    border-radius: 12px !important;
+    font-family: 'Outfit', sans-serif !important;
+}

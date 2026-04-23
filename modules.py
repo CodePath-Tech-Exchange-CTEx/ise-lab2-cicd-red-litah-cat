@@ -7,9 +7,11 @@
 # function other than the example.
 #############################################################################
 
-from internals import create_component, safe_string, load_html_file
+from internals import create_component, load_html_file, safe_string
 import streamlit as st
+import streamlit.components.v1 as components
 from datetime import datetime
+import html as _html
 
 
 # This one has been written for you as an example. You may change it as wanted.
@@ -91,7 +93,6 @@ def display_activity_summary(workouts_list):
     }
 
     html_file_name = "activity_summary"
-    # Iframe default height is 150px; this card is taller — size it to fit without scrolling.
     create_component(data, html_file_name, height=520, scrolling=False)
 
 def display_recent_workouts(workouts_list):
@@ -117,9 +118,7 @@ def display_recent_workouts(workouts_list):
             'END_COORDS': f"{workout['end_lat_lng'][0]}, {workout['end_lat_lng'][1]}"
         }
         
-        # This renders 'custom_components/workout_card.html'.
-        html_file_name = "workout_card"
-        create_component(data, "workout_card", 270, 500)
+        create_component(data, "workout_summary_card", 270, 500)
 
 def display_genai_advice(timestamp, content, image):
     """Write a good docstring here.
@@ -139,31 +138,30 @@ def display_genai_advice(timestamp, content, image):
             'IMAGE': image}
 
     html_file_name = 'display_genai_advice_component'
-    create_component(data, html_file_name, height=300, scrolling=True)
-    
+    create_component(data, html_file_name, height=500, scrolling=True)
+
 
 def display_ai_trainer_hero(user_name):
     """Displays the hero greeting for the AI Trainer page.
 
-    Renders a centred greeting ("Hello, <name>!!"). The actual functional
-    input is Streamlit's ``st.chat_input``, styled separately in Python/CSS.
+    Renders a centred greeting ("Hello, <name>!!").
 
     Args:
-        user_name (str): The user's first name (or display name) to show in
-                         the greeting.
+        user_name (str): The user's display name to show in the greeting.
     """
     data = {'USER_NAME': user_name}
     create_component(data, "ai_trainer_hero", height=120)
 
 
 def display_chat_history(messages):
-    """
-    Renders the full chat history as a single HTML component to avoid
-    creating one iframe per message. Iterates the messages list in Python,
-    builds one HTML string, and passes it as a single template variable.
+    """Renders the full chat history as a single HTML component.
+
+    Assembles all message bubbles in Python using the user and AI fragment
+    templates, then injects the result into the wrapper which contains all
+    necessary CSS. A single iframe is rendered for the whole thread.
 
     Args:
-        messages (list): List of message dicts with keys 'role', 'content', 'timestamp'.
+        messages (list): List of dicts with keys 'role', 'content', 'timestamp'.
                          Role must be 'user' or 'model'.
     """
     user_tmpl = load_html_file('custom_components/chat_message_user.html')
@@ -176,23 +174,52 @@ def display_chat_history(messages):
             if hasattr(msg['timestamp'], 'strftime')
             else str(msg['timestamp'])
         )
-        content_safe = safe_string(str(msg['content']))
-        timestamp_safe = safe_string(timestamp_str)
+        content_safe = _html.escape(str(msg['content']))
+        timestamp_safe = _html.escape(timestamp_str)
 
         if msg['role'] == 'user':
-            bubble = user_tmpl.replace('{{CONTENT}}', content_safe).replace('{{TIMESTAMP}}', timestamp_safe)
+            bubble = (user_tmpl
+                      .replace('{{CONTENT}}', content_safe)
+                      .replace('{{TIMESTAMP}}', timestamp_safe))
         else:
-            bubble = ai_tmpl.replace('{{CONTENT}}', content_safe).replace('{{TIMESTAMP}}', timestamp_safe)
+            bubble = (ai_tmpl
+                      .replace('{{CONTENT}}', content_safe)
+                      .replace('{{TIMESTAMP}}', timestamp_safe))
 
         assembled_html += bubble + "\n"
 
-    base_css = load_html_file("iframe_base.css")
-    shell = load_html_file("chat_feed_wrapper.html")
-    wrapper = (
-        shell.replace("/*__CHAT_FEED_WRAPPER_IFRAME_BASE_CSS__*/", base_css)
-        .replace("{{INNER_HTML}}", assembled_html)
-    )
+    wrapper = load_html_file('custom_components/chat_feed_wrapper.html')
+    wrapper = wrapper.replace('{{INNER_HTML}}', assembled_html)
 
-    import streamlit.components.v1 as components
-    height = max(300, min(len(messages) * 100, 700))
+    height = max(300, min(len(messages) * 110, 500))
     components.html(wrapper, height=height, scrolling=True)
+
+def display_goals(goal_name, duration, status):
+    duration = f"{duration} min"
+    check_mark = "✓" if status else ""
+
+    data = {
+        "GOAL_NAME": goal_name,
+        "DURATION": duration,
+        "CHECK_MARK": check_mark
+    }
+
+    create_component(data, "daily_goals", height=120, scrolling=False)
+
+
+def display_workout_plan_card(workout_name, duration, intensity, workout_date):
+    """Displays a single logged workout as a white rounded card.
+
+    Args:
+        workout_name (str): The name of the workout (e.g. 'Running').
+        duration (int): Duration of the workout in minutes.
+        intensity (str): Intensity level (e.g. 'Moderate').
+        workout_date: The date the workout was performed.
+    """
+    data = {
+        "WORKOUT_NAME": workout_name,
+        "DURATION": str(duration),
+        "INTENSITY": intensity,
+        "WORKOUT_DATE": str(workout_date),
+    }
+    create_component(data, "workout_plan_card", height=120, scrolling=False)

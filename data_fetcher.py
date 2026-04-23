@@ -12,7 +12,7 @@ import json
 import requests
 import vertexai
 from vertexai.generative_models import GenerativeModel, GenerationConfig
-from datetime import datetime
+from datetime import datetime, date, timedelta
 from google.cloud import bigquery
 
 
@@ -385,6 +385,25 @@ def get_user_friends(user_id):
 
     return friends
 
+def _strip_markdown(text: str) -> str:
+    """Removes common markdown formatting and escape sequences from a string,
+    returning clean plain text suitable for display in HTML."""
+    import re
+    # Unescape backslash-escaped characters (e.g. \' -> ')
+    text = text.replace("\\'", "'").replace('\\"', '"').replace("\\n", " ").replace("\\t", " ")
+    # Remove bold/italic markers: **, *, __, _
+    text = re.sub(r'\*{1,3}|_{1,3}', '', text)
+    # Remove inline code backticks
+    text = re.sub(r'`+', '', text)
+    # Remove markdown headings (# Heading)
+    text = re.sub(r'^\s*#{1,6}\s+', '', text, flags=re.MULTILINE)
+    # Remove markdown links [text](url) -> text
+    text = re.sub(r'\[([^\]]+)\]\([^)]*\)', r'\1', text)
+    # Collapse multiple spaces
+    text = re.sub(r'  +', ' ', text)
+    return text.strip()
+
+
 def get_genai_advice(user_id):
     """Returns the most recent advice from the genai model.
 
@@ -404,6 +423,8 @@ def get_genai_advice(user_id):
 
     latest_workout = workouts[0]
 
+    vertexai.init(project=PROJECT_ID, location="us-central1")
+    
     if not _safe_vertex_ai_init():
         return {
             "advice_id": "ADV-LOCAL",
@@ -411,9 +432,15 @@ def get_genai_advice(user_id):
             "content": "Nice work! Keep up the momentum and hydrate after your workout.",
             "image": None,
         }
-
-    model = GenerativeModel("gemini-2.5-flash-lite",
-                            system_instruction="You are a helpful and encouraging workout coach.")
+    
+    model = GenerativeModel(
+        "gemini-2.5-flash-lite",
+        system_instruction=(
+            "You are a helpful and encouraging workout coach. "
+            "Respond in plain text only. Do not use markdown formatting, "
+            "asterisks, bold, italics, bullet points, or any escape characters."
+        )
+    )
     
     prompt = f"""
             The user just finished a workout with these stats:
@@ -425,7 +452,11 @@ def get_genai_advice(user_id):
     
             Provide one to two sentence of expert, encouraging fitness advice based on these specific numbers.
             Also, provide 3 keywords for a matching stock photo (e.g., 'running shoes asphalt').
-    """
+
+            IMPORTANT: Respond in plain text only. Do not use markdown formatting of any kind — 
+            no asterisks, no bold, no italics, no bullet point dashes, no headers, no backticks, 
+            and no escape characters such as \\' or \\\".    
+            """
     
     # Line Written By Gemini
     response = model.generate_content(
@@ -460,7 +491,7 @@ def get_genai_advice(user_id):
 
     return {"advice_id": advice_id,
             "timestamp": datetime.now(),
-            "content": ai_response["content"],
+            "content": _strip_markdown(ai_response["content"]),
             "image": image_url
             }
 
@@ -526,6 +557,7 @@ def insert_post(user_id, content):
     query_job = client.query(query, job_config=job_config)
     query_job.result()
 
+
 def get_chat_history(user_id):
     """Returns chat history for a given user from BigQuery."""
     client = _get_bigquery_client()
@@ -549,7 +581,6 @@ def get_chat_history(user_id):
     try:
         results = query_job.result()
     except Exception as e:
-        # Table might not exist yet; return empty list gracefully
         print(f"Error fetching chat history: {e}")
         return []
 
@@ -560,10 +591,11 @@ def get_chat_history(user_id):
             "user_id": row.UserId,
             "timestamp": row.Timestamp,
             "role": row.Role,
-            "content": row.Content
+            "content": _strip_markdown(row.Content or "")
         })
 
     return history
+
 
 def insert_chat_message(user_id, role, content):
     """Inserts a new chat message into the BigQuery ChatHistory table."""
@@ -591,6 +623,7 @@ def insert_chat_message(user_id, role, content):
 
     query_job = client.query(query, job_config=job_config)
     query_job.result()
+
 
 def get_fitness_profile(user_id):
     """Returns the saved fitness profile for a given user from BigQuery.
@@ -649,7 +682,6 @@ def save_fitness_profile(user_id, first_name, last_name, age, sex, height,
         return
     updated_at = datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')
 
-    # BigQuery MERGE (upsert) — insert if not exists, update if exists.
     query = f"""
         MERGE `{PROJECT_ID}.{COURSE_CODE}.UserFitnessProfiles` AS target
         USING (SELECT @user_id AS UserId) AS source
@@ -694,26 +726,28 @@ def save_fitness_profile(user_id, first_name, last_name, age, sex, height,
 
 
 def chat_with_ai(user_id, user_message):
-    """
-    Sends a message to Vertex AI with full conversation context fetched from
+    """Sends a message to Vertex AI with full conversation context fetched from
     BigQuery on every call. Uses generate_content() with a reconstructed
     contents list so no stateful client object is needed between server restarts.
+
+    Args:
+        user_id (str): The ID of the current user.
+        user_message (str): The message sent by the user.
+
+    Returns:
+        str: The AI model's reply text.
     """
     from vertexai.generative_models import Content, Part
 
-    # Store the user's message first so it is included in history
     insert_chat_message(user_id, 'user', user_message)
 
-    # Rebuild full conversation history from BigQuery on every call
     history = get_chat_history(user_id)
 
-    # Reconstruct the contents list — Vertex AI only accepts 'user' or 'model'
     contents = []
     for msg in history:
         vertex_role = 'user' if msg['role'] == 'user' else 'model'
         contents.append(Content(role=vertex_role, parts=[Part.from_text(msg['content'])]))
 
-    # Include fitness profile as context in the system instruction if available.
     profile = get_fitness_profile(user_id)
     if profile:
         profile_context = f"""
@@ -733,27 +767,290 @@ def chat_with_ai(user_id, user_message):
         profile_context = "\n    No fitness profile saved yet. Encourage the user to complete their profile.\n"
 
     vertexai.init(project=PROJECT_ID, location="us-central1")
-    model = GenerativeModel("gemini-2.5-flash-lite",
-    system_instruction=f"""You are Arnold, an expert AI personal trainer and fitness coach. You have deep knowledge of strength training, cardio, nutrition, injury prevention, recovery, and workout programming.
-{profile_context}
-    You ONLY answer questions related to:
-    - Exercise and workout programming
-    - Fitness goals (weight loss, muscle building, flexibility, endurance)
-    - Nutrition as it relates to fitness and performance
-    - Recovery, sleep, and injury prevention
-    - The user's personal training context provided above
-
-    If a user asks about ANYTHING outside of fitness and training — coding, math, general knowledge, current events, or anything unrelated — you must politely decline and redirect. For example: "That's outside my expertise! I'm here strictly for your fitness journey. Ask me about your workouts, nutrition, or training plan instead."
-
-    Tone: Direct, motivating, and knowledgeable. Like a real personal trainer who genuinely cares about results. Be concise — 2-4 sentences unless the user explicitly asks for detail or a full plan.
-
-    Never break character. Never answer non-fitness questions even if the user insists."""
+    model = GenerativeModel(
+        "gemini-2.5-flash-lite",
+        system_instruction=(
+            f"You are Arnold, an expert AI personal trainer and fitness coach. "
+            f"You have deep knowledge of strength training, cardio, nutrition, "
+            f"injury prevention, recovery, and workout programming.\n"
+            f"{profile_context}\n"
+            "You ONLY answer questions related to:\n"
+            "- Exercise and workout programming\n"
+            "- Fitness goals (weight loss, muscle building, flexibility, endurance)\n"
+            "- Nutrition as it relates to fitness and performance\n"
+            "- Recovery, sleep, and injury prevention\n"
+            "- The user's personal training context provided above\n\n"
+            "If a user asks about ANYTHING outside of fitness and training — coding, math, "
+            "general knowledge, current events, or anything unrelated — you must politely "
+            "decline and redirect. For example: \"That's outside my expertise! I'm here "
+            "strictly for your fitness journey. Ask me about your workouts, nutrition, or "
+            "training plan instead.\"\n\n"
+            "Tone: Direct, motivating, and knowledgeable. Like a real personal trainer who "
+            "genuinely cares about results. Be concise — 2-4 sentences unless the user "
+            "explicitly asks for detail or a full plan.\n\n"
+            "Never break character. Never answer non-fitness questions even if the user insists.\n\n"
+            "IMPORTANT: Respond in plain text only. Do not use markdown formatting of any kind — "
+            "no asterisks, no bold, no italics, no bullet point dashes, no headers, no backticks, "
+            "and no escape characters such as \\' or \\\"."
+        )
     )
 
     response = model.generate_content(contents=contents)
-    ai_text = response.text
+    ai_text = _strip_markdown(response.text)
 
-    # Persist the model's response using the correct role string
     insert_chat_message(user_id, 'model', ai_text)
 
     return ai_text
+
+# PROJECT_ID = "toyosi-ajiboye-fisk"
+
+def get_daily_goals(user_id):
+    """Displays daily workout goals."""
+    client = bigquery.Client(project=PROJECT_ID)
+    goal_date = date.today()
+
+    query = f"""
+        SELECT
+            GoalId AS goal_id,
+            UserId AS user_id,
+            GoalName AS goal_name,
+            Duration AS duration,
+            Status AS status,
+            GoalDate AS goal_date
+        FROM `{PROJECT_ID}.{COURSE_CODE}.DailyGoals`
+        WHERE UserId = @user_id AND GoalDate = @goal_date
+        ORDER BY goal_name
+    """
+
+    job_config = bigquery.QueryJobConfig(
+        query_parameters=[
+            bigquery.ScalarQueryParameter("user_id", "STRING", user_id),
+            bigquery.ScalarQueryParameter("goal_date", "DATE", goal_date),
+        ]
+    )
+
+    query_job = client.query(query, job_config=job_config)
+    results = query_job.result()
+
+    daily_goals = []
+    for row in results:
+        daily_goals.append({
+            "goal_id": row.goal_id,
+            "user_id": row.user_id,
+            "goal_name": row.goal_name,
+            "duration": row.duration,
+            "status": row.status,
+            "goal_date": row.goal_date,
+        })
+
+    return daily_goals
+
+def save_new_goal(user_id: str, goal_name: str, duration: int):
+    client = bigquery.Client(project=PROJECT_ID)
+
+    query = f"""
+        INSERT INTO `{PROJECT_ID}.{COURSE_CODE}.DailyGoals`
+            (GoalId, UserId, GoalName, Duration, Status, GoalDate)
+        VALUES (@goal_id, @user_id, @goal_name, @duration, FALSE, @goal_date)
+    """
+
+    job_config = bigquery.QueryJobConfig(
+        query_parameters=[
+            bigquery.ScalarQueryParameter("goal_id", "STRING", str(uuid.uuid4())),
+            bigquery.ScalarQueryParameter("user_id", "STRING", user_id),
+            bigquery.ScalarQueryParameter("goal_name", "STRING", goal_name),
+            bigquery.ScalarQueryParameter("duration", "INT64", duration),
+            bigquery.ScalarQueryParameter("goal_date", "DATE", date.today()),
+        ]
+    )
+
+    client.query(query, job_config=job_config).result()
+    
+def update_goal_status(goal_id: str, completed: bool):
+    """Updates the completion status of a goal."""
+    client = bigquery.Client(project=PROJECT_ID)
+
+    query = f"""
+        UPDATE `{PROJECT_ID}.{COURSE_CODE}.DailyGoals`
+        SET Status = @completed
+        WHERE GoalId = @goal_id
+    """
+    job_config = bigquery.QueryJobConfig(
+        query_parameters=[
+            bigquery.ScalarQueryParameter("goal_id", "STRING", goal_id),
+            bigquery.ScalarQueryParameter("completed", "BOOL", completed),
+        ]
+    )
+    client.query(query, job_config=job_config).result()
+
+
+def get_logged_workouts(user_id):
+    """Fetches all manually logged workouts for a user from the Workouts table.
+
+    Manually logged workouts are identified by having a non-null WorkoutType.
+    Returns a list of dicts ordered by date descending.
+    """
+    client = bigquery.Client(project=PROJECT_ID)
+
+    # We use subqueries with ARRAY_AGG to bundle the child rows into lists
+    query = f"""
+        SELECT
+            w.WorkoutName   AS workout_name,
+            w.WorkoutId      AS workout_id,
+            w.UserId         AS user_id,
+            w.WorkoutType    AS workout_type,
+            w.DurationMinutes AS duration,
+            w.Intensity      AS intensity,
+            w.CaloriesBurned AS calories_burned,
+            DATE(w.StartTimestamp) AS workout_date,
+            w.Notes          AS notes,
+            
+            -- Pack the muscle groups into a simple list of strings
+            (SELECT ARRAY_AGG(m.MuscleGroup) 
+             FROM `{PROJECT_ID}.{COURSE_CODE}.WorkoutMuscleGroups` m 
+             WHERE m.WorkoutID = w.WorkoutId) AS muscle_groups,
+             
+            -- Pack the exercises into a list of dictionaries (STRUCTs)
+            (SELECT ARRAY_AGG(
+                STRUCT(
+                    e.ExerciseName AS name, 
+                    e.ExerciseSets AS sets, 
+                    e.ExerciseReps AS reps, 
+                    e.ExerciseWeight AS weight, 
+                    e.ExerciseTimeOrDistance AS cardio_metric
+                )
+             ) 
+             FROM `{PROJECT_ID}.{COURSE_CODE}.WorkoutExercises` e 
+             WHERE e.WorkoutID = w.WorkoutId) AS exercises
+
+        FROM `{PROJECT_ID}.{COURSE_CODE}.Workouts` w
+        WHERE w.UserId = @user_id
+          AND w.WorkoutType IS NOT NULL
+        ORDER BY w.StartTimestamp DESC
+    """
+
+    job_config = bigquery.QueryJobConfig(
+        query_parameters=[
+            bigquery.ScalarQueryParameter("user_id", "STRING", user_id)
+        ]
+    )
+
+    query_job = client.query(query, job_config=job_config)
+    results = query_job.result()
+
+    logged_workouts = []
+    for row in results:
+        # BigQuery will return None for the arrays if no child rows exist, 
+        # so we use `or []` to ensure Python always gets a list.
+        
+        # Unpack the BigQuery Structs into standard Python dictionaries
+        raw_exercises = row.exercises or []
+        parsed_exercises = [dict(ex) for ex in raw_exercises]
+        
+        logged_workouts.append({
+            "workout_name": row.workout_name,
+            "workout_id": row.workout_id,
+            "user_id": row.user_id,
+            "workout_type": row.workout_type,
+            "duration": row.duration,
+            "intensity": row.intensity,
+            "calories_burned": row.calories_burned,
+            "workout_date": row.workout_date,
+            "notes": row.notes,
+            "muscle_groups": row.muscle_groups or [], # List of strings
+            "exercises": parsed_exercises             # List of dictionaries
+        })
+
+    return logged_workouts
+
+def save_logged_workout(user_id, workout_data):
+    """Inserts a manually logged workout into the Workouts table.
+
+    GPS, distance, and step columns are left NULL for manually logged entries.
+    StartTimestamp and EndTimestamp are derived from workout_date and duration
+    so the activity summary can still calculate totals correctly.
+
+    Args:
+        user_id (str): The ID of the user logging the workout.
+        workout_data (dict): A dictionary containing the workout details.
+            workout_type (str): Type of workout (e.g. 'Running').
+            duration (int): Duration in minutes.
+            intensity (str): Intensity level (e.g. 'Moderate').
+            calories_burned (int): Estimated calories burned (0 if not provided).
+            workout_date (date): The date the workout took place.
+            notes (str): Optional free-text notes.
+            muscle_groups (List[str]): The muscle group the workout plan targets
+            exercises (List[dict{}]): the exercises that make up the workout plan
+    """
+    client = bigquery.Client(project=PROJECT_ID)
+
+    start_dt = datetime.combine(workout_data['date'], datetime.min.time())
+    end_dt = start_dt + timedelta(minutes=workout_data['duration'])
+    start_ts = start_dt.strftime('%Y-%m-%d %H:%M:%S')
+    end_ts = end_dt.strftime('%Y-%m-%d %H:%M:%S')
+
+    workout_id = str(uuid.uuid4())
+
+    # Standard Workout Info
+    wr_errors = []
+    workout_rows = [{'WorkoutId':workout_id, 'UserId':user_id, 
+                    'StartTimestamp':start_ts, 'EndTimestamp':end_ts, 
+                    'WorkoutType':workout_data['type'], 'DurationMinutes':workout_data['duration'], 
+                    'Intensity':workout_data['intensity'], 'CaloriesBurned':workout_data['calories'],
+                    'Notes':workout_data['notes'], 'WorkoutName':workout_data['name']}]
+
+    if workout_rows:
+        # Insert workout rows into db
+        wr_errors = client.insert_rows_json('ISE.Workouts', workout_rows)
+    else:
+        wr_errors.append("ERROR: Rows not added because List was empty.")
+        print('ERROR: Rows not added because List was empty.')
+
+    if wr_errors:
+        print(f'Encountered Error Inserting Workout Rows: {wr_errors}')
+    
+
+    # Exercises
+    exercises = workout_data['exercises']
+    er_errors = []
+    exercise_rows = []
+
+    for exercise in exercises:
+        if exercise['name'].strip() != '':
+            exercise_rows.append({
+                'WorkoutId':workout_id, 'ExerciseId': str(uuid.uuid4()), 
+                'ExerciseName': exercise['name'], 'ExerciseSets': exercise['sets'],
+                'ExerciseReps': exercise['reps'], 'ExerciseWeight': exercise['weight'],
+                'ExerciseTimeOrDistance': exercise['cardio_metric']
+            })
+    
+    if not wr_errors:
+        if exercise_rows:
+            # Insert exercise rows into db
+            er_errors = client.insert_rows_json('ISE.WorkoutExercises', exercise_rows)
+        else:
+            er_errors = []
+            print('ERROR: Rows not added because List was empty.')
+
+    if er_errors:
+        print(f'Encountered Error Inserting Exercise Rows: {er_errors}')
+
+
+    # Muscle Groups
+    muscle_groups = workout_data['muscle_groups']
+    mg_errors = []
+    muscle_group_rows = []
+
+    for group in muscle_groups: 
+        muscle_group_rows.append({
+            'WorkoutId': workout_id,
+            'MuscleGroup': group
+        })
+
+    if muscle_group_rows:
+        # Insert muscle group rows into db
+        mg_errors = client.insert_rows_json('ISE.WorkoutMuscleGroups', muscle_group_rows)
+        if mg_errors:
+            print(f"Error inserting muscle groups: {mg_errors}")
+    else:
+        print('ERROR: Rows not added because List was empty.')
