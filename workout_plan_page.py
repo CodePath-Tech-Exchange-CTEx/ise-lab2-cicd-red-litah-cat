@@ -9,7 +9,6 @@ from datetime import datetime, date
 from modules import display_workout_plan_card
 from data_fetcher import get_logged_workouts, save_logged_workout
 
-user_id = "user1"
 
 
 def load_workout_plan_css():
@@ -31,7 +30,7 @@ def display_workout_plan_header():
 
 
 @st.dialog("ADD NEW WORKOUT", width="large")
-def display_add_workout_plan_modal():
+def display_add_workout_plan_modal(userId):
     """
     Displays a modal for adding a new workout plan.
     """
@@ -152,7 +151,7 @@ def display_add_workout_plan_modal():
                 }
                 
                 # Save workout
-                save_logged_workout(user_id, workout_data)
+                save_logged_workout(userId, workout_data)
                 
                 st.success("Workout Saved Successfully!")
                 
@@ -246,7 +245,7 @@ def display_workout_details_modal(workout):
             st.rerun()
 
 
-def display_workout_plan_page():
+def display_workout_plan_page(userId):
     """Displays the Workout Plan page with a card-based list and an add modal."""
     load_workout_plan_css()
 
@@ -259,7 +258,7 @@ def display_workout_plan_page():
         unsafe_allow_html=True
     )
 
-    workouts = get_logged_workouts(user_id)
+    workouts = get_logged_workouts(userId)
 
     if not workouts:
         st.write("No workout plans added yet.")
@@ -285,7 +284,7 @@ def display_workout_plan_page():
     with workout_plan_cta:
         st.markdown('<div class="add-goal-label">Add new workout plan</div>', unsafe_allow_html=True)
         if st.button("✚", key="open_workout_plan_modal"):
-            display_add_workout_plan_modal()
+            display_add_workout_plan_modal(userId)
 
     st.markdown('</div>', unsafe_allow_html=True)
 
