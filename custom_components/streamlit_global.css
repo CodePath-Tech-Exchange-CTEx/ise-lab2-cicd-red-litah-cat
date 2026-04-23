@@ -176,12 +176,14 @@
   fill: #888 !important;
 }
 
-[data-testid="stTextInput"]  > label,
+/* Commented Out because it hides text labels */
+
+/* [data-testid="stTextInput"]  > label,
 [data-testid="stNumberInput"] > label,
 [data-testid="stTextArea"]   > label,
 [data-testid="stSelectbox"]  > label {
   display: none !important;
-}
+} */
 
 [data-testid="stForm"] {
   border: none !important;
