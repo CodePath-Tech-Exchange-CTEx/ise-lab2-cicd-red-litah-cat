@@ -138,3 +138,43 @@ div[data-testid="stDialog"] div[data-baseweb="notification"] {
     border-radius: 12px !important;
     font-family: 'Outfit', sans-serif !important;
 }
+
+/* ── CIRCULAR PLAY BUTTONS ── */
+
+/* 1. Target any container whose key starts with 'play_container' */
+div[class*="st-key-play_container"] div[data-testid="stButton"] > button {
+    border-radius: 50% !important;
+    width: 48px !important;
+    height: 48px !important;
+    min-width: 48px !important;
+    min-height: 48px !important;
+    padding: 0 !important;
+    background-color: #f97316 !important; /* Streamlit Accent Orange */
+    border: none !important;
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    box-shadow: 0 4px 10px rgba(249, 115, 22, 0.3) !important;
+    transition: all 0.15s ease !important;
+}
+
+/* 2. Style the Play Triangle */
+div[class*="st-key-play_container"] div[data-testid="stButton"] > button p {
+    color: #ffffff !important;
+    font-size: 22px !important;
+    margin: 0 !important;
+    /* Optical adjustment: Triangles always look slightly off-center unless you nudge them right */
+    padding-left: 4px !important; 
+}
+
+/* 3. Give it a satisfying "pop" when hovered */
+div[class*="st-key-play_container"] div[data-testid="stButton"] > button:hover {
+    transform: scale(1.1) !important;
+    background-color: #ea6b0e !important;
+    box-shadow: 0 6px 14px rgba(249, 115, 22, 0.5) !important;
+}
+
+/* 4. Nudge the button up to align its center with the card */
+div[class*="st-key-play_container"] div[data-testid="stButton"] {
+    margin-top: -24px !important; /* Increase or decrease this number to dial it in perfectly! */
+}
