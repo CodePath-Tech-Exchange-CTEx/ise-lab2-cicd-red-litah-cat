@@ -1,7 +1,7 @@
 import streamlit as st
 from datetime import datetime
 from modules import display_goals
-from data_fetcher import get_daily_goals, get_user_profile, update_goal_status, save_new_goal
+from data_fetcher import get_daily_goals, update_goal_status, save_new_goal
 
 
 def load_workout_css():
@@ -9,26 +9,11 @@ def load_workout_css():
         st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
 
 
-def display_workout_header(userId):
-    user_profile = get_user_profile(userId)
-    profile_image = user_profile["profile_image"]
-
-    left, middle, right = st.columns([1, 5, 1])
-
-    with middle:
-        st.markdown(
-            f'<div class="workout-title">{datetime.now().strftime("%A, %d %B")}</div>',
-            unsafe_allow_html=True
-        )
-
-    with right:
-        if profile_image:
-            st.image(profile_image, width=60)
-        else:
-            # Use a default generic avatar silhouette if they don't have one
-            DEFAULT_AVATAR = "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png"
-            st.image(DEFAULT_AVATAR, width=60)
-
+def display_workout_header():
+    st.markdown(
+        f'<div class="workout-title">{datetime.now().strftime("%A, %d %B")}</div>',
+        unsafe_allow_html=True
+    )
     st.divider()
 
 
@@ -90,7 +75,7 @@ def display_daily_goals_page(userId):
 
     st.markdown('<div class="daily-goals-page">', unsafe_allow_html=True)
 
-    display_workout_header(userId)
+    display_workout_header()
 
     st.markdown(
         '<div class="section-label">View your daily goals:</div>',

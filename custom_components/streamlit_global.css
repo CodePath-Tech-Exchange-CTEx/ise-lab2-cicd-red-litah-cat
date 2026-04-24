@@ -190,6 +190,12 @@
   padding: 0 !important;
 }
 
+/* Hide "Press Enter to submit form" tooltip on focused inputs */
+[data-testid="stForm"] input:focus ~ div[data-testid="InputInstructions"],
+[data-testid="InputInstructions"] {
+  display: none !important;
+}
+
 .pf-divider {
   border: none;
   border-top: 1px solid #2e2e2e;

@@ -1057,6 +1057,25 @@ def create_new_user(first_name, last_name, username, password):
         print(f"Error inserting new user: {errors}")
         return None
         
+    # Seed the fitness profile with the account name so AI Trainer's
+    # profile section is pre-populated immediately after signup.
+    try:
+        save_fitness_profile(
+            user_id=new_user_id,
+            first_name=first_name,
+            last_name=last_name,
+            age=0,
+            sex="",
+            height="",
+            weight="",
+            fitness_level="",
+            injuries_limitations="",
+            primary_goal="Lose Weight",
+        )
+    except Exception as exc:
+        # Do not fail account creation if profile seeding fails.
+        print(f"Warning: could not seed fitness profile for {username}: {exc}")
+
     print(f"Successfully created user: {username}")
     return new_user_id
 

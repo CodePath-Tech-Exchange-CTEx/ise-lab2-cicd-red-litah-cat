@@ -20,13 +20,27 @@ def _display_profile_form(user_id):
     st.divider()
 
     saved = get_fitness_profile(user_id) or {}
+    user_profile = get_user_profile(user_id)
+    candidate_name = (
+        (user_profile.get("full_name") or "").strip()
+        or (user_profile.get("username") or "").strip()
+    )
+    full_name_parts = candidate_name.split(maxsplit=1) if candidate_name else []
+    fallback_first_name = full_name_parts[0] if full_name_parts else ""
+    fallback_last_name = full_name_parts[1] if len(full_name_parts) > 1 else ""
 
     with st.form("fitness_profile_form_inline"):
         col1, col2 = st.columns(2)
         with col1:
-            first_name = st.text_input("First Name", value=saved.get("first_name", ""))
+            first_name = st.text_input(
+                "First Name",
+                value=saved.get("first_name") or fallback_first_name
+            )
         with col2:
-            last_name = st.text_input("Last Name", value=saved.get("last_name", ""))
+            last_name = st.text_input(
+                "Last Name",
+                value=saved.get("last_name") or fallback_last_name
+            )
 
         col3, col4 = st.columns(2)
         with col3:
