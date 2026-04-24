@@ -155,7 +155,7 @@ class TestDataFetcher(unittest.TestCase):
         
 class TestGetUserSensorData(unittest.TestCase):
 
-    @patch("data_fetcher._get_bigquery_client")
+    @patch("backend.data_fetcher._get_bigquery_client")
     def test_get_user_sensor_data_returns_expected_data(self, mock_get_client):
         mock_client = MagicMock()
         mock_get_client.return_value = mock_client
@@ -210,7 +210,7 @@ class TestGetUserSensorData(unittest.TestCase):
 
         self.assertEqual(result, expected)
 
-    @patch("data_fetcher._get_bigquery_client")
+    @patch("backend.data_fetcher._get_bigquery_client")
     def test_get_user_sensor_data_empty_result(self, mock_get_client):
         mock_client = MagicMock()
         mock_get_client.return_value = mock_client
@@ -223,7 +223,7 @@ class TestGetUserSensorData(unittest.TestCase):
 
         self.assertEqual(result, [])
 
-    @patch("data_fetcher._get_bigquery_client")
+    @patch("backend.data_fetcher._get_bigquery_client")
     def test_get_user_sensor_data_calls_query_with_correct_parameters(self, mock_get_client):
         mock_client = MagicMock()
         mock_get_client.return_value = mock_client
@@ -248,7 +248,7 @@ class TestGetUserSensorData(unittest.TestCase):
         self.assertEqual(params[1].name, "workout_id")
         self.assertEqual(params[1].value, "workout1")
 
-    @patch("data_fetcher._get_bigquery_client")
+    @patch("backend.data_fetcher._get_bigquery_client")
     def test_get_user_sensor_data_single_row(self, mock_get_client):
         mock_client = MagicMock()
         mock_get_client.return_value = mock_client
@@ -272,7 +272,7 @@ class TestGetUserSensorData(unittest.TestCase):
         self.assertEqual(result[0]["data"], 115.0)
         self.assertEqual(result[0]["units"], "bpm")
     
-    @patch("data_fetcher._get_bigquery_client")
+    @patch("backend.data_fetcher._get_bigquery_client")
     def test_get_user_posts_returns_posts(self, mock_get_client):
         mock_client = Mock()
         mock_get_client.return_value = mock_client
@@ -316,7 +316,7 @@ class TestGetUserSensorData(unittest.TestCase):
 
         mock_client.query.assert_called_once()
 
-    @patch("data_fetcher._get_bigquery_client")
+    @patch("backend.data_fetcher._get_bigquery_client")
     def test_get_user_posts_returns_empty_list_when_no_posts(self, mock_get_client):
         mock_client = Mock()
         mock_get_client.return_value = mock_client
@@ -329,7 +329,7 @@ class TestGetUserSensorData(unittest.TestCase):
 
         assert result == []
 
-    @patch("data_fetcher._get_bigquery_client")
+    @patch("backend.data_fetcher._get_bigquery_client")
     def test_get_user_friends_returns_friends(self, mock_get_client):
         mock_client = Mock()
         mock_get_client.return_value = mock_client
@@ -353,7 +353,7 @@ class TestGetUserSensorData(unittest.TestCase):
 
         mock_client.query.assert_called_once()
 
-    @patch("data_fetcher._get_bigquery_client")
+    @patch("backend.data_fetcher._get_bigquery_client")
     def test_get_user_friends_returns_empty_list_when_no_friends(self, mock_get_client):
         mock_client = Mock()
         mock_get_client.return_value = mock_client
