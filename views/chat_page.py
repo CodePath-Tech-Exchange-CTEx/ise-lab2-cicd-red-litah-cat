@@ -5,9 +5,9 @@
 #############################################################################
 
 import streamlit as st
-from data_fetcher import (get_chat_history, chat_with_ai, get_fitness_profile,
-                          save_fitness_profile, get_user_profile)
-from modules import display_chat_history, display_ai_trainer_hero
+from backend.data_fetcher import (get_chat_history, chat_with_ai, get_fitness_profile,
+                                  save_fitness_profile, get_user_profile)
+from utils.modules import display_chat_history, display_ai_trainer_hero
 
 
 def _display_profile_form(user_id):

@@ -38,7 +38,7 @@ mock_st.session_state = MockSessionState()
 sys.modules['streamlit'] = mock_st
 
 # 3. Import the page. It will grab our mock and hold onto it as `st`
-import workout_plan_page
+import views.workout_plan_page as workout_plan_page
 
 # 4. Restore the global environment so other tests don't crash!
 if original_streamlit is not None:
@@ -75,8 +75,8 @@ class TestWorkoutPlanPage(unittest.TestCase):
 
         mock_st.columns.side_effect = dynamic_columns_mock
 
-    @patch('workout_plan_page.get_logged_workouts')
-    @patch('workout_plan_page.display_workout_plan_card')
+    @patch('views.workout_plan_page.get_logged_workouts')
+    @patch('views.workout_plan_page.display_workout_plan_card')
     def test_display_workout_plan_page_with_data(self, mock_display_card, mock_get_workouts):
         """Tests that the main page renders cards correctly when workouts exist."""
         mock_get_workouts.return_value = [{
@@ -95,7 +95,7 @@ class TestWorkoutPlanPage(unittest.TestCase):
             "Back Day", 45, "High", date(2026, 4, 25)
         )
 
-    @patch('workout_plan_page.get_logged_workouts')
+    @patch('views.workout_plan_page.get_logged_workouts')
     def test_display_workout_plan_page_empty(self, mock_get_workouts):
         """Tests the empty state when a user has no logged workouts."""
         mock_get_workouts.return_value = []
@@ -152,7 +152,7 @@ class TestWorkoutPlanPage(unittest.TestCase):
         self.assertEqual(len(mock_st.session_state.exercise_rows), 1)
         self.assertEqual(mock_st.session_state.exercise_rows[0]["name"], "")
 
-    @patch('workout_plan_page.save_logged_workout')
+    @patch('views.workout_plan_page.save_logged_workout')
     def test_add_workout_modal_validation_empty_name(self, mock_save):
         """Tests that form validation stops execution if the workout name is missing."""
         mock_st.text_input.return_value = "   " # Blank name
@@ -172,7 +172,7 @@ class TestWorkoutPlanPage(unittest.TestCase):
         mock_st.error.assert_called_with("Please enter a Workout Name.")
         mock_save.assert_not_called()
 
-    @patch('workout_plan_page.save_logged_workout')
+    @patch('views.workout_plan_page.save_logged_workout')
     def test_add_workout_modal_successful_save(self, mock_save):
         """Tests that a fully valid form successfully calls the backend save function."""
         mock_st.text_input.side_effect = ["Valid Name", "Bench Press", "135", ""] 

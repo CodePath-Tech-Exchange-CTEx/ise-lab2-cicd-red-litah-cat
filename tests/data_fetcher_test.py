@@ -9,13 +9,13 @@ import unittest
 import re
 import json
 from unittest.mock import MagicMock, patch, Mock
-from data_fetcher import get_user_workouts, insert_post, get_user_sensor_data, get_user_profile, get_user_posts, get_user_friends, get_genai_advice, get_image_url_genai_advice, get_logged_workouts, save_logged_workout
-from data_fetcher import create_new_user, verify_login, get_last_x_posts
+from backend.data_fetcher import get_user_workouts, insert_post, get_user_sensor_data, get_user_profile, get_user_posts, get_user_friends, get_genai_advice, get_image_url_genai_advice, get_logged_workouts, save_logged_workout
+from backend.data_fetcher import create_new_user, verify_login, get_last_x_posts
 from datetime import datetime
 
 class TestDataFetcher(unittest.TestCase):
 
-    @patch('data_fetcher._get_bigquery_client')
+    @patch('backend.data_fetcher._get_bigquery_client')
     def test_get_user_workouts_comprehensive(self, mock_get_client):
         """
         Comprehensive test covering:
@@ -87,7 +87,7 @@ class TestDataFetcher(unittest.TestCase):
         self.assertEqual(partial['end_lat_lng'], (None, None))
 
 
-    @patch('data_fetcher._get_bigquery_client')
+    @patch('backend.data_fetcher._get_bigquery_client')
     def test_get_user_workouts_no_data(self, mock_get_client):
         """Tests scenario where a user has 0 workouts in the database."""
         mock_client = MagicMock()
@@ -101,7 +101,7 @@ class TestDataFetcher(unittest.TestCase):
         self.assertEqual(result, [])
         self.assertIsInstance(result, list)
 
-    @patch('data_fetcher._get_bigquery_client')
+    @patch('backend.data_fetcher._get_bigquery_client')
     def test_insert_post_executes_query(self, mock_get_client):
         """Tests that insert_post calls BigQuery with the correct parameters."""
         mock_client = MagicMock()
@@ -129,7 +129,7 @@ class TestDataFetcher(unittest.TestCase):
         self.assertEqual(param_values['content'], 'I walked 8000 steps today!')
     
 
-    @patch('data_fetcher._get_bigquery_client')
+    @patch('backend.data_fetcher._get_bigquery_client')
     def test_insert_post_unique_ids(self, mock_get_client):
         """Tests that each call to insert_post generates a unique post ID."""
         mock_client = MagicMock()
@@ -369,7 +369,7 @@ class TestGetUserSensorData(unittest.TestCase):
 # Written by Gemini
 class TestGenAIAdvice(unittest.TestCase):
 
-    @patch('data_fetcher.get_user_workouts')
+    @patch('backend.data_fetcher.get_user_workouts')
     def test_get_genai_advice_no_workouts(self, mock_get_workouts):
         """Tests that the function returns a default dictionary if no workouts exist."""
         # Mock the workout fetcher to return an empty list
@@ -383,11 +383,11 @@ class TestGenAIAdvice(unittest.TestCase):
         self.assertEqual(result["content"], "No workouts found yet. Time to get moving!")
         self.assertIn("timestamp", result)
 
-    @patch('data_fetcher.get_image_url_genai_advice')
-    @patch('data_fetcher.GenerativeModel')
-    @patch('data_fetcher.vertexai.init')
-    @patch('data_fetcher._safe_vertex_ai_init')
-    @patch('data_fetcher.get_user_workouts')
+    @patch('backend.data_fetcher.get_image_url_genai_advice')
+    @patch('backend.data_fetcher.GenerativeModel')
+    @patch('backend.data_fetcher.vertexai.init')
+    @patch('backend.data_fetcher._safe_vertex_ai_init')
+    @patch('backend.data_fetcher.get_user_workouts')
     def test_get_genai_advice_success(self, mock_get_workouts, mock_safe_init, mock_vertex_init, mock_gen_model, mock_get_image):
         """Tests the happy path where workouts exist and Gemini returns valid JSON."""
         # 1. Mock the workout data
@@ -427,10 +427,10 @@ class TestGenAIAdvice(unittest.TestCase):
         self.assertEqual(result["image"], "https://images.unsplash.com/fake-photo.jpg")
         self.assertIsNotNone(result["timestamp"])
 
-    @patch('data_fetcher.get_user_workouts')
-    @patch('data_fetcher.GenerativeModel')
-    @patch('data_fetcher.vertexai.init')
-    @patch('data_fetcher._safe_vertex_ai_init')
+    @patch('backend.data_fetcher.get_user_workouts')
+    @patch('backend.data_fetcher.GenerativeModel')
+    @patch('backend.data_fetcher.vertexai.init')
+    @patch('backend.data_fetcher._safe_vertex_ai_init')
     def test_get_genai_advice_invalid_json(self, mock_safe_init, mock_vertex_init, mock_gen_model, mock_get_workouts):
         """Tests that the function handles malformed JSON from the Gemini API safely."""
         mock_get_workouts.return_value = [{'start_timestamp': '2026-03-24', 'distance': 5, 'steps': 5000, 'calories_burned': 200}]
@@ -452,11 +452,11 @@ class TestGenAIAdvice(unittest.TestCase):
         # Verify it caught the JSONDecodeError and used the fallback content
         self.assertEqual(result["content"], "Great job on your workout!")
 
-    @patch('data_fetcher.get_user_workouts')
-    @patch('data_fetcher.GenerativeModel')
-    @patch('data_fetcher.vertexai.init')
-    @patch('data_fetcher._safe_vertex_ai_init')
-    @patch('data_fetcher.get_image_url_genai_advice')
+    @patch('backend.data_fetcher.get_user_workouts')
+    @patch('backend.data_fetcher.GenerativeModel')
+    @patch('backend.data_fetcher.vertexai.init')
+    @patch('backend.data_fetcher._safe_vertex_ai_init')
+    @patch('backend.data_fetcher.get_image_url_genai_advice')
     def test_get_genai_advice_id_format(self, mock_get_image, mock_safe_init, mock_vertex_init, mock_gen_model, mock_get_workouts):
         """Tests that the generated advice_id matches the expected ADV-XXXXXXXX format."""
         mock_get_workouts.return_value = [{'start_timestamp': '2026-03-24', 'distance': 5, 'steps': 5000, 'calories_burned': 200}]
@@ -479,9 +479,9 @@ class TestGenAIAdvice(unittest.TestCase):
 # Written By Gemini
 class TestGetImageUrlGenaiAdvice(unittest.TestCase):
 
-    @patch('data_fetcher.requests.get')
-    @patch('data_fetcher.os.environ.get')
-    @patch('data_fetcher.random.random')
+    @patch('backend.data_fetcher.requests.get')
+    @patch('backend.data_fetcher.os.environ.get')
+    @patch('backend.data_fetcher.random.random')
     def test_get_image_url_success(self, mock_random, mock_env, mock_requests):
         """Tests successful retrieval of an image URL from the Unsplash API."""
         # Force the random roll to succeed (greater than 0)
@@ -510,9 +510,9 @@ class TestGetImageUrlGenaiAdvice(unittest.TestCase):
         self.assertIn("query=running,shoes", called_url)
         self.assertIn("client_id=FAKE_API_KEY", called_url)
 
-    @patch('data_fetcher.requests.get')
-    @patch('data_fetcher.os.environ.get')
-    @patch('data_fetcher.random.random')
+    @patch('backend.data_fetcher.requests.get')
+    @patch('backend.data_fetcher.os.environ.get')
+    @patch('backend.data_fetcher.random.random')
     def test_get_image_url_api_failure(self, mock_random, mock_env, mock_requests):
         """Tests that the function safely handles an Unsplash API crash/timeout."""
         mock_random.return_value = 0.5
@@ -529,7 +529,7 @@ class TestGetImageUrlGenaiAdvice(unittest.TestCase):
         # Should safely return None
         self.assertIsNone(result)
 
-    @patch('data_fetcher.random.random')
+    @patch('backend.data_fetcher.random.random')
     def test_get_image_url_random_roll_fails(self, mock_random):
         """Tests the scenario where the random chance determines no image should be fetched."""
         # Force the random roll to fail
@@ -541,9 +541,9 @@ class TestGetImageUrlGenaiAdvice(unittest.TestCase):
         # Should immediately return None without calling the API
         self.assertIsNone(result)
 
-    @patch('data_fetcher.requests.get')
-    @patch('data_fetcher.os.environ.get')
-    @patch('data_fetcher.random.random')
+    @patch('backend.data_fetcher.requests.get')
+    @patch('backend.data_fetcher.os.environ.get')
+    @patch('backend.data_fetcher.random.random')
     def test_get_image_url_unauthorized_api_key(self, mock_random, mock_env, mock_requests):
         """Tests Unsplash returning a 401 Unauthorized error (Bad API Key)."""
         mock_random.return_value = 0.5
@@ -563,7 +563,7 @@ class TestGetImageUrlGenaiAdvice(unittest.TestCase):
 # Written by Gemini
 class TestGetUserProfile(unittest.TestCase):
 
-    @patch('data_fetcher._get_bigquery_client')
+    @patch('backend.data_fetcher._get_bigquery_client')
     def test_get_user_profile_success(self, mock_get_client):
         """Tests that a valid user with friends returns the correct dictionary."""
         mock_client = MagicMock()
@@ -591,7 +591,7 @@ class TestGetUserProfile(unittest.TestCase):
         self.assertIn('user2', result['friends'])
 
     @patch('os.environ.get')
-    @patch('data_fetcher._get_bigquery_client')
+    @patch('backend.data_fetcher._get_bigquery_client')
     def test_get_user_profile_no_friends(self, mock_get_client, mock_env_get):
         """Tests that a user with no friends returns an empty list for 'friends'."""
         # Mock PROJECT_ID so _get_bigquery_client returns the mock client
@@ -617,7 +617,7 @@ class TestGetUserProfile(unittest.TestCase):
         result = get_user_profile('user_bob')
         self.assertEqual(result['friends'], [])
 
-    @patch('data_fetcher._get_bigquery_client')
+    @patch('backend.data_fetcher._get_bigquery_client')
     def test_get_user_profile_not_found(self, mock_get_client):
         """Tests that a ValueError is raised if the user ID doesn't exist."""
         mock_client = MagicMock()
@@ -633,7 +633,7 @@ class TestGetUserProfile(unittest.TestCase):
         
         self.assertEqual(str(cm.exception), 'User fake_id not found.')
 
-    @patch('data_fetcher._get_bigquery_client')
+    @patch('backend.data_fetcher._get_bigquery_client')
     def test_get_user_profile_config_parameters(self, mock_get_client):
         """Verifies that QueryJobConfig is used to pass the ID safely."""
         mock_client = MagicMock()
@@ -659,7 +659,7 @@ from datetime import date
 
 class TestGetLoggedWorkouts(unittest.TestCase):
 
-    @patch('data_fetcher.bigquery.Client')
+    @patch('backend.data_fetcher.bigquery.Client')
     def test_get_logged_workouts_comprehensive(self, mock_client_class):
         """Tests that a fully populated workout with exercises and muscle groups maps correctly."""
         mock_client = MagicMock()
@@ -698,7 +698,7 @@ class TestGetLoggedWorkouts(unittest.TestCase):
         self.assertEqual(len(workout["exercises"]), 1)
         self.assertEqual(workout["exercises"][0]["name"], "Bench Press")
 
-    @patch('data_fetcher.bigquery.Client')
+    @patch('backend.data_fetcher.bigquery.Client')
     def test_get_logged_workouts_null_arrays(self, mock_client_class):
         """Tests that BigQuery returning None for arrays is safely converted to empty lists."""
         mock_client = MagicMock()
@@ -732,7 +732,7 @@ class TestGetLoggedWorkouts(unittest.TestCase):
         self.assertEqual(workout["muscle_groups"], [])
         self.assertEqual(workout["exercises"], [])
 
-    @patch('data_fetcher.bigquery.Client')
+    @patch('backend.data_fetcher.bigquery.Client')
     def test_get_logged_workouts_empty(self, mock_client_class):
         """Tests that a user with no workouts returns an empty list."""
         mock_client = MagicMock()
@@ -763,7 +763,7 @@ class TestSaveLoggedWorkout(unittest.TestCase):
             ]
         }
 
-    @patch('data_fetcher.bigquery.Client')
+    @patch('backend.data_fetcher.bigquery.Client')
     def test_save_logged_workout_success(self, mock_client_class):
         """Tests the happy path where all three tables receive bulk inserts."""
         mock_client = MagicMock()
@@ -783,7 +783,7 @@ class TestSaveLoggedWorkout(unittest.TestCase):
         self.assertEqual(calls[1].args[0], 'ISE.WorkoutExercises')
         self.assertEqual(calls[2].args[0], 'ISE.WorkoutMuscleGroups')
 
-    @patch('data_fetcher.bigquery.Client')
+    @patch('backend.data_fetcher.bigquery.Client')
     def test_save_logged_workout_filters_empty_exercises(self, mock_client_class):
         """Tests that exercises with blank names are filtered out before insertion."""
         mock_client = MagicMock()
@@ -805,7 +805,7 @@ class TestSaveLoggedWorkout(unittest.TestCase):
         self.assertEqual(len(inserted_exercises), 1)
         self.assertEqual(inserted_exercises[0]["ExerciseName"], "Squat")
 
-    @patch('data_fetcher.bigquery.Client')
+    @patch('backend.data_fetcher.bigquery.Client')
     def test_save_logged_workout_parent_failure(self, mock_client_class):
         """Tests that exercise child rows are not inserted if the parent workout insert fails."""
         mock_client = MagicMock()
@@ -828,8 +828,8 @@ class TestSaveLoggedWorkout(unittest.TestCase):
 
 class TestCreateNewUser(unittest.TestCase):
 
-    @patch('data_fetcher.bigquery.Client')
-    @patch('data_fetcher.bcrypt')
+    @patch('backend.data_fetcher.bigquery.Client')
+    @patch('backend.data_fetcher.bcrypt')
     def test_create_new_user_success(self, mock_bcrypt, mock_client_class):
         """Tests successful user creation with password hashing and DB insertion."""
         # 1. Setup DB Mocks
@@ -865,7 +865,7 @@ class TestCreateNewUser(unittest.TestCase):
         self.assertEqual(inserted_payload['Username'], "janedoe")
         self.assertEqual(inserted_payload['PasswordHash'], "fake_hashed_password") # Decoded to string
 
-    @patch('data_fetcher.bigquery.Client')
+    @patch('backend.data_fetcher.bigquery.Client')
     def test_create_new_user_username_taken(self, mock_client_class):
         """Tests that user creation stops and returns None if the username exists."""
         mock_client = MagicMock()
@@ -882,8 +882,8 @@ class TestCreateNewUser(unittest.TestCase):
         self.assertIsNone(result)
         mock_client.insert_rows_json.assert_not_called()
 
-    @patch('data_fetcher.bigquery.Client')
-    @patch('data_fetcher.bcrypt')
+    @patch('backend.data_fetcher.bigquery.Client')
+    @patch('backend.data_fetcher.bcrypt')
     def test_create_new_user_insert_fails(self, mock_bcrypt, mock_client_class):
         """Tests that None is returned if BigQuery rejects the insert."""
         mock_client = MagicMock()
@@ -908,8 +908,8 @@ class TestCreateNewUser(unittest.TestCase):
 
 class TestVerifyLogin(unittest.TestCase):
 
-    @patch('data_fetcher.bigquery.Client')
-    @patch('data_fetcher.bcrypt')
+    @patch('backend.data_fetcher.bigquery.Client')
+    @patch('backend.data_fetcher.bcrypt')
     def test_verify_login_success(self, mock_bcrypt, mock_client_class):
         """Tests that providing a correct password returns the UserId."""
         mock_client = MagicMock()
@@ -934,7 +934,7 @@ class TestVerifyLogin(unittest.TestCase):
             b'stored_fake_hash'
         )
 
-    @patch('data_fetcher.bigquery.Client')
+    @patch('backend.data_fetcher.bigquery.Client')
     def test_verify_login_user_not_found(self, mock_client_class):
         """Tests that a non-existent username returns None gracefully."""
         mock_client = MagicMock()
@@ -949,8 +949,8 @@ class TestVerifyLogin(unittest.TestCase):
 
         self.assertIsNone(result)
 
-    @patch('data_fetcher.bigquery.Client')
-    @patch('data_fetcher.bcrypt')
+    @patch('backend.data_fetcher.bigquery.Client')
+    @patch('backend.data_fetcher.bcrypt')
     def test_verify_login_incorrect_password(self, mock_bcrypt, mock_client_class):
         """Tests that an incorrect password returns None."""
         mock_client = MagicMock()
@@ -971,7 +971,7 @@ class TestVerifyLogin(unittest.TestCase):
 
 class TestGetLastXPosts(unittest.TestCase):
 
-    @patch('data_fetcher.bigquery.Client')
+    @patch('backend.data_fetcher.bigquery.Client')
     def test_get_last_x_posts_success(self, mock_client_class):
         """Tests that post data from the JOIN query is mapped correctly to dictionaries."""
         mock_client = MagicMock()
@@ -1018,7 +1018,7 @@ class TestGetLastXPosts(unittest.TestCase):
         query_sent = mock_client.query.call_args[0][0]
         self.assertIn("LIMIT 5", query_sent)
 
-    @patch('data_fetcher.bigquery.Client')
+    @patch('backend.data_fetcher.bigquery.Client')
     def test_get_last_x_posts_empty(self, mock_client_class):
         """Tests that it returns an empty list if there are no posts in the database."""
         mock_client = MagicMock()

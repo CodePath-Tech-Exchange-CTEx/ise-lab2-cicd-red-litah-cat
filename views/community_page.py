@@ -1,6 +1,6 @@
 import streamlit as st
-from modules import display_post, display_genai_advice
-from data_fetcher import get_user_posts, get_user_friends, get_genai_advice, get_last_x_posts
+from utils.modules import display_post, display_genai_advice
+from backend.data_fetcher import get_user_posts, get_user_friends, get_genai_advice, get_last_x_posts
 
 userId = 'user2'
 

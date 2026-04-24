@@ -1,11 +1,11 @@
 import streamlit as st
 from datetime import datetime
-from modules import display_goals
-from data_fetcher import get_daily_goals, update_goal_status, save_new_goal
+from utils.modules import display_goals
+from backend.data_fetcher import get_daily_goals, update_goal_status, save_new_goal
 
 
 def load_workout_css():
-    with open("custom_components/daily_goals.css") as f:
+    with open("components/daily_goals.css") as f:
         st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
 
 

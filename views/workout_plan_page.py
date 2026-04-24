@@ -6,13 +6,13 @@
 
 import streamlit as st
 from datetime import datetime, date
-from modules import display_workout_plan_card
-from data_fetcher import get_logged_workouts, save_logged_workout
+from utils.modules import display_workout_plan_card
+from backend.data_fetcher import get_logged_workouts, save_logged_workout
 
 
 
 def load_workout_plan_css():
-    with open("custom_components/workout_plan.css") as f:
+    with open("components/workout_plan.css") as f:
         st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
 
 

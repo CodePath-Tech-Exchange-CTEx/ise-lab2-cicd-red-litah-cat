@@ -22,7 +22,7 @@ def safe_string(string):
 
 def create_component(data, component_name, height=None, width=None, scrolling=True):
     # Read the HTML content from the file
-    component_html = load_html_file(f'custom_components/{component_name}.html')
+    component_html = load_html_file(f'components/{component_name}.html')
 
     # Replace the templates with the specified data
     for key in data:

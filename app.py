@@ -6,17 +6,16 @@
 #############################################################################
 
 import streamlit as st
-from modules import display_my_custom_component, display_post, display_genai_advice, display_activity_summary, display_recent_workouts
-from data_fetcher import get_user_posts, get_genai_advice, get_user_profile, get_user_sensor_data, get_user_workouts
-from activity_page import display_activity_page
-from community_page import display_community_page
-from daily_goals_page import display_daily_goals_page
-from chat_page import display_chat_page
-from workout_plan_page import display_workout_plan_page
+from utils.modules import display_my_custom_component, display_post, display_genai_advice, display_activity_summary, display_recent_workouts
+from backend.data_fetcher import get_user_posts, get_genai_advice, get_user_profile, get_user_sensor_data, get_user_workouts
+from views.activity_page import display_activity_page
+from views.community_page import display_community_page
+from views.daily_goals_page import display_daily_goals_page
+from views.chat_page import display_chat_page
+from views.workout_plan_page import display_workout_plan_page
 import datetime
 
-# Import our new authentication UI
-from auth import display_auth_page
+from views.auth import display_auth_page
 
 # --- INITIALIZE SESSION STATE ---
 # This runs once when the user first visits the URL
@@ -71,7 +70,7 @@ def display_app_page(userId):
  
 # This is the starting point for your app.
 if __name__ == '__main__':
-    with open('custom_components/streamlit_global.css') as f:
+    with open('components/streamlit_global.css') as f:
         st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
 
     # --- THE ROUTER ---

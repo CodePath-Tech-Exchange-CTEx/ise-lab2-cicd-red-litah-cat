@@ -7,7 +7,7 @@
 # function other than the example.
 #############################################################################
 
-from internals import create_component, load_html_file, safe_string
+from utils.internals import create_component, load_html_file, safe_string
 import streamlit as st
 import streamlit.components.v1 as components
 from datetime import datetime
@@ -28,7 +28,7 @@ def display_my_custom_component(value):
         'NAME': value,
     }
     # Register and display the component by providing the data and name
-    # of the HTML file. HTML must be placed inside the "custom_components" folder.
+    # of the HTML file. HTML must be placed inside the "components" folder.
     html_file_name = "my_custom_component"
     create_component(data, html_file_name)
 
@@ -164,8 +164,8 @@ def display_chat_history(messages):
         messages (list): List of dicts with keys 'role', 'content', 'timestamp'.
                          Role must be 'user' or 'model'.
     """
-    user_tmpl = load_html_file('custom_components/chat_message_user.html')
-    ai_tmpl = load_html_file('custom_components/chat_message_ai.html')
+    user_tmpl = load_html_file('components/chat_message_user.html')
+    ai_tmpl = load_html_file('components/chat_message_ai.html')
 
     assembled_html = ""
     for msg in messages:
@@ -188,7 +188,7 @@ def display_chat_history(messages):
 
         assembled_html += bubble + "\n"
 
-    wrapper = load_html_file('custom_components/chat_feed_wrapper.html')
+    wrapper = load_html_file('components/chat_feed_wrapper.html')
     wrapper = wrapper.replace('{{INNER_HTML}}', assembled_html)
 
     height = max(300, min(len(messages) * 110, 500))

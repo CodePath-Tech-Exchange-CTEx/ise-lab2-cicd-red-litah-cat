@@ -6,8 +6,8 @@
 #############################################################################
 
 import streamlit as st
-from modules import display_recent_workouts, display_activity_summary
-from data_fetcher import get_user_workouts, insert_post
+from utils.modules import display_recent_workouts, display_activity_summary
+from backend.data_fetcher import get_user_workouts, insert_post
 
 
 def display_activity_page(userId):

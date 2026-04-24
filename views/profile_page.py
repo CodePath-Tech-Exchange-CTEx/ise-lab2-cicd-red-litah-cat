@@ -6,8 +6,8 @@
 #############################################################################
 
 import streamlit as st
-from internals import inject_streamlit_global_styles
-from data_fetcher import get_fitness_profile, save_fitness_profile
+from utils.internals import inject_streamlit_global_styles
+from backend.data_fetcher import get_fitness_profile, save_fitness_profile
 
 
 def _label(text, required=False):

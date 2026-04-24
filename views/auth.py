@@ -1,6 +1,6 @@
 import streamlit as st
 import re
-from data_fetcher import verify_login, create_new_user
+from backend.data_fetcher import verify_login, create_new_user
 
 def is_valid_username(username):
     """

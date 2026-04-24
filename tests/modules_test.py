@@ -9,7 +9,7 @@
 import unittest
 from unittest.mock import patch
 from streamlit.testing.v1 import AppTest
-from modules import display_post, display_activity_summary, display_genai_advice, display_recent_workouts
+from utils.modules import display_post, display_activity_summary, display_genai_advice, display_recent_workouts
 from unittest.mock import patch
 
 # -------------------------
@@ -19,8 +19,8 @@ from unittest.mock import patch
 def run_display_post(username, user_image, timestamp, content, post_image) -> AppTest:
     """Create a fresh test app session for display_post and run once.""" #
     at = AppTest.from_string(f"""
-import streamlit as st 
-import modules
+import streamlit as st
+import utils.modules as modules
 
 modules.st = st #Line written by ChatGPT
 st.session_state["rendered_posts"] = [] #Line written by ChatGPT
@@ -51,7 +51,7 @@ def run_recent_workouts(workouts_list) -> AppTest:
     """Create a fresh test app session for display_recent_workouts and run once."""
     at = AppTest.from_string(f"""
 import streamlit as st
-import modules
+import utils.modules as modules
 
 modules.st = st
 
@@ -201,7 +201,7 @@ class TestDisplayActivitySummary(unittest.TestCase):
                 'end_timestamp':   '2024-01-02 01:00:00',  # 60 min
             },
         ]
-        with patch('modules.create_component') as mock_cc:
+        with patch('utils.modules.create_component') as mock_cc:
             display_activity_summary(workouts)
             data, _ = mock_cc.call_args[0]
 
@@ -220,7 +220,7 @@ class TestDisplayGenAiAdvice(unittest.TestCase):
         self.valid_content = "Increase weight slightly while maintaining strict form."
         self.valid_image = "https://example.com/image.jpg"
 
-    @patch("modules.create_component")
+    @patch("utils.modules.create_component")
     def test_display_genai_advice_calls_create_component_once_none(self, mock_create):
         """Tests create_component is called exactly once and returns None."""
         result = display_genai_advice(
@@ -232,7 +232,7 @@ class TestDisplayGenAiAdvice(unittest.TestCase):
         mock_create.assert_called_once()
         self.assertIsNone(result)
 
-    @patch("modules.create_component")
+    @patch("utils.modules.create_component")
     def test_display_genai_advice_passes_correct_data_dictionary_none(self, mock_create):
         """Tests correct data dictionary is passed to create_component."""
         display_genai_advice(
@@ -254,7 +254,7 @@ class TestDisplayGenAiAdvice(unittest.TestCase):
             scrolling=True
         )
 
-    @patch("modules.create_component")
+    @patch("utils.modules.create_component")
     def test_display_genai_advice_handles_empty_strings_none(self, mock_create):
         """Tests function handles empty string inputs."""
         display_genai_advice("", "", "")
@@ -272,7 +272,7 @@ class TestDisplayGenAiAdvice(unittest.TestCase):
             scrolling=True
         )
 
-    @patch("modules.create_component")
+    @patch("utils.modules.create_component")
     def test_display_genai_advice_handles_none_inputs_none(self, mock_create):
         """Tests function handles None inputs."""
         display_genai_advice(None, None, None)
@@ -290,7 +290,7 @@ class TestDisplayGenAiAdvice(unittest.TestCase):
             scrolling=True
         )
 
-    @patch("modules.create_component")
+    @patch("utils.modules.create_component")
     def test_display_genai_advice_handles_long_content_none(self, mock_create):
         """Tests function handles very long content string."""
         long_content = "A" * 10000
@@ -314,7 +314,7 @@ class TestDisplayGenAiAdvice(unittest.TestCase):
             scrolling=True
         )
 
-    @patch("modules.create_component")
+    @patch("utils.modules.create_component")
     def test_display_genai_advice_uses_correct_component_name_none(self, mock_create):
         display_genai_advice(
             self.valid_timestamp,
@@ -325,7 +325,7 @@ class TestDisplayGenAiAdvice(unittest.TestCase):
         args, kwargs = mock_create.call_args
         self.assertEqual(args[1], "display_genai_advice_component")
 
-    @patch("modules.create_component")
+    @patch("utils.modules.create_component")
     def test_display_genai_advice_contains_required_keys_none(self, mock_create):
         display_genai_advice(
             self.valid_timestamp,
